@@ -17,30 +17,29 @@ var APIs = map[string]string{
 	"search": "/Home/Search?searchstr=",
 }
 
-func Scrape(searchstr string) (rows map[string]string) {
-	rows = make(map[string]string)
+func Scrape(searchstr string) {
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})
-	var count int
 	c.OnResponse(func(r *colly.Response) {
 		doc, err := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if err != nil {
 			log.Fatal(err)
 		}
 		a := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/ul[@class='list-inline an-ul']/li/a//@href`)
-		if a!=nil{
+		if a != nil {
 			fmt.Println(htmlquery.InnerText(a))
-		}else{
+		} else {
 			fmt.Println("NOT FOUND")
-			fn:=htmlquery.FindOne(doc,`/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[1]/a[@class='magnet-link-wrap']`)
-		    size:=htmlquery.FindOne(doc,`/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[2]`)
-		    t:=htmlquery.FindOne(doc,`/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[3]`)
-			torr:=htmlquery.FindOne(doc,`/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[4]/a/@href`)
+			fn := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[1]/a[@class='magnet-link-wrap']`)
+			size := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[2]`)
+			t := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[3]`)
+			torr := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[4]/a/@href`)
 			fmt.Printf("file_name:%s,size:%s,update_time=%s,torrent:%s",
-			htmlquery.InnerText(fn),
-			htmlquery.InnerText(size),
-			htmlquery.InnerText(t),
-			htmlquery.InnerText(torr))
+				htmlquery.InnerText(fn),
+				htmlquery.InnerText(size),
+				htmlquery.InnerText(t),
+				htmlquery.InnerText(torr))
+
 		}
 		// for _, node := range divNodes {
 		// 	url := htmlquery.FindOne(node, "./h1[@class='post-title entry-title']/a/@href")
@@ -77,20 +76,16 @@ func Scrape(searchstr string) (rows map[string]string) {
 		c.SetProxyFunc(p)
 	}
 
-	c.Visit(BuildSearching(SearchConstruct(searchstr)))
-
-
-	fmt.Println(count)
-	return rows
+	c.Visit(BuildSearching(ConstructSearch(searchstr)))
 
 }
 
-func SearchConstruct(s string) (utoa string) {
-	a:= url.QueryEscape(strings.ReplaceAll(s, " ", "+"))
-	utoa=strings.ReplaceAll(a, "%2B", "+")
-    return
+func ConstructSearch(s string) (utoa string) {
+	a := url.QueryEscape(strings.ReplaceAll(s, " ", "+"))
+	utoa = strings.ReplaceAll(a, "%2B", "+")
+	return
 }
 
-func BuildSearching(s string)string{
-       return SourceUrl+APIs["search"]+s
+func BuildSearching(s string) string {
+	return SourceUrl + APIs["search"] + s
 }
