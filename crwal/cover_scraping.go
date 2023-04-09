@@ -14,6 +14,10 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+type CoverScraper interface {
+	Scrap(filePath, CoverName string)
+}
+
 const CoverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
 
 func TouchCoverImg(fpath, cover string) {
