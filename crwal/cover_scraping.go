@@ -15,39 +15,45 @@ import (
 )
 
 type CoverScraper interface {
-	Scrap(filePath, CoverName string)
+	Scrape(filePath, CoverName string)
 }
 
 const CoverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
 
-func TouchCoverImg(fpath, cover string) {
-	u := coverImgScrap(cover)
+func TouchCoverImg(fpath, cover string) (err error) {
+	u, err := coverImgScrape(cover)
+	if err != nil {
+		return err
+	}
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})
 	c.OnResponse(func(r *colly.Response) {
 		exp := `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
-		doc, err := htmlquery.Parse(strings.NewReader(string(r.Body)))
-		if err != nil {
-			log.Fatal(err)
+		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
+		if e != nil {
+			log.Fatal(e)
 		}
 		a := htmlquery.FindOne(doc, exp)
 		m := htmlquery.InnerText(a)
 		dl := strings.ReplaceAll(m, `/m/`, `/l/`)
 		fmt.Println(dl)
 		//download
-		resp, err := http.Get(dl)
-		if err != nil {
-			log.Fatal(err)
+		resp, e := http.Get(dl)
+		if e != nil {
+			log.Fatal(e)
+			err = e
 		}
-		f, err := os.Create(fpath)
-		if err != nil {
-			log.Fatal(err)
+		f, e := os.Create(fpath)
+		if e != nil {
+			log.Fatal(e)
+			err = e
 		}
 		defer resp.Body.Close()
 		defer f.Close()
-		wn, err := io.Copy(f, resp.Body)
-		if err != nil {
-			fmt.Println(err)
+		wn, e := io.Copy(f, resp.Body)
+		if e != nil {
+			fmt.Println(e)
+			err = e
 		}
 		fmt.Println(wn)
 	})
@@ -60,15 +66,12 @@ func TouchCoverImg(fpath, cover string) {
 		log.Println("Something went wrong:", err)
 	})
 
-	// c.OnScraped(func(r *colly.Response) {
-	//     fmt.Printf("Finished total count:%d /n", count)
-	// })
-
 	c.Visit(u)
+	return err
 }
 
-func coverImgScrap(coverName string) (cUrl string) {
-	c := colly.NewCollector(colly.UserAgent("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"))
+func coverImgScrape(coverName string) (cUrl string, err error) {
+	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})
 	c.OnResponse(func(r *colly.Response) {
 		jsonstr := string(r.Body)
@@ -82,19 +85,16 @@ func coverImgScrap(coverName string) (cUrl string) {
 		fmt.Println("Visiting", r.URL)
 	})
 
-	c.OnError(func(_ *colly.Response, err error) {
-		log.Println("Something went wrong:", err)
+	c.OnError(func(_ *colly.Response, e error) {
+		log.Println("Something went wrong:", e)
+		err = e
 	})
 
-	// c.OnScraped(func(r *colly.Response) {
-	//     fmt.Printf("Finished total count:%d /n", count)
-	// })
+	c.OnScraped(func(r *colly.Response) {
+		fmt.Printf("coverScrapUrl=%s \n", cUrl)
+	})
+
 	parseParam := ConstructSearch(coverName)
 	c.Visit(fmt.Sprintf(CoverSearchUrl, parseParam))
 	return
 }
-
-// func ConstructCoverSearch(s string) string {
-// 	p := strings.ReplaceAll(s, " ", "+")
-// 	return fmt.Sprintf(CoverSearchUrl, p)
-// }
