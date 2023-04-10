@@ -26,6 +26,6 @@ func TestJsonArray(t *testing.T) {
 }
 
 func TestTouchCoverImg(t *testing.T) {
-	err := TouchCoverImg("cover_testing/cover5.jpg", "言叶之庭")
+	err := DOUBANCoverScraper.Scrape("cover_testing/cover7.jpg", "奇蛋物语")
 	fmt.Println(err)
 }

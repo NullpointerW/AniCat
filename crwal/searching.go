@@ -39,7 +39,6 @@ func Scrape(searchstr string) {
 				htmlquery.InnerText(size),
 				htmlquery.InnerText(t),
 				htmlquery.InnerText(torr))
-
 		}
 		// for _, node := range divNodes {
 		// 	url := htmlquery.FindOne(node, "./h1[@class='post-title entry-title']/a/@href")
