@@ -5,35 +5,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 )
 
-type SubjectManager struct {
-	mu                   *sync.Mutex
-	finished, unfinished map[int]*Subject
-}
 
 var HOME string = "./subjts"
 
-const (
-	RSS = iota
-	Torrent
-	TV
-	MOVE
-)
 
-type Subject struct {
-	SubjId      int
-	Name        string
-	Path        string
-	Finished    bool
-	Episode     int
-	ResourceTyp int
-	ResourceUrl string
-	Typ         int
-	StartTime   string
-	EndTime     string
-}
 
 func scan() {
 	if fs, err := os.ReadDir(HOME); err != nil {
