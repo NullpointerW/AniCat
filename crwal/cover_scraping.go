@@ -13,7 +13,9 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/tidwall/gjson"
 )
- var DOUBANCoverScraper =CoverScraper(CoverScraperFunc(TouchCoverImg))
+
+var DOUBANCoverScraper = CoverScraper(CoverScraperFunc(TouchCoverImg))
+
 type CoverScraperFunc func(string, string) error
 
 func (f CoverScraperFunc) Scrape(filePath, CoverName string) error {
