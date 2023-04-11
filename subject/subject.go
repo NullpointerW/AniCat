@@ -9,6 +9,12 @@ const (
 	MOVIE
 )
 
+var Manager = SubjectManager{
+	mu:         new(sync.Mutex),
+	finished:   make(map[int]*Subject),
+	unfinished: make(map[int]*Subject),
+}
+
 type SubjectManager struct {
 	mu                   *sync.Mutex
 	finished, unfinished map[int]*Subject
@@ -35,27 +41,30 @@ func (m SubjectManager) Remove(sid int, s *Subject, fin bool) {
 
 }
 
-func (m SubjectManager) Move(sid int, s *Subject, tofin bool) {
+func (m SubjectManager) Move(sid int, tofin bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	var copy *Subject
 	if tofin {
+		copy = m.unfinished[sid]
 		delete(m.unfinished, sid)
-		m.finished[sid] = s
+		m.finished[sid] = copy
 		return
 	}
+	copy = m.finished[sid]
 	delete(m.finished, sid)
-	m.unfinished[sid] = s
+	m.unfinished[sid] = copy
 }
 
 type Subject struct {
 	SubjId      int    `json:"subjId"`
 	Name        string `json:"name"`
-	Path        string
-	Finished    bool
-	Episode     int
-	ResourceTyp int
-	ResourceUrl string
-	Typ         int
-	StartTime   string
-	EndTime     string
+	Path        string `json:"path"`
+	Finished    bool   `json:"finished"`
+	Episode     int    `json:"episode"`
+	ResourceTyp int    `json:"resourceTyp"`
+	ResourceUrl string `json:"resourceUrl"`
+	Typ         int    `json:"typ"`
+	StartTime   string `json:"startTime"`
+	EndTime     string `json:"endTime"`
 }
