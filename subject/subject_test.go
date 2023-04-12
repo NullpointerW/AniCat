@@ -18,6 +18,8 @@ func TestMap(t *testing.T){
 	Manager.Move(8848,false)
 	fmt.Println(len(Manager.finished))
 	fmt.Println(len(Manager.unfinished))
+}
 
-
+func TestScan(t *testing.T){
+	Scan()
 }
