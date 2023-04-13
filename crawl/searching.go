@@ -1,4 +1,4 @@
-package crwal
+package crawl
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/gocolly/colly/proxy"
 )
 
-const ResourcesBaseUrl = `https://mikanani.me`
+const resourcesBaseUrl = `https://mikanani.me`
 
 var ResourceAPIs = map[string]string{
 	"search": "/Home/Search?searchstr=",
@@ -86,5 +86,5 @@ func ConstructSearch(s string) (utoa string) {
 }
 
 func BuildSearching(s string) string {
-	return ResourcesBaseUrl + ResourceAPIs["search"] + s
+	return resourcesBaseUrl + ResourceAPIs["search"] + s
 }

@@ -1,4 +1,4 @@
-package crwal
+package crawl
 
 import (
 	"fmt"
@@ -27,7 +27,10 @@ type CoverScraper interface {
 	Scrape(filePath, CoverName string) error
 }
 
-const CoverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
+const (
+	coverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
+	coverXpathExp     = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
+)
 
 func TouchCoverImg(fpath, cover string) (err error) {
 	u, err := coverImgScrape(cover)
@@ -37,7 +40,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})
 	c.OnResponse(func(r *colly.Response) {
-		exp := `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
+		exp := coverXpathExp
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
 			log.Fatal(e)
@@ -48,7 +51,6 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		fmt.Println(dl)
 		//download
 
-		
 		resp, e := http.Get(dl)
 		if e != nil {
 			log.Fatal(e)
@@ -112,6 +114,6 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	parseParam := ConstructSearch(coverName)
-	c.Visit(fmt.Sprintf(CoverSearchUrl, parseParam))
+	c.Visit(fmt.Sprintf(coverSearchUrl, parseParam))
 	return
 }
