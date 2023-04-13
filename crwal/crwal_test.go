@@ -29,3 +29,7 @@ func TestTouchCoverImg(t *testing.T) {
 	err := DOUBANCoverScraper.Scrape("coverimg/cover9.jpg", "雪之少女")
 	fmt.Println(err)
 }
+
+func TestInfoSearch(t *testing.T){
+	InfoScrape("凉宫 春日")
+}

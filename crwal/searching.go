@@ -11,9 +11,9 @@ import (
 	"github.com/gocolly/colly/proxy"
 )
 
-const SourceUrl = `https://mikanani.me`
+const ResourcesBaseUrl = `https://mikanani.me`
 
-var APIs = map[string]string{
+var ResourceAPIs = map[string]string{
 	"search": "/Home/Search?searchstr=",
 }
 
@@ -86,5 +86,5 @@ func ConstructSearch(s string) (utoa string) {
 }
 
 func BuildSearching(s string) string {
-	return SourceUrl + APIs["search"] + s
+	return ResourcesBaseUrl + ResourceAPIs["search"] + s
 }
