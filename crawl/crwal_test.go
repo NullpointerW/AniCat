@@ -1,4 +1,4 @@
-package crwal
+package crawl
 
 import (
 	"fmt"
@@ -30,6 +30,6 @@ func TestTouchCoverImg(t *testing.T) {
 	fmt.Println(err)
 }
 
-func TestInfoSearch(t *testing.T){
-	InfoScrape("凉宫 春日")
+func TestInfoSearch(t *testing.T) {
+	InfoScrape("你的门子")
 }
