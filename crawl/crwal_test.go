@@ -31,5 +31,5 @@ func TestTouchCoverImg(t *testing.T) {
 }
 
 func TestInfoSearch(t *testing.T) {
-	InfoScrape("你的门子")
+	InfoPageScrape("你的门子")
 }

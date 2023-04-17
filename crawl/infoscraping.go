@@ -20,7 +20,7 @@ var InfoAPIs = map[string]string{
 	"subject": "/subject/%d",
 }
 
-func InfoScrape(searchstr string) (p string, err error) {
+func InfoPageScrape(searchstr string) (p string, err error) {
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})
 	c.OnResponse(func(r *colly.Response) {
