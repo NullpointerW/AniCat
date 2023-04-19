@@ -43,9 +43,9 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 			for _, l := range ls {
 				t := htmlquery.FindOne(l, "./span")
 				tt := htmlquery.InnerText(t)
-				tt=strings.TrimSuffix(tt,": ")
 				lt:= htmlquery.InnerText(l)
 				lt=strings.Replace(lt,tt,"",1)
+				tt=strings.TrimSuffix(tt,": ")
 				tips[tt] =lt
 			}
 		} else {
