@@ -29,7 +29,7 @@ type CoverScraper interface {
 
 const (
 	coverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
-	coverXpathExp     = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
+	coverXpathExp  = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
 )
 
 func TouchCoverImg(fpath, cover string) (err error) {
@@ -86,6 +86,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 	})
 
 	c.Visit(u)
+
 	return err
 }
 
@@ -115,5 +116,6 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 
 	parseParam := ConstructSearch(coverName)
 	c.Visit(fmt.Sprintf(coverSearchUrl, parseParam))
+
 	return
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/NullpointerW/mikanani/errs"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
@@ -42,11 +43,14 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 			for _, l := range ls {
 				t := htmlquery.FindOne(l, "./span")
 				tt := htmlquery.InnerText(t)
-				c := htmlquery.InnerText(l)
-				tips[tt] = c
+				tt=strings.TrimSuffix(tt,": ")
+				lt:= htmlquery.InnerText(l)
+				lt=strings.Replace(lt,tt,"",1)
+				tips[tt] =lt
 			}
 		} else {
 			fmt.Println("NOT FOUND")
+			err=errs.ErrCrawlNotFound
 			return
 		}
 	})
@@ -89,6 +93,7 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 			fmt.Println(htmlquery.InnerText(a))
 		} else {
 			fmt.Println("NOT FOUND")
+			err=errs.ErrCrawlNotFound
 			return
 		}
 	})
