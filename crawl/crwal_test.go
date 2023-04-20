@@ -36,7 +36,7 @@ func TestInfoSearch(t *testing.T) {
 
 
 func TestInfoScraping(t *testing.T){
-	tip,err:=InfoScrape("凉宫春日的消失")
+	tip,err:=InfoScrape("凉宫春日的忧郁2009")
 	if err!=nil{
 		fmt.Println(err)
 		t.Fail()

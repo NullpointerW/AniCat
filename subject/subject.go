@@ -1,6 +1,11 @@
 package subject
 
-import "sync"
+import (
+	"strconv"
+
+	"github.com/NullpointerW/mikanani/crawl"
+	"github.com/NullpointerW/mikanani/errs"
+)
 
 const (
 	RSS = iota
@@ -22,50 +27,36 @@ type Subject struct {
 	EndTime     string `json:"endTime"`
 }
 
-var Manager = SubjectManager{
-	mu:         new(sync.Mutex),
-	finished:   make(map[int]*Subject),
-	unfinished: make(map[int]*Subject),
-}
+func CreateSubject(n string) error {
+	subject := new(Subject)
 
-type SubjectManager struct {
-	mu                   *sync.Mutex
-	finished, unfinished map[int]*Subject
-}
-
-func (m SubjectManager) Add(sid int, s *Subject, fin bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if fin {
-		m.finished[sid] = s
-		return
+	tips, err := crawl.InfoScrape(n)
+	if err != nil {
+		return err
 	}
-	m.unfinished[sid] = s
-}
 
-func (m SubjectManager) Remove(sid int, s *Subject, fin bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if fin {
-		delete(m.finished, sid)
-		return
+	sid, _ := strconv.Atoi(tips["sid"])
+	if Manager.GetSubject(sid) != nil {
+		return errs.Custom("subject %d already existed ", sid)
 	}
-	delete(m.unfinished, sid)
+	subject.SubjId = sid
 
-}
+	subject.Name = tips["中文名"]
 
-func (m SubjectManager) Move(sid int, tofin bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	var copy *Subject
-	if tofin {
-		copy = m.unfinished[sid]
-		delete(m.unfinished, sid)
-		m.finished[sid] = copy
-		return
+	if subject.Episode, _ = strconv.Atoi(tips["话数"]); subject.Episode > 1 {
+		subject.Typ = TV
+	} else {
+		subject.Typ = MOVIE
 	}
-	copy = m.finished[sid]
-	delete(m.finished, sid)
-	m.unfinished[sid] = copy
-}
 
+	subject.StartTime = tips["放送开始"]
+
+	if et, e := tips["播放结束"]; e {
+		subject.EndTime = et
+		subject.Finished = true
+	}
+
+	
+
+	return nil
+}

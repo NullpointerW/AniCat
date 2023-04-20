@@ -24,11 +24,11 @@ var InfoAPIs = map[string]string{
 
 func InfoScrape(searchstr string) (tips map[string]string, err error) {
 	tips = make(map[string]string)
-	p,err:=InfoPageScrape(searchstr)
-	if err!=nil{
-		return tips,err
+	p, err := InfoPageScrape(searchstr)
+	if err != nil {
+		return tips, err
 	}
-	url:=infoBaseUrl+p
+	url := infoBaseUrl + p
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})
 	c.OnResponse(func(r *colly.Response) {
@@ -43,14 +43,17 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 			for _, l := range ls {
 				t := htmlquery.FindOne(l, "./span")
 				tt := htmlquery.InnerText(t)
-				lt:= htmlquery.InnerText(l)
-				lt=strings.Replace(lt,tt,"",1)
-				tt=strings.TrimSuffix(tt,": ")
-				tips[tt] =lt
+				lt := htmlquery.InnerText(l)
+				lt = strings.Replace(lt, tt, "", 1)
+				tt = strings.TrimSuffix(tt, ": ")
+				tips[tt] = lt
 			}
+			s := strings.Split(p, `/`)
+			sid := s[len(s)-1]
+			tips["sid"] = sid
 		} else {
 			fmt.Println("NOT FOUND")
-			err=errs.ErrCrawlNotFound
+			err = errs.ErrCrawlNotFound
 			return
 		}
 	})
@@ -93,7 +96,7 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 			fmt.Println(htmlquery.InnerText(a))
 		} else {
 			fmt.Println("NOT FOUND")
-			err=errs.ErrCrawlNotFound
+			err = errs.ErrCrawlNotFound
 			return
 		}
 	})

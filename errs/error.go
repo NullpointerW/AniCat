@@ -1,12 +1,20 @@
 package errs
 
-import "errors"
-
-var (
-	ErrCrawlNotFound = errors.New("content not crawled")
+import (
+	"errors"
+	"fmt"
 )
 
-func RequireNonErrr(err error) bool {
+var (
+	ErrCrawlNotFound  = errors.New("content not crawled")
+	
+)
+
+func Custom(format string, a ...any) error {
+	return fmt.Errorf(format, a...)
+}
+
+func RequireNonErr(err error) bool {
 	return err != nil
 }
 
