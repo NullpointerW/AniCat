@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/NullpointerW/mikanani/crawl"
+	ic "github.com/NullpointerW/mikanani/crawl/information"
 	"github.com/NullpointerW/mikanani/errs"
 )
 
@@ -35,7 +35,7 @@ type Subject struct {
 func CreateSubject(n string) error {
 	subject := new(Subject)
 
-	tips, err := crawl.InfoScrape(n)
+	tips, err := ic.InfoScrape(n)
 	if err != nil {
 		return err
 	}

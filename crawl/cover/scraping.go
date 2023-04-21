@@ -1,4 +1,4 @@
-package crawl
+package cover
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	CR "github.com/NullpointerW/mikanani/crawl"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"github.com/schollz/progressbar/v3"
@@ -19,16 +20,6 @@ const (
 	coverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
 	coverXpathExp  = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
 )
-
-type CoverScraper interface {
-	Scrape(filePath, CoverName string) error
-}
-
-type CoverScraperFunc func(string, string) error
-
-func (f CoverScraperFunc) Scrape(filePath, CoverName string) error {
-	return f(filePath, CoverName)
-}
 
 var DOUBANCoverScraper = CoverScraper(CoverScraperFunc(TouchCoverImg))
 
@@ -114,7 +105,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 		fmt.Printf("coverScrapUrl=%s \n", cUrl)
 	})
 
-	parseParam := ConstructSearch(coverName)
+	parseParam := CR.ConstructSearch(coverName)
 	c.Visit(fmt.Sprintf(coverSearchUrl, parseParam))
 
 	return

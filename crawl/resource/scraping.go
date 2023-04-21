@@ -1,9 +1,9 @@
-package crawl
+package resource
 
 import (
 	"fmt"
+	CR "github.com/NullpointerW/mikanani/crawl"
 	"log"
-	"net/url"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
@@ -49,16 +49,10 @@ func Scrape(searchstr string) {
 		log.Println("Something went wrong:", err)
 	})
 
-	setProxy(c)
+	CR.SetProxy(c)
 
-	c.Visit(BuildSearching(ConstructSearch(searchstr)))
+	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
 
-}
-
-func ConstructSearch(s string) (utoa string) {
-	a := url.QueryEscape(strings.ReplaceAll(s, " ", "+"))
-	utoa = strings.ReplaceAll(a, "%2B", "+")
-	return
 }
 
 func BuildSearching(s string) string {

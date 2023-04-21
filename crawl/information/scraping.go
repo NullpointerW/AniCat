@@ -1,14 +1,14 @@
-package crawl
+package infomation
 
 import (
 	"fmt"
 	"log"
 	"strings"
 
+	CR "github.com/NullpointerW/mikanani/crawl"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/proxy"
 )
 
 const (
@@ -67,7 +67,7 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 		err = e
 	})
 
-	setProxy(c)
+	CR.SetProxy(c)
 
 	c.Visit(url)
 	return tips, err
@@ -102,17 +102,9 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		err = e
 	})
 
-	// c.OnScraped(func(r *colly.Response) {
-	//     fmt.Printf("Finished total count:%d /n", count)
-	// })
+	CR.SetProxy(c)
 
-	if p, err := proxy.RoundRobinProxySwitcher(
-		"http://127.0.0.1:7890",
-	); err == nil {
-		c.SetProxyFunc(p)
-	}
-
-	c.Visit(BuildInfoSearching(ConstructSearch(searchstr)))
+	c.Visit(BuildInfoSearching(CR.ConstructSearch(searchstr)))
 	return p, err
 
 }
