@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	CFG "github.com/NullpointerW/mikanani/conf"
 )
 
-var HOME string = "./subjts"
+var HOME string = CFG.SubjPath
 
 func Scan() {
 	if fs, err := os.ReadDir(HOME);err == nil {

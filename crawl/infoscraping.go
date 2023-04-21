@@ -67,15 +67,7 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 		err = e
 	})
 
-	// c.OnScraped(func(r *colly.Response) {
-	//     fmt.Printf("Finished total count:%d /n", count)
-	// })
-
-	if p, err := proxy.RoundRobinProxySwitcher(
-		"http://127.0.0.1:7890",
-	); err == nil {
-		c.SetProxyFunc(p)
-	}
+	setProxy(c)
 
 	c.Visit(url)
 	return tips, err

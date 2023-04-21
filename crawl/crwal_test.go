@@ -26,7 +26,7 @@ func TestJsonArray(t *testing.T) {
 }
 
 func TestTouchCoverImg(t *testing.T) {
-	err := DOUBANCoverScraper.Scrape("coverimg/cover9.jpg", "雪之少女")
+	err := DOUBANCoverScraper.Scrape("cover.jpg", "雪之少女")
 	fmt.Println(err)
 }
 
@@ -44,6 +44,5 @@ func TestInfoScraping(t *testing.T){
 	for k,v:= range tip{
 		fmt.Println(k)
 		fmt.Println(v)
-
 	}
 }

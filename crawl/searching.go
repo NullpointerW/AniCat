@@ -8,7 +8,6 @@ import (
 
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/proxy"
 )
 
 const resourcesBaseUrl = `https://mikanani.me`
@@ -40,21 +39,6 @@ func Scrape(searchstr string) {
 				htmlquery.InnerText(t),
 				htmlquery.InnerText(torr))
 		}
-		// for _, node := range divNodes {
-		// 	url := htmlquery.FindOne(node, "./h1[@class='post-title entry-title']/a/@href")
-		// 	text := htmlquery.FindOne(node, "./h1[@class='post-title entry-title']/a")
-
-		// 	fmt.Println(htmlquery.InnerText(url))
-		// 	fmt.Println(htmlquery.InnerText(text))
-		// 	rows[htmlquery.InnerText(text)] = htmlquery.InnerText(url)
-		// 	count++
-		// }
-		// preFound := htmlquery.Find(doc, `/html/body/div[@id='outer-wrapper']/div[@id='wrap2']/div[@id='content-wrapper']/div[@id='main-wrapper']/div[@id='main']/div[@id='Blog1']/div[@id='blog-pager']/span[@id='blog-pager-older-link']/a[@id='Blog1_blog-pager-older-link']/@href`)
-		// if len(preFound) != 0 {
-		// 	pre := preFound[0]
-		// 	link := htmlquery.InnerText(pre)
-		// 	c.Visit(link)
-		// }
 	})
 
 	c.OnRequest(func(r *colly.Request) {
@@ -65,15 +49,7 @@ func Scrape(searchstr string) {
 		log.Println("Something went wrong:", err)
 	})
 
-	// c.OnScraped(func(r *colly.Response) {
-	//     fmt.Printf("Finished total count:%d /n", count)
-	// })
-
-	if p, err := proxy.RoundRobinProxySwitcher(
-		"http://127.0.0.1:7890",
-	); err == nil {
-		c.SetProxyFunc(p)
-	}
+	setProxy(c)
 
 	c.Visit(BuildSearching(ConstructSearch(searchstr)))
 
