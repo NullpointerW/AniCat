@@ -2,7 +2,7 @@ package subject
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -27,7 +27,7 @@ func Scan() {
 					var s Subject
 					err := json.Unmarshal(jsraw, &s)
 					if err != nil {
-						fmt.Println(err)
+						log.Println(err)
 					}
 					Manager.Add(s.SubjId, &s, s.Finished)
 					if !s.Finished {
@@ -35,13 +35,12 @@ func Scan() {
 						go func(s *Subject) {}(&s)
 					}
 				} else {
-					fmt.Println(err)
+					log.Println(err)
 				}
-
 			}
 		}
 	} else {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 

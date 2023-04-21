@@ -3,6 +3,7 @@ package conf
 import (
 	"flag"
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -23,6 +24,8 @@ var (
 )
 
 func init() {
+	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
+
 	flag.StringVar(&SubjPath, "p", "./subject", "subjects directory path")
 	flag.Var(&Proxy, "h", "http proxy host")
 	testing.Init()
