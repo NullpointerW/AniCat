@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -55,7 +56,11 @@ func initFolder(subject *Subject) error {
 		return err
 	}
 
-	subject.Path = folderPath
+	if ap, err := filepath.Abs(folderPath); err == nil {
+		subject.Path = ap
+	} else {
+		return err
+	}
 
 	b, _ := json.Marshal(*subject)
 	err = os.WriteFile(folderPath+"/"+jsonfileName, b, os.ModePerm)
