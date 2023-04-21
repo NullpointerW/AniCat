@@ -1,6 +1,7 @@
 package subject
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/NullpointerW/mikanani/crawl"
@@ -8,9 +9,13 @@ import (
 )
 
 const (
+	//resource type
 	RSS = iota
 	Torrent
-	TV
+)
+const (
+	//anime type
+	TV = iota
 	MOVIE
 )
 
@@ -55,9 +60,26 @@ func CreateSubject(n string) error {
 		subject.EndTime = et
 		subject.Finished = true
 	}
+	// for testing
+	fmt.Printf("%#+v", *subject)
+	err = solveResource(subject)
+	if err != nil {
+		return err
+	}
 
+	err = initFolder(subject)
+	if err != nil {
+		return err
+	}
+	Manager.Add(subject.SubjId, subject, subject.Finished)
+	if subject.Finished {
+		// TODO go handlerfunc()
+	}
 
+	return nil
+}
 
-
+func solveResource(*Subject) error {
+	//TODO qb-api
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 
 var (
 	ErrCrawlNotFound  = errors.New("content not crawled")
-	
 )
 
 func Custom(format string, a ...any) error {

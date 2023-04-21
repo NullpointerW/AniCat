@@ -15,7 +15,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var DOUBANCoverScraper = CoverScraper(CoverScraperFunc(TouchCoverImg))
+const (
+	coverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
+	coverXpathExp  = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
+)
+
+type CoverScraper interface {
+	Scrape(filePath, CoverName string) error
+}
 
 type CoverScraperFunc func(string, string) error
 
@@ -23,14 +30,7 @@ func (f CoverScraperFunc) Scrape(filePath, CoverName string) error {
 	return f(filePath, CoverName)
 }
 
-type CoverScraper interface {
-	Scrape(filePath, CoverName string) error
-}
-
-const (
-	coverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
-	coverXpathExp  = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`
-)
+var DOUBANCoverScraper = CoverScraper(CoverScraperFunc(TouchCoverImg))
 
 func TouchCoverImg(fpath, cover string) (err error) {
 	u, err := coverImgScrape(cover)
