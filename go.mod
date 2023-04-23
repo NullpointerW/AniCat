@@ -7,8 +7,10 @@ require github.com/gocolly/colly v1.2.0
 require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/schollz/progressbar/v3 v3.13.1 // indirect
+	github.com/superturkey650/go-qbittorrent v0.0.0-20190708212631-514bc1f1e281 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
