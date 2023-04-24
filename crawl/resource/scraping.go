@@ -33,11 +33,14 @@ func Scrape(searchstr string) {
 			size := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[2]`)
 			t := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[3]`)
 			torr := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[4]/a/@href`)
-			fmt.Printf("file_name:%s,size:%s,update_time=%s,torrent:%s",
+			mglink := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[1]/a[2]/@data-clipboard-text`)
+			fmt.Printf("file_name:%s,size:%s,update_time=%s,torrent:%s,magnetLink=%s",
 				htmlquery.InnerText(fn),
 				htmlquery.InnerText(size),
 				htmlquery.InnerText(t),
-				htmlquery.InnerText(torr))
+				htmlquery.InnerText(torr),
+				htmlquery.InnerText(mglink),
+			)
 		}
 	})
 
