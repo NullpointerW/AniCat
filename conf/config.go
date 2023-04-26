@@ -1,33 +1,14 @@
 package conf
 
-import (
-	"flag"
-	"fmt"
-	"log"
-	"testing"
-)
+import ()
 
-type multiValue []string
+var Env Environment
 
-func (mv *multiValue) String() string {
-	return fmt.Sprintf("%v", *mv)
-}
-
-func (mv *multiValue) Set(value string) error {
-	*mv = append(*mv, value)
-	return nil
-}
-
-var (
-	SubjPath string
-	Proxy    multiValue
-)
-
-func init() {
-	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
-
-	flag.StringVar(&SubjPath, "p", "./subject", "subjects directory path")
-	flag.Var(&Proxy, "h", "http proxy host")
-	testing.Init()
-	flag.Parse()
+type Environment struct {
+	Qbt struct {
+		Host         string `json:"host"`
+		Username     string `json:"username"`
+		Password     string `json:"password"`
+		LocalConnect bool   `json:"localed"`
+	} `json:"qbt_config"`
 }
