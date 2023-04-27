@@ -6,11 +6,17 @@ import (
 )
 
 var (
-	ErrCrawlNotFound  = errors.New("content not crawled")
+	ErrCrawlNotFound = errors.New("content not crawled")
 )
 
 func Custom(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
+}
+
+func PanicErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func RequireNonErr(err error) bool {

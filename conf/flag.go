@@ -3,7 +3,6 @@ package conf
 import (
 	"flag"
 	"fmt"
-	"log"
 	"testing"
 )
 
@@ -21,11 +20,11 @@ func (mv *multiValue) Set(value string) error {
 var (
 	SubjPath string
 	Proxy    multiValue
+	EnvPath  string
 )
 
-func init() {
-	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
-
+func flaginit() {
+	flag.StringVar(&EnvPath, "e", "./env.yaml", "env yaml file path")
 	flag.StringVar(&SubjPath, "p", "./subject", "subjects directory path")
 	flag.Var(&Proxy, "h", "http proxy host")
 	testing.Init()
