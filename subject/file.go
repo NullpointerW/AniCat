@@ -44,6 +44,8 @@ func Scan() {
 	}
 }
 
+// Initialize the content library in OS file for the `subject` in the memory.
+// If initialization is successful, write the path to Subject.Path.
 func initFolder(subject *Subject) error {
 	var folderPath string
 

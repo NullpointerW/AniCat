@@ -3,9 +3,11 @@ package subject
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	ic "github.com/NullpointerW/mikanani/crawl/information"
 	"github.com/NullpointerW/mikanani/errs"
+	"github.com/NullpointerW/mikanani/utils"
 )
 
 const (
@@ -40,26 +42,31 @@ func CreateSubject(n string) error {
 		return err
 	}
 
-	sid, _ := strconv.Atoi(tips["sid"])
+	sid, _ := strconv.Atoi(tips[ic.SubjId])
 	if Manager.GetSubject(sid) != nil {
 		return errs.Custom("subject %d already existed ", sid)
 	}
 	subject.SubjId = sid
 
-	subject.Name = tips["中文名"]
+	subject.Name = tips[ic.SubjName]
 
-	if subject.Episode, _ = strconv.Atoi(tips["话数"]); subject.Episode > 1 {
+	if subject.Episode, _ = strconv.Atoi(tips[ic.SubjEpisode]); subject.Episode > 1 {
 		subject.Typ = TV
 	} else {
 		subject.Typ = MOVIE
 	}
 
-	subject.StartTime = tips["放送开始"]
-
-	if et, e := tips["播放结束"]; e {
+	subject.StartTime = tips[ic.SubjStartTime]
+	if et, e := tips[ic.SubjectEndTime]; e {
+		n := time.Now()
+		eti, err := utils.ParseTime()
+		if err != nil {
+			return err
+		}
 		subject.EndTime = et
-		subject.Finished = true
+		subject.Finished = n.After(eti) || n.Equal(eti)
 	}
+
 	// for testing
 	fmt.Printf("%#+v", *subject)
 	err = solveResource(subject)
@@ -71,6 +78,7 @@ func CreateSubject(n string) error {
 	if err != nil {
 		return err
 	}
+
 	Manager.Add(subject.SubjId, subject, subject.Finished)
 	if subject.Finished {
 		// TODO go handlerfunc()

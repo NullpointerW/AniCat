@@ -10,12 +10,6 @@ import (
 	"github.com/gocolly/colly"
 )
 
-const resourcesBaseUrl = `https://mikanani.me`
-
-var ResourceAPIs = map[string]string{
-	"search": "/Home/Search?searchstr=",
-}
-
 func Scrape(searchstr string) {
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{Parallelism: 1})

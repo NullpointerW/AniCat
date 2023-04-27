@@ -21,17 +21,25 @@ func Add(url, path, tag string) (string, error) {
 	return torrs[0].Hash, nil
 }
 
-func DLcompl(h string) (bool, error) {
+func Get(h string) (torr qbt.BasicTorrent, err error) {
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
-		"filter":  "all",
-		"hashes ": h,
+		"filter": "all",
+		"hashes": h,
 	})
+	if err != nil {
+		return torr, err
+	}
+	if len(torrs) == 0 {
+		return torr, errs.Custom("%w:torr hash:%s", errs.ErrTorrnetNotFound, h)
+	}
+	torr = torrs[0]
+	return
+}
+
+func DLcompl(h string) (bool, error) {
+	torr, err := Get(h)
 	if err != nil {
 		return false, err
 	}
-	if len(torrs) == 0 {
-		return false, errs.Custom("%w torr hash:%s", errs.ErrTorrnetNotFound, h)
-	}
-	torr := torrs[0]
-	return torr.Progress == 100, nil
+	return torr.Progress == 1, nil
 }

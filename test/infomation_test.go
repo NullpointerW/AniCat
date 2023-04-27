@@ -1,16 +1,17 @@
-package infomation
+package test
 
 import (
 	"fmt"
+	I "github.com/NullpointerW/mikanani/crawl/information"
 	"testing"
 )
 
 func TestInfoSearch(t *testing.T) {
-	InfoPageScrape("凉宫春日的消失")
+	I.InfoPageScrape("凉宫春日的消失")
 }
 
 func TestInfoScraping(t *testing.T) {
-	tip, err := InfoScrape("凉宫春日的忧郁2009")
+	tip, err := I.InfoScrape("凉宫春日的忧郁2009")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
