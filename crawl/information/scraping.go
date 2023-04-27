@@ -11,8 +11,6 @@ import (
 	"github.com/gocolly/colly"
 )
 
-
-
 func InfoScrape(searchstr string) (tips map[string]string, err error) {
 	tips = make(map[string]string)
 	p, err := InfoPageScrape(searchstr)
@@ -20,8 +18,7 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 		return tips, err
 	}
 	url := infoBaseUrl + p
-	c := colly.NewCollector()
-	c.Limit(&colly.LimitRule{Parallelism: 1})
+	c:=CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
@@ -65,8 +62,7 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 }
 
 func InfoPageScrape(searchstr string) (p string, err error) {
-	c := colly.NewCollector()
-	c.Limit(&colly.LimitRule{Parallelism: 1})
+	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
@@ -92,8 +88,6 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		log.Println("Something went wrong:", e)
 		err = e
 	})
-
-	CR.SetProxy(c)
 
 	c.Visit(BuildInfoSearching(CR.ConstructSearch(searchstr)))
 	return p, err

@@ -13,8 +13,7 @@ import (
 )
 
 func Scrape(searchstr string) (url string, isrss bool, err error) {
-	c := colly.NewCollector()
-	c.Limit(&colly.LimitRule{Parallelism: 1})
+	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if err != nil {
@@ -65,8 +64,7 @@ func Scrape(searchstr string) (url string, isrss bool, err error) {
 }
 
 func scrapeRssEndPoint(endpoint string) (rssep string, err error) {
-	c := colly.NewCollector()
-	c.Limit(&colly.LimitRule{Parallelism: 1})
+	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
@@ -89,8 +87,6 @@ func scrapeRssEndPoint(endpoint string) (rssep string, err error) {
 	c.OnError(func(_ *colly.Response, err error) {
 		log.Println("Something went wrong:", err)
 	})
-
-	CR.SetProxy(c)
 
 	c.Visit(resourcesBaseUrl + endpoint)
 

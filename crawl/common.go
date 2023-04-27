@@ -9,6 +9,13 @@ import (
 	"github.com/gocolly/colly/proxy"
 )
 
+func NewCollector() *colly.Collector {
+	c := colly.NewCollector()
+	c.Limit(&colly.LimitRule{Parallelism: 1})
+	SetProxy(c)
+	return c
+}
+
 func SetProxy(c *colly.Collector) {
 	if CFG.Proxy != nil {
 		if p, err := proxy.RoundRobinProxySwitcher(

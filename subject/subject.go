@@ -12,6 +12,9 @@ import (
 	"github.com/NullpointerW/mikanani/util"
 )
 
+// Subject as basic obj of each bgmi
+// programm will load it from OS file and manage thme
+// while some of fileds have updating it will be refresh to OS file
 type Subject struct {
 	SubjId      int    `json:"subjId"`
 	Name        string `json:"name"`
@@ -23,6 +26,8 @@ type Subject struct {
 	Typ         int    `json:"typ"`
 	StartTime   string `json:"startTime"`
 	EndTime     string `json:"endTime"`
+	// used when `ResourceTyp` is `Torrent`
+	TorrentHash string `json:"torrentHash"`
 }
 
 // The tag used when adding a torrent with qbt
@@ -78,6 +83,11 @@ func CreateSubject(n string) error {
 		return err
 	}
 
+	err = download(subject)
+	if err != nil {
+		return err
+	}
+
 	Manager.Add(subject.SubjId, subject, subject.Finished)
 	if subject.Finished {
 		// TODO go handlerfunc()
@@ -100,8 +110,13 @@ func solveResource(n string, subj *Subject) error {
 	return nil
 }
 
-func download(subj *Subject) {
+func download(subj *Subject) error {
 	if subj.ResourceTyp == Torrent {
-		torrent.Add(subj.ResourceUrl, subj.Path, "dd")
+		h, err := torrent.Add(subj.ResourceUrl, subj.Path, subj.QbtTag())
+		if err != nil {
+			return err
+		}
+		subj.TorrentHash = h
 	}
+	return nil
 }

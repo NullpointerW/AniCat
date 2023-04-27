@@ -21,8 +21,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 	if err != nil {
 		return err
 	}
-	c := colly.NewCollector()
-	c.Limit(&colly.LimitRule{Parallelism: 1})
+	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		exp := coverXpathExp
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
@@ -75,8 +74,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 }
 
 func coverImgScrape(coverName string) (cUrl string, err error) {
-	c := colly.NewCollector()
-	c.Limit(&colly.LimitRule{Parallelism: 1})
+	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		jsonstr := string(r.Body)
 		subjUrl := gjson.Get(jsonstr, "0").Get("url").String()
