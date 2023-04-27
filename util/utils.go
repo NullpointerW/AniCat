@@ -1,6 +1,7 @@
 package util
 
 import (
+	"strings"
 	"time"
 )
 
@@ -14,4 +15,8 @@ func ParseTime(strd string) (time.Time, error) {
 		return time.Time{}, err
 	}
 	return t, nil
+}
+
+func FileSeparatorConv(path string) string {
+	return strings.ReplaceAll(path, "\\", "/")
 }

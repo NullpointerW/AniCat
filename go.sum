@@ -1,5 +1,7 @@
 github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.4 h1:CedutH0mCnvl6zKgMdP/0jbD+bEHEoKFDs3vxnuJj4A=
 github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.4/go.mod h1:qhx64qXeKDgbCJQOE/eqaNKRjPi0GgTUJ6WA5D4CBoc=
+github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.5 h1:pCVSq1T7FR1koYN/olvqJEQ3qxK6oB2Z1JLKVun7Jmk=
+github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.5/go.mod h1:qhx64qXeKDgbCJQOE/eqaNKRjPi0GgTUJ6WA5D4CBoc=
 github.com/PuerkitoBio/goquery v1.8.1 h1:uQxhNlArOIdbrH1tr0UXwdVFgDcZDrZVdcpygAcwmWM=
 github.com/PuerkitoBio/goquery v1.8.1/go.mod h1:Q8ICL1kNUJ2sXGoAhPGUdYDJvgQgHzJsnnd3H7Ho5jQ=
 github.com/andybalholm/cascadia v1.3.1 h1:nhxRkql1kdYCc8Snf7D5/D3spOX+dBgjA6u8x004T2c=

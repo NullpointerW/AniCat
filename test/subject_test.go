@@ -1,11 +1,13 @@
 package test
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/subject"
 	"os"
 	"testing"
+
+	"github.com/NullpointerW/mikanani/errs"
+	"github.com/NullpointerW/mikanani/subject"
 )
 
 func TestOS(t *testing.T) {
@@ -19,6 +21,16 @@ func TestMap(t *testing.T) {
 	subject.Manager.Add(8850, &subject.Subject{}, false)
 	subject.Manager.Move(8848, false)
 
+}
+func TestJsonSubj(t *testing.T) {
+	b, _ := json.Marshal(subject.Subject{})
+	fmt.Println(string(b))
+	s := &subject.Subject{}
+	js := `{"subjId":214,"name":"","path":"","finished":false,"episode":0,"resourceTyp":1,"resourceUrl":"","typ":1,"startTime":"","endTime":"","torrentHash":""}`
+	json.Unmarshal([]byte(js), s)
+	fmt.Printf("%#+v\n", s)
+	fmt.Println(s.ResourceTyp == subject.Torrent)
+	fmt.Println(s.ResourceTyp == 1)
 }
 
 func TestScan(t *testing.T) {

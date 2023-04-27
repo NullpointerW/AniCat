@@ -24,3 +24,12 @@ func TestDLcompl(t *testing.T) {
 	}
 	fmt.Println(c)
 }
+
+func TestGetViaPath(t *testing.T) {
+      ts,err:= TORR.GetViaPath("C:/Users/W/Downloads")
+	  if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fmt.Printf("%#+v",ts[0])
+}

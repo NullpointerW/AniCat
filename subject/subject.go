@@ -1,12 +1,14 @@
 package subject
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
 
 	ic "github.com/NullpointerW/mikanani/crawl/information"
 	rc "github.com/NullpointerW/mikanani/crawl/resource"
+	detn "github.com/NullpointerW/mikanani/download/detection"
 	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/util"
@@ -16,18 +18,28 @@ import (
 // programm will load it from OS file and manage thme
 // while some of fileds have updating it will be refresh to OS file
 type Subject struct {
-	SubjId      int    `json:"subjId"`
-	Name        string `json:"name"`
-	Path        string `json:"path"`
-	Finished    bool   `json:"finished"`
-	Episode     int    `json:"episode"`
-	ResourceTyp int    `json:"resourceTyp"`
-	ResourceUrl string `json:"resourceUrl"`
-	Typ         int    `json:"typ"`
-	StartTime   string `json:"startTime"`
-	EndTime     string `json:"endTime"`
+	SubjId      int         `json:"subjId"`
+	Name        string      `json:"name"`
+	Path        string      `json:"path"`
+	Finished    bool        `json:"finished"`
+	Episode     int         `json:"episode"`
+	ResourceTyp ResourceTyp `json:"resourceTyp"`
+	ResourceUrl string      `json:"resourceUrl"`
+	Typ         BgmiTyp     `json:"typ"`
+	StartTime   string      `json:"startTime"`
+	EndTime     string      `json:"endTime"`
 	// used when `ResourceTyp` is `Torrent`
 	TorrentHash string `json:"torrentHash"`
+	// manager use ctxcancel func to exit gorountine running the current subject.
+	// when delete a subject manager,should run the cancelfunc and if a gorountine is runing
+	// for this subject it will exit.
+	// Context is hold by subject-running gorountine
+	// while subject-running gorountine exit actively exit should be called
+	exit context.CancelFunc
+	// While detection-gorountine detected that the resource download of the subject is completed
+	// it will send downLoad message to subject-running gorountine
+	// received and push to terminal
+	PushChan chan detn.BgmiDLInfo
 }
 
 // The tag used when adding a torrent with qbt

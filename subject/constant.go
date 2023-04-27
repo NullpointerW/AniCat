@@ -1,14 +1,32 @@
 package subject
 
 // resource type
+type ResourceTyp int
+
+func (t ResourceTyp) String() string {
+	if t == 0 {
+		return "RSS"
+	}
+	return "Torrent"
+}
+
 const (
-	RSS = iota
+	RSS ResourceTyp = iota
 	Torrent
 )
 
+type BgmiTyp int
+
+func (t BgmiTyp) String() string {
+	if t == 0 {
+		return "TV"
+	}
+	return "MOVIE"
+}
+
 // anime type
 const (
-	TV = iota
+	TV BgmiTyp = iota
 	MOVIE
 )
 

@@ -45,6 +45,8 @@ func Scan() {
 }
 
 // Initialize the content library in OS file for the `subject` in the memory.
+// Path can be used to monitor the download status of resources
+// apply to RSS and Torrent type.
 // If initialization is successful, write the path to Subject.Path.
 func initFolder(subject *Subject) error {
 	var folderPath string
