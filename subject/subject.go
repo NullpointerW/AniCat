@@ -6,8 +6,9 @@ import (
 	"time"
 
 	ic "github.com/NullpointerW/mikanani/crawl/information"
+	rc "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/utils"
+	"github.com/NullpointerW/mikanani/util"
 )
 
 const (
@@ -44,7 +45,7 @@ func CreateSubject(n string) error {
 
 	sid, _ := strconv.Atoi(tips[ic.SubjId])
 	if Manager.GetSubject(sid) != nil {
-		return errs.Custom("subject %d already existed ", sid)
+		return errs.Custom("%w:sid: ", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
 
@@ -59,7 +60,7 @@ func CreateSubject(n string) error {
 	subject.StartTime = tips[ic.SubjStartTime]
 	if et, e := tips[ic.SubjectEndTime]; e {
 		n := time.Now()
-		eti, err := utils.ParseTime()
+		eti, err := util.ParseTime(et)
 		if err != nil {
 			return err
 		}
@@ -69,7 +70,8 @@ func CreateSubject(n string) error {
 
 	// for testing
 	fmt.Printf("%#+v", *subject)
-	err = solveResource(subject)
+
+	err = solveResource(n, subject)
 	if err != nil {
 		return err
 	}
@@ -87,7 +89,7 @@ func CreateSubject(n string) error {
 	return nil
 }
 
-func solveResource(*Subject) error {
-	//TODO qb-api
+func solveResource(n string, subj *Subject) error {
+	rc.Scrape(n)
 	return nil
 }

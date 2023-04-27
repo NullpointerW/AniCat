@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ErrCrawlNotFound   = errors.New("content not crawled")
-	ErrTorrnetNotFound = errors.New("torrnet not found")
+	ErrCrawlNotFound         = errors.New("content not crawled")
+	ErrTorrnetNotFound       = errors.New("torrnet not found")
+	ErrSubjectAlreadyExisted = errors.New("subject already existed")
 )
 
 func Custom(format string, a ...any) error {
