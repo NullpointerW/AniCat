@@ -3,6 +3,7 @@ package download
 import (
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	CFG "github.com/NullpointerW/mikanani/conf"
+	"github.com/NullpointerW/mikanani/errs"
 )
 
 var Qbt *qbt.Client
@@ -17,8 +18,6 @@ func init() {
 	} else {
 		cli, err = qbt.NewCli(CFG.Env.Qbt.Host, CFG.Env.Qbt.Username, CFG.Env.Qbt.Password)
 	}
-	if err != nil {
-		panic(err)
-	}
+	errs.PanicErr(err)
 	Qbt = cli
 }

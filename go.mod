@@ -2,14 +2,16 @@ module github.com/NullpointerW/mikanani
 
 go 1.20
 
-require github.com/gocolly/colly v1.2.0
+require (
+	github.com/gocolly/colly v1.2.0
+	github.com/schollz/progressbar/v3 v3.13.1
+)
 
 require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/schollz/progressbar/v3 v3.13.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
@@ -17,7 +19,7 @@ require (
 )
 
 require (
-	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.1
+	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.4
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/antchfx/htmlquery v1.3.0
