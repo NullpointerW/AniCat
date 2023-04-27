@@ -37,7 +37,7 @@ func Scrape(searchstr string) (url string, isrss bool, err error) {
 			t := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[3]`)
 			torr := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[4]/a/@href`)
 			mglink := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[1]/a[2]/@data-clipboard-text`)
-			log.Printf("file_name:%s,size:%s,update_time=%s,torrent:%s,magnetLink=%s",
+			log.Printf("\nfile_name:%s\nsize:%s\nupdate_time=%s\ntorrent:%s\nmagnet:%s\n",
 				htmlquery.InnerText(fn),
 				htmlquery.InnerText(size),
 				htmlquery.InnerText(t),

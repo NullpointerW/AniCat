@@ -1,4 +1,4 @@
-package torrnet
+package torrent
 
 import (
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"

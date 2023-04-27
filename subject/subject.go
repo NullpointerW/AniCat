@@ -7,19 +7,9 @@ import (
 
 	ic "github.com/NullpointerW/mikanani/crawl/information"
 	rc "github.com/NullpointerW/mikanani/crawl/resource"
+	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/util"
-)
-
-const (
-	//resource type
-	RSS = iota
-	Torrent
-)
-const (
-	//anime type
-	TV = iota
-	MOVIE
 )
 
 type Subject struct {
@@ -33,6 +23,13 @@ type Subject struct {
 	Typ         int    `json:"typ"`
 	StartTime   string `json:"startTime"`
 	EndTime     string `json:"endTime"`
+}
+
+// The tag used when adding a torrent with qbt
+// can be used to monitor the download status of resources
+// related to this subject file.
+func (s *Subject) QbtTag() string {
+	return fmt.Sprintf(QbtTag, s.SubjId)
 }
 
 func CreateSubject(n string) error {
@@ -90,6 +87,21 @@ func CreateSubject(n string) error {
 }
 
 func solveResource(n string, subj *Subject) error {
-	rc.Scrape(n)
+	u, isrss, err := rc.Scrape(n)
+	if err != nil {
+		return err
+	}
+	subj.ResourceUrl = u
+	if isrss {
+		subj.ResourceTyp = RSS
+	} else {
+		subj.ResourceTyp = Torrent
+	}
 	return nil
+}
+
+func download(subj *Subject) {
+	if subj.ResourceTyp == Torrent {
+		torrent.Add(subj.ResourceUrl, subj.Path, "dd")
+	}
 }
