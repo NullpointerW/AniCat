@@ -2,6 +2,8 @@ package subject
 
 import "sync"
 
+
+
 var Manager = SubjectManager{
 	mu:         new(sync.Mutex),
 	finished:   make(map[int]*Subject),
