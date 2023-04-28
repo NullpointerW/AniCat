@@ -22,7 +22,7 @@ func Add(url, path, tag string) (string, error) {
 	return torrs[0].Hash, nil
 }
 
-func Get(h string) (torr qbt.BasicTorrent, err error) {
+func Get(h string) (torr qbt.Torrent, err error) {
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
 		"filter": "all",
 		"hashes": h,
@@ -37,7 +37,7 @@ func Get(h string) (torr qbt.BasicTorrent, err error) {
 	return
 }
 
-func GetViaPath(path string) (hits []qbt.BasicTorrent, err error) {
+func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
 		"filter": "all",
 	})

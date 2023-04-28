@@ -28,3 +28,18 @@ func RequireNonErr(err error) bool {
 func ErrTransfer(src error, dst *error) {
 	*dst = src
 }
+
+type Thrower func() error
+type ErrWrapper struct {
+	e error
+}
+
+func (wp *ErrWrapper) Handle(t Thrower) {
+	if wp.e == nil {
+		wp.e = t()
+	}
+}
+
+func (wp *ErrWrapper) Error() error {
+	return wp.e
+}

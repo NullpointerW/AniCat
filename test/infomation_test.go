@@ -11,7 +11,7 @@ func TestInfoSearch(t *testing.T) {
 }
 
 func TestInfoScraping(t *testing.T) {
-	tip, err := I.InfoScrape("凉宫春日的忧郁2009")
+	tip, err := I.InfoScrape("铃芽之旅")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()

@@ -55,7 +55,6 @@ func (m SubjectManager) GetSubject(sid int) *Subject {
 	s, e := m.unfinished[sid]
 	if !e {
 		return m.finished[sid]
-	} else {
-		return s
 	}
+	return s
 }

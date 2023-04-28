@@ -8,11 +8,12 @@ const (
 
 // keys for info map Scrape from bgm.tv
 const (
-	SubjId         = "sid"
-	SubjName       = "中文名"
-	SubjEpisode    = "话数"
-	SubjStartTime  = "放送开始"
-	SubjectEndTime = "播放结束"
+	SubjId            = "sid"
+	SubjName          = "中文名"
+	SubjEpisode       = "话数"
+	SubjStartTime     = "放送开始"
+	SubjMoveStartTime = "上映年度"
+	SubjectEndTime    = "播放结束"
 )
 
 var InfoAPIs = map[string]string{

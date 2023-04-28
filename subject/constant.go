@@ -34,3 +34,7 @@ const (
 const (
 	QbtTag = "mikan@subject-%d"
 )
+
+const(
+	CoverFN ="cover.jpg"
+)

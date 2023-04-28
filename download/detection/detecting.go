@@ -1,4 +1,5 @@
 package detection
 
-type BgmiDLInfo struct {
-}
+import qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+
+

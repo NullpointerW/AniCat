@@ -3,15 +3,15 @@ package subject
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"time"
-
-	ic "github.com/NullpointerW/mikanani/crawl/information"
-	rc "github.com/NullpointerW/mikanani/crawl/resource"
-	detn "github.com/NullpointerW/mikanani/download/detection"
+	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	CC "github.com/NullpointerW/mikanani/crawl/cover"
+	IC "github.com/NullpointerW/mikanani/crawl/information"
+	RC "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/util"
+	"strconv"
+	"time"
 )
 
 // Subject as basic obj of each bgmi
@@ -28,18 +28,25 @@ type Subject struct {
 	Typ         BgmiTyp     `json:"typ"`
 	StartTime   string      `json:"startTime"`
 	EndTime     string      `json:"endTime"`
-	// used when `ResourceTyp` is `Torrent`
+	// used while `ResourceTyp` is `Torrent`
 	TorrentHash string `json:"torrentHash"`
 	// manager use ctxcancel func to exit gorountine running the current subject.
 	// when delete a subject manager,should run the cancelfunc and if a gorountine is runing
 	// for this subject it will exit.
 	// Context is hold by subject-running gorountine
-	// while subject-running gorountine exit actively exit should be called
+	// while subject-running gorountine exit actively func should be called
 	exit context.CancelFunc
+	// before detection-gorountine push to subject,Check if this channel is closed.
+	// before exit exited channel should  be closed
+	exited chan struct{}
 	// While detection-gorountine detected that the resource download of the subject is completed
 	// it will send downLoad message to subject-running gorountine
 	// received and push to terminal
-	PushChan chan detn.BgmiDLInfo
+	PushChan chan qbt.Torrent
+	// The anime series of this project has already ended and all episodes have been downloaded.
+	// while init,if this flag is false then there is noneed to start a gorountine to run it
+	// exit actively flag should  be set to true
+	Terminal bool
 }
 
 // The tag used when adding a torrent with qbt
@@ -52,34 +59,39 @@ func (s *Subject) QbtTag() string {
 func CreateSubject(n string) error {
 	subject := new(Subject)
 
-	tips, err := ic.InfoScrape(n)
+	tips, err := IC.InfoScrape(n)
 	if err != nil {
 		return err
 	}
 
-	sid, _ := strconv.Atoi(tips[ic.SubjId])
+	sid, _ := strconv.Atoi(tips[IC.SubjId])
 	if Manager.GetSubject(sid) != nil {
 		return errs.Custom("%w:sid: ", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
 
-	subject.Name = tips[ic.SubjName]
+	subject.Name = tips[IC.SubjName]
 
-	if subject.Episode, _ = strconv.Atoi(tips[ic.SubjEpisode]); subject.Episode > 1 {
+	if subject.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode]); subject.Episode > 1 {
 		subject.Typ = TV
 	} else {
 		subject.Typ = MOVIE
 	}
 
-	subject.StartTime = tips[ic.SubjStartTime]
-	if et, e := tips[ic.SubjectEndTime]; e {
-		n := time.Now()
-		eti, err := util.ParseTime(et)
-		if err != nil {
-			return err
+	if subject.Typ == TV {
+		subject.StartTime = tips[IC.SubjStartTime]
+		if et, e := tips[IC.SubjectEndTime]; e {
+			n := time.Now()
+			eti, err := util.ParseTime(et)
+			if err != nil {
+				return err
+			}
+			subject.EndTime = et
+			subject.Finished = n.After(eti) || n.Equal(eti)
 		}
-		subject.EndTime = et
-		subject.Finished = n.After(eti) || n.Equal(eti)
+	} else { // if movie finished
+		subject.StartTime = tips[IC.SubjMoveStartTime]
+		subject.Finished = true
 	}
 
 	// for testing
@@ -91,6 +103,12 @@ func CreateSubject(n string) error {
 	}
 
 	err = initFolder(subject)
+	if err != nil {
+		return err
+	}
+
+	cp := subject.Path + "/" + CoverFN
+	err = CC.DOUBANCoverScraper.Scrape(cp, n)
 	if err != nil {
 		return err
 	}
@@ -109,7 +127,7 @@ func CreateSubject(n string) error {
 }
 
 func solveResource(n string, subj *Subject) error {
-	u, isrss, err := rc.Scrape(n)
+	u, isrss, err := RC.Scrape(n)
 	if err != nil {
 		return err
 	}
