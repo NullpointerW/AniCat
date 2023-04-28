@@ -48,29 +48,29 @@ func Scan() {
 // Path can be used to monitor the download status of resources
 // apply to RSS and Torrent type.
 // If initialization is successful, write the path to Subject.Path.
-func initFolder(subject *Subject) error {
+func initFolder(subject *Subject) (err error) {
 	var folderPath string
 
 	folderPath = trimPath(HOME)
 	folderPath += "/" + strconv.Itoa(subject.SubjId) + folderSuffix
 
-	err := os.MkdirAll(folderPath, os.ModePerm)
+	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	if ap, err := filepath.Abs(folderPath); err == nil {
 		subject.Path = ap
-	} else {
-		return err
 	}
 
-	b, _ := json.Marshal(*subject)
-	err = os.WriteFile(folderPath+"/"+jsonfileName, b, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	return nil
+	return
+}
+
+func (s *Subject) writeJson() (err error) {
+	b, _ := json.Marshal(*s)
+	fldrp := s.Path
+	err = os.WriteFile(fldrp+"/"+jsonfileName, b, os.ModePerm)
+	return err
 }
 
 func trimPath(n string) string {

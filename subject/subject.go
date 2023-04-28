@@ -3,6 +3,9 @@ package subject
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	CC "github.com/NullpointerW/mikanani/crawl/cover"
 	IC "github.com/NullpointerW/mikanani/crawl/information"
@@ -10,8 +13,6 @@ import (
 	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/util"
-	"strconv"
-	"time"
 )
 
 // Subject as basic obj of each bgmi
@@ -35,18 +36,18 @@ type Subject struct {
 	// for this subject it will exit.
 	// Context is hold by subject-running gorountine
 	// while subject-running gorountine exit actively func should be called
-	exit context.CancelFunc
+	exit context.CancelFunc `json:"-"`
 	// before detection-gorountine push to subject,Check if this channel is closed.
 	// before exit exited channel should  be closed
-	exited chan struct{}
+	exited chan struct{} `json:"-"`
 	// While detection-gorountine detected that the resource download of the subject is completed
 	// it will send downLoad message to subject-running gorountine
 	// received and push to terminal
-	PushChan chan qbt.Torrent
+	PushChan chan qbt.Torrent `json:"-"`
 	// The anime series of this project has already ended and all episodes have been downloaded.
 	// while init,if this flag is false then there is noneed to start a gorountine to run it
 	// exit actively flag should  be set to true
-	Terminal bool
+	Terminate bool `json:"terminate"`
 }
 
 // The tag used when adding a torrent with qbt
