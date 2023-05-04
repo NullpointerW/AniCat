@@ -39,8 +39,8 @@ type Subject struct {
 	// while subject-running gorountine exit actively func should be called
 	exit context.CancelFunc `json:"-"`
 	// before detection-gorountine push to subject,Check if this channel is closed.
-	// before exit exited channel should  be closed
-	exited chan struct{} `json:"-"`
+	// before exit Exited channel should  be closed
+	Exited chan struct{} `json:"-"`
 	// While detection-gorountine detected that the resource download of the subject is completed
 	// it will send downLoad message to subject-running gorountine
 	// received and push to terminal

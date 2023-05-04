@@ -1,11 +1,13 @@
 package detection
 
 import (
-	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	
 
 	DL "github.com/NullpointerW/mikanani/download"
 	"github.com/NullpointerW/mikanani/errs"
@@ -20,7 +22,6 @@ func init() {
 func detect() {
 	subject.Wg.Wait()
 	for {
-		// TODO
 		sync, err := DL.Qbt.GetMainData()
 		if err == nil {
 			for _, torr := range sync.Torrents {
@@ -59,6 +60,8 @@ func detect() {
 					continue
 				}
 			}
+		} else {
+			log.Println(err)
 		}
 		time.Sleep(5 * time.Minute)
 	}
@@ -67,9 +70,15 @@ func detect() {
 
 func send(sid int, torr qbt.Torrent) error {
 	s := subject.Manager.GetSubject(sid)
+
 	if s == nil {
 		return errs.Custom("%w:sid:%d", errs.ErrSubjectNotFound, sid)
 	}
-	s.PushChan <- torr
+	select {
+	case <-s.Exited:
+	default:
+		s.PushChan <- torr
+	}
+
 	return nil
 }
