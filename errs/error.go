@@ -9,6 +9,7 @@ var (
 	ErrCrawlNotFound         = errors.New("content not crawled")
 	ErrTorrnetNotFound       = errors.New("torrnet not found")
 	ErrSubjectAlreadyExisted = errors.New("subject already existed")
+	ErrSubjectNotFound       = errors.New("subject not found ")
 )
 
 func Custom(format string, a ...any) error {

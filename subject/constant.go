@@ -30,9 +30,16 @@ const (
 	MOVIE
 )
 
+// file-related
+const (
+	FolderSuffix = "@mikan"
+	jsonfileName = "info.json"
+)
+
 // qbt tag generation template
 const (
-	QbtTag  = "mikan@subject-%d"
+	QbtTag_prefix = "mikan@subject-"
+	QbtTag        = QbtTag_prefix + "%d"
 )
 
 const (

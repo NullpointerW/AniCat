@@ -14,11 +14,6 @@ import (
 
 var Wg sync.WaitGroup
 
-const (
-	folderSuffix = "@mikan"
-	jsonfileName = "info.json"
-)
-
 var HOME string = CFG.SubjPath
 
 func Scan() {
@@ -27,7 +22,7 @@ func Scan() {
 	home := trimPath(HOME)
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
-			if f.IsDir() && strings.HasSuffix(f.Name(), folderSuffix) {
+			if f.IsDir() && strings.HasSuffix(f.Name(), FolderSuffix) {
 				if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + jsonfileName); err != nil {
 					var s Subject
 					err := json.Unmarshal(jsraw, &s)
@@ -53,7 +48,7 @@ func initFolder(subject *Subject) (err error) {
 	var folderPath string
 
 	folderPath = trimPath(HOME)
-	folderPath += "/" + strconv.Itoa(subject.SubjId) + folderSuffix
+	folderPath += "/" + strconv.Itoa(subject.SubjId) + FolderSuffix
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {

@@ -19,7 +19,6 @@ func (s *Subject) runtimeInit(reload bool) {
 	s.exited = make(chan struct{})
 	Manager.Add(s)
 	go s.run(ctx, reload)
-	return
 }
 
 func (s *Subject) run(ctx context.Context, reload bool) {
