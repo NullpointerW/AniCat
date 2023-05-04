@@ -1,6 +1,7 @@
 package util
 
 import (
+	"regexp"
 	"strings"
 	"time"
 )
@@ -19,4 +20,10 @@ func ParseTime(strd string) (time.Time, error) {
 
 func FileSeparatorConv(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
+}
+
+
+func IsRegexp(str string) bool {
+    _, err := regexp.Compile(str)
+    return err == nil
 }

@@ -32,9 +32,9 @@ const (
 
 // qbt tag generation template
 const (
-	QbtTag = "mikan@subject-%d"
+	QbtTag  = "mikan@subject-%d"
 )
 
-const(
-	CoverFN ="cover.jpg"
+const (
+	CoverFN = "cover.jpg"
 )

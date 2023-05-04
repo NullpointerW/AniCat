@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/NullpointerW/mikanani/errs"
@@ -20,8 +21,8 @@ func TestMap(t *testing.T) {
 	subject.Manager.Add(8849, &subject.Subject{}, true)
 	subject.Manager.Add(8850, &subject.Subject{}, false)
 	subject.Manager.Move(8848, false)
-
 }
+
 func TestJsonSubj(t *testing.T) {
 	b, _ := json.Marshal(subject.Subject{})
 	fmt.Println(string(b))
@@ -40,4 +41,11 @@ func TestScan(t *testing.T) {
 func TestCreateSubj(t *testing.T) {
 	err := subject.CreateSubject("轻音少女")
 	errs.NoError(t, err)
+}
+
+func TestXxx(t *testing.T) {
+	typ:=reflect.TypeOf(subject.Extra{}.RssOption)
+	fmt.Println("Type:", typ)
+	typ=reflect.TypeOf(subject.Extra{})
+	fmt.Println("Type:", typ)
 }

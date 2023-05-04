@@ -10,6 +10,7 @@ import (
 	CC "github.com/NullpointerW/mikanani/crawl/cover"
 	IC "github.com/NullpointerW/mikanani/crawl/information"
 	RC "github.com/NullpointerW/mikanani/crawl/resource"
+	"github.com/NullpointerW/mikanani/download/rss"
 	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/util"
@@ -50,11 +51,24 @@ type Subject struct {
 	Terminate bool `json:"terminate"`
 }
 
+type Extra struct {
+	SubtitleGroup string
+	RssOption     struct {
+		MustContain    string
+		MustNotContain string
+		UseRegex       bool
+	}
+}
+
 // The tag used when adding a torrent with qbt
 // can be used to monitor the download status of resources
 // related to this subject file.
 func (s *Subject) QbtTag() string {
 	return fmt.Sprintf(QbtTag, s.SubjId)
+}
+
+func (s *Subject) RssPath() string {
+	return s.QbtTag()
 }
 
 func CreateSubject(n string) error {
@@ -148,6 +162,26 @@ func download(subj *Subject) error {
 			return err
 		}
 		subj.TorrentHash = h
+	} else {
+		err := rss.Download(qbt.AutoDLRule{
+			Enabled:       true,
+			AffectedFeeds: []string{subj.ResourceUrl},
+			SavePath:      subj.Path,
+		}, subj.RssPath())
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+// TODO use in v2
+func buildRssDLR(subj *Subject, ext Extra) (DLR qbt.AutoDLRule) {
+	DLR.Enabled = true
+	DLR.AffectedFeeds = []string{subj.ResourceUrl}
+	DLR.SavePath = subj.Path
+	DLR.UseRegex = ext.RssOption.UseRegex
+	DLR.MustContain = ext.RssOption.MustContain
+	DLR.MustNotContain = ext.RssOption.MustNotContain
+	return
 }

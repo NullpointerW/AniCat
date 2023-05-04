@@ -1,7 +1,7 @@
 package detection
 
 import (
-	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	// qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	"github.com/NullpointerW/mikanani/subject"
 	"time"
 )
