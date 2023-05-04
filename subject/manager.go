@@ -1,62 +1,67 @@
 package subject
 
-import "sync"
+import (
+	"log"
+	"sync"
+)
 
+var (
+	Create chan string
+	Delete chan int
+)
 
+func init() {
+	Create = make(chan string, 1024)
+	Delete = make(chan int, 1024)
+}
 
 var Manager = SubjectManager{
-	mu:         new(sync.Mutex),
-	finished:   make(map[int]*Subject),
-	unfinished: make(map[int]*Subject),
+	mu:  new(sync.Mutex),
+	sto: make(map[int]*Subject),
 }
 
 type SubjectManager struct {
-	mu                   *sync.Mutex
-	finished, unfinished map[int]*Subject
+	mu  *sync.Mutex
+	sto map[int]*Subject
 }
 
-func (m SubjectManager) Add(sid int, s *Subject, fin bool) {
+func (m SubjectManager) Add(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if fin {
-		m.finished[sid] = s
-		return
-	}
-	m.unfinished[sid] = s
+	m.sto[s.SubjId] = s
 }
 
-func (m SubjectManager) Remove(sid int, s *Subject, fin bool) {
+func (m SubjectManager) Remove(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if fin {
-		delete(m.finished, sid)
-		return
-	}
-	delete(m.unfinished, sid)
-
-}
-
-func (m SubjectManager) Move(sid int, tofin bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	var copy *Subject
-	if tofin {
-		copy = m.unfinished[sid]
-		delete(m.unfinished, sid)
-		m.finished[sid] = copy
-		return
-	}
-	copy = m.finished[sid]
-	delete(m.finished, sid)
-	m.unfinished[sid] = copy
+	delete(m.sto, s.SubjId)
 }
 
 func (m SubjectManager) GetSubject(sid int) *Subject {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	s, e := m.unfinished[sid]
-	if !e {
-		return m.finished[sid]
+	return m.sto[sid]
+}
+
+func StartManagement() {
+	for {
+		select {
+		case n := <-Create:
+			err := CreateSubject(n)
+			if err != nil {
+				log.Println(err)
+			}
+		case i := <-Delete:
+			s := Manager.GetSubject(i)
+			if s != nil {
+				s.exit()
+				Manager.Remove(s)
+				err := rmFolder(s)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
 	}
-	return s
+
 }

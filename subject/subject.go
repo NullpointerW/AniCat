@@ -133,10 +133,7 @@ func CreateSubject(n string) error {
 		return err
 	}
 
-	Manager.Add(subject.SubjId, subject, subject.Finished)
-	if subject.Finished {
-		// TODO go handlerfunc()
-	}
+	subject.runtimeInit(false)
 
 	return nil
 }

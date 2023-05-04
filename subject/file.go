@@ -34,11 +34,7 @@ func Scan() {
 					if err != nil {
 						log.Println(err)
 					}
-					Manager.Add(s.SubjId, &s, s.Finished)
-					if !s.Finished {
-						// TODO handler
-						go func(s *Subject) {}(&s)
-					}
+					s.runtimeInit(true)
 				} else {
 					log.Println(err)
 				}
@@ -69,6 +65,10 @@ func initFolder(subject *Subject) (err error) {
 	}
 
 	return
+}
+
+func rmFolder(s *Subject) error {
+	return os.Remove(s.Path)
 }
 
 func (s *Subject) writeJson() (err error) {

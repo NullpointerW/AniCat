@@ -17,10 +17,9 @@ func TestOS(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	subject.Manager.Add(8848, &subject.Subject{}, true)
-	subject.Manager.Add(8849, &subject.Subject{}, true)
-	subject.Manager.Add(8850, &subject.Subject{}, false)
-	subject.Manager.Move(8848, false)
+	subject.Manager.Add(&subject.Subject{})
+	subject.Manager.Add(&subject.Subject{})
+	subject.Manager.Add(&subject.Subject{})
 }
 
 func TestJsonSubj(t *testing.T) {
@@ -44,8 +43,8 @@ func TestCreateSubj(t *testing.T) {
 }
 
 func TestXxx(t *testing.T) {
-	typ:=reflect.TypeOf(subject.Extra{}.RssOption)
+	typ := reflect.TypeOf(subject.Extra{}.RssOption)
 	fmt.Println("Type:", typ)
-	typ=reflect.TypeOf(subject.Extra{})
+	typ = reflect.TypeOf(subject.Extra{})
 	fmt.Println("Type:", typ)
 }
