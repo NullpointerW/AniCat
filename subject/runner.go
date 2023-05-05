@@ -13,6 +13,10 @@ import (
 
 // before gorountie handle it init inner channels and ctxfunc
 func (s *Subject) runtimeInit(reload bool) {
+	if s.Terminate {
+		Manager.Add(s)
+		return
+	}
 	c := context.Background()
 	ctx, exit := context.WithCancel(c)
 	s.exit = exit
@@ -27,15 +31,17 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 		s.checkDL()
 	}
 	t := time.NewTicker(util.Day)
-	select {
-	case torr := <-s.PushChan:
-		err := s.push(torr)
-		log.Println(err)
-	case <-ctx.Done():
-		close(s.Exited)
-		return
-	case <-t.C:
-		s.update()
+	for {
+		select {
+		case torr := <-s.PushChan:
+			err := s.push(torr)
+			log.Println(err)
+		case <-ctx.Done():
+			exit(s)
+			return
+		case <-t.C:
+			s.update()
+		}
 	}
 
 }
@@ -45,7 +51,6 @@ func (s *Subject) update() {
 }
 
 func exit(s *Subject) {
-	s.exit()
 	close(s.Exited)
 	close(s.PushChan)
 }

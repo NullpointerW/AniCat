@@ -21,3 +21,14 @@ func TestInfoScraping(t *testing.T) {
 		fmt.Println(v)
 	}
 }
+func TestBgmTVInfoScrape(t *testing.T) {
+	tip, err := I.BgmTVInfoScrape(485)
+	if err != nil {
+		fmt.Println(err)
+		t.FailNow()
+	}
+	for k, v := range tip {
+		fmt.Println(k)
+		fmt.Println(v)
+	}
+}

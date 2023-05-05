@@ -11,14 +11,25 @@ import (
 	"github.com/gocolly/colly"
 )
 
+func BgmTVInfoScrape(sid int) (tips map[string]string, err error) {
+	url := infoBaseUrl + fmt.Sprintf(InfoAPIs["subject"], sid)
+	tips, err = doScrape(url)
+	return
+}
+
 func InfoScrape(searchstr string) (tips map[string]string, err error) {
-	tips = make(map[string]string)
 	p, err := InfoPageScrape(searchstr)
 	if err != nil {
 		return tips, err
 	}
 	url := infoBaseUrl + p
-	c:=CR.NewCollector()
+	tips, err = doScrape(url)
+	return
+}
+
+func doScrape(url string) (tips map[string]string, err error) {
+	tips = make(map[string]string)
+	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
@@ -36,11 +47,10 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 				tt = strings.TrimSuffix(tt, ": ")
 				tips[tt] = lt
 			}
-			s := strings.Split(p, `/`)
+			s := strings.Split(url, `/`)
 			sid := s[len(s)-1]
 			tips["sid"] = sid
 		} else {
-			fmt.Println("NOT FOUND")
 			err = errs.ErrCrawlNotFound
 			return
 		}
@@ -91,7 +101,6 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 
 	c.Visit(BuildInfoSearching(CR.ConstructSearch(searchstr)))
 	return p, err
-
 }
 
 func BuildInfoSearching(s string) string {

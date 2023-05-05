@@ -7,7 +7,6 @@ import (
 	"time"
 
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	
 
 	DL "github.com/NullpointerW/mikanani/download"
 	"github.com/NullpointerW/mikanani/errs"
@@ -73,6 +72,9 @@ func send(sid int, torr qbt.Torrent) error {
 
 	if s == nil {
 		return errs.Custom("%w:sid:%d", errs.ErrSubjectNotFound, sid)
+	}
+	if s.Terminate {
+		return nil
 	}
 	select {
 	case <-s.Exited:

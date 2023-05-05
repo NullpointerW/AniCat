@@ -81,7 +81,7 @@ func CreateSubject(n string) error {
 
 	sid, _ := strconv.Atoi(tips[IC.SubjId])
 	if Manager.GetSubject(sid) != nil {
-		return errs.Custom("%w:sid: ", errs.ErrSubjectAlreadyExisted, sid)
+		return errs.Custom("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
 
@@ -136,6 +136,9 @@ func CreateSubject(n string) error {
 	subject.runtimeInit(false)
 
 	return nil
+}
+func (s *Subject)FetchInfo(){
+	
 }
 
 func solveResource(n string, subj *Subject) error {
