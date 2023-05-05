@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	TORR "github.com/NullpointerW/mikanani/download/torrent"
@@ -26,10 +27,18 @@ func TestDLcompl(t *testing.T) {
 }
 
 func TestGetViaPath(t *testing.T) {
-      ts,err:= TORR.GetViaPath("C:/Users/W/Downloads")
-	  if err != nil {
+	ts, err := TORR.GetViaPath("C:/Users/W/Downloads")
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	fmt.Printf("%#+v",ts[0])
+	fmt.Printf("%#+v", ts[0])
+}
+
+func TestStr(t *testing.T) {
+	str := "jook     lol"
+	fs := strings.Fields(str)
+	for _, s := range fs {
+		fmt.Println(s)
+	}
 }
