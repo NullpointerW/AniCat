@@ -6,7 +6,10 @@ import (
 	"time"
 
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+
+	"github.com/NullpointerW/mikanani/download/rss"
 	TORR "github.com/NullpointerW/mikanani/download/torrent"
+	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/pusher"
 	"github.com/NullpointerW/mikanani/util"
 )
@@ -46,8 +49,18 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 
 }
 
-func (s *Subject) update() {
-         
+func (s *Subject) update() error {
+	wrap := errs.ErrWrapper{}
+	wrap.Handle(func() error {
+		return s.FetchInfo()
+	})
+	wrap.Handle(func() error {
+		return s.writeJson()
+	})
+	wrap.Handle(func() error {
+		return s.checkDL()
+	})
+	return wrap.Error()
 }
 
 func exit(s *Subject) {
@@ -62,9 +75,46 @@ func (s *Subject) checkDL() (err error) {
 			return err
 		} else if compl {
 			s.terminate()
+			return err
 		}
+	} else if s.ResourceTyp == RSS && s.Finished {
+		if s.Typ == TV && s.EndTime != "" {
+			e, err := util.ParseTime(s.EndTime)
+			if err != nil {
+				return err
+			}
+			if time.Since(e) >= util.Day {
+				goto checkSync
+			}
+		} else if s.Typ == MOVIE {
+			goto checkSync
+		}
+	} else {
+		return
 	}
-	return err
+checkSync:
+	sync, err := s.RssDLSynced()
+	if err != nil {
+		return err
+	}
+	if sync {
+		s.terminate()
+	}
+	return
+}
+
+func (s *Subject) RssDLSynced() (bool, error) {
+	arts, err := rss.GetMatchedArts(s.RssPath())
+	if err != nil {
+		return false, nil
+	}
+	tlen := len(arts)
+	hs, err := TORR.GetViaPath(s.Path)
+	if err != nil {
+		return false, nil
+	}
+	llen := len(hs)
+	return llen >= tlen, nil
 }
 
 func (s *Subject) push(torr qbt.Torrent) error {
@@ -78,5 +128,5 @@ func (s *Subject) push(torr qbt.Torrent) error {
 func (s *Subject) terminate() {
 	s.Terminate, s.Finished = true, true
 	s.writeJson()
-	exit(s)
+	s.exit()
 }
