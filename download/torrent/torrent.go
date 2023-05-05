@@ -12,6 +12,7 @@ func Add(url, path, tag string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
 		"filter": "all",
 		"tag":    tag,
@@ -19,6 +20,7 @@ func Add(url, path, tag string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return torrs[0].Hash, nil
 }
 

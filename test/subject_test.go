@@ -38,7 +38,7 @@ func TestScan(t *testing.T) {
 }
 
 func TestCreateSubj(t *testing.T) {
-	err := subject.CreateSubject("轻音少女")
+	err := subject.CreateSubject("未闻花名")
 	errs.NoError(t, err)
 }
 

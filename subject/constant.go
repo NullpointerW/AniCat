@@ -38,7 +38,7 @@ const (
 
 // qbt tag generation template
 const (
-	QbtTag_prefix = "mikan@subject-"
+	QbtTag_prefix = "mikan@subj-"
 	QbtTag        = QbtTag_prefix + "%d"
 )
 

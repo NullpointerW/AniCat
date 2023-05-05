@@ -107,8 +107,6 @@ func CreateSubject(n string) error {
 	if err != nil {
 		return err
 	}
-	// create Info-Json after init completed
-	subject.writeJson()
 
 	cp := subject.Path + "/" + CoverFN
 	err = CC.DOUBANCoverScraper.Scrape(cp, n)
@@ -120,6 +118,9 @@ func CreateSubject(n string) error {
 	if err != nil {
 		return err
 	}
+	
+	// create Info-Json after init completed
+	subject.writeJson()
 
 	subject.runtimeInit(false)
 
