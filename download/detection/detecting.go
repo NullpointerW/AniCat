@@ -14,12 +14,7 @@ import (
 	"github.com/NullpointerW/mikanani/util"
 )
 
-func init() {
-	go detect()
-}
-
-func detect() {
-	subject.Wg.Wait()
+func Detect() {
 	for {
 		sync, err := DL.Qbt.GetMainData()
 		if err == nil {
@@ -40,6 +35,10 @@ func detect() {
 						if err != nil {
 							log.Println(err)
 						}
+						continue
+					} else if strings.Contains(torr.SavePath, subject.FolderSuffix) {
+						goto viaSP
+					} else {
 						continue
 					}
 				viaSP:

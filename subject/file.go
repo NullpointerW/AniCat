@@ -7,18 +7,15 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	CFG "github.com/NullpointerW/mikanani/conf"
 )
 
-var Wg sync.WaitGroup
+
 
 var HOME string = CFG.SubjPath
 
 func Scan() {
-	Wg.Add(1)
-	defer Wg.Done()
 	home := trimPath(HOME)
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {

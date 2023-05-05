@@ -23,7 +23,7 @@ func (s *Subject) runtimeInit(reload bool) {
 	c := context.Background()
 	ctx, exit := context.WithCancel(c)
 	s.exit = exit
-	s.PushChan = make(chan qbt.Torrent, 2)
+	s.PushChan = make(chan qbt.Torrent, 1024)
 	s.Exited = make(chan struct{})
 	Manager.Add(s)
 	go s.run(ctx, reload)
