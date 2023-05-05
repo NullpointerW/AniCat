@@ -47,7 +47,7 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 }
 
 func (s *Subject) update() {
-
+         
 }
 
 func exit(s *Subject) {

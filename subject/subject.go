@@ -84,29 +84,9 @@ func CreateSubject(n string) error {
 		return errs.Custom("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
-
-	subject.Name = tips[IC.SubjName]
-
-	if subject.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode]); subject.Episode > 1 {
-		subject.Typ = TV
-	} else {
-		subject.Typ = MOVIE
-	}
-
-	if subject.Typ == TV {
-		subject.StartTime = tips[IC.SubjStartTime]
-		if et, e := tips[IC.SubjectEndTime]; e {
-			n := time.Now()
-			eti, err := util.ParseTime(et)
-			if err != nil {
-				return err
-			}
-			subject.EndTime = et
-			subject.Finished = n.After(eti) || n.Equal(eti)
-		}
-	} else { // if movie finished
-		subject.StartTime = tips[IC.SubjMoveStartTime]
-		subject.Finished = true
+	err = subject.Loadfileds(tips)
+	if err != nil {
+		return err
 	}
 
 	// for testing
@@ -121,6 +101,8 @@ func CreateSubject(n string) error {
 	if err != nil {
 		return err
 	}
+	// create Info-Json after init completed
+	subject.writeJson()
 
 	cp := subject.Path + "/" + CoverFN
 	err = CC.DOUBANCoverScraper.Scrape(cp, n)
@@ -137,8 +119,46 @@ func CreateSubject(n string) error {
 
 	return nil
 }
-func (s *Subject)FetchInfo(){
-	
+
+func (subj *Subject) Loadfileds(tips map[string]string) error {
+	subj.Name = tips[IC.SubjName]
+	if subj.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode]); subj.Episode > 1 {
+		subj.Typ = TV
+	} else {
+		subj.Typ = MOVIE
+	}
+
+	if subj.Typ == TV {
+		subj.StartTime = tips[IC.SubjStartTime]
+		if et, e := tips[IC.SubjectEndTime]; e {
+			n := time.Now()
+			eti, err := util.ParseTime(et)
+			if err != nil {
+				return err
+			}
+			subj.EndTime = et
+			subj.Finished = n.After(eti) || n.Equal(eti)
+		}
+	} else { // if movie finished
+		subj.StartTime = tips[IC.SubjMoveStartTime]
+		subj.Finished = true
+	}
+	return nil
+}
+
+func (s *Subject) FetchInfo() error {
+	tips, err := IC.BgmTVInfoScrape(s.SubjId)
+	if err != nil {
+		return nil
+	}
+	wrap := errs.ErrWrapper{}
+	wrap.Handle(func() error {
+		return s.Loadfileds(tips)
+	})
+	wrap.Handle(func() error {
+		return s.writeJson()
+	})
+	return wrap.Error()
 }
 
 func solveResource(n string, subj *Subject) error {
