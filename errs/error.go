@@ -10,6 +10,7 @@ var (
 	ErrTorrnetNotFound       = errors.New("torrnet not found")
 	ErrSubjectAlreadyExisted = errors.New("subject already existed")
 	ErrSubjectNotFound       = errors.New("subject not found")
+	ErrBgmUrlNotFoundOnMikan = errors.New("bgm url not found on mikanani")
 )
 
 func Custom(format string, a ...any) error {

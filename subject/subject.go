@@ -74,7 +74,21 @@ func (s *Subject) RssPath() string {
 func CreateSubject(n string) error {
 	subject := new(Subject)
 
-	tips, err := IC.InfoScrape(n)
+	// for testing
+	fmt.Printf("%#+v", *subject)
+
+	bgmurl, err := solveResource(n, subject)
+	if err != nil {
+		return err
+	}
+
+	var tips map[string]string
+
+	if bgmurl != "" {
+		tips, err = IC.DoScrape(bgmurl)
+	} else {
+		tips, err = IC.InfoScrape(n)
+	}
 	if err != nil {
 		return err
 	}
@@ -85,14 +99,6 @@ func CreateSubject(n string) error {
 	}
 	subject.SubjId = sid
 	err = subject.Loadfileds(tips)
-	if err != nil {
-		return err
-	}
-
-	// for testing
-	fmt.Printf("%#+v", *subject)
-
-	err = solveResource(n, subject)
 	if err != nil {
 		return err
 	}
@@ -161,10 +167,10 @@ func (s *Subject) FetchInfo() error {
 	return wrap.Error()
 }
 
-func solveResource(n string, subj *Subject) error {
-	u, isrss, err := RC.Scrape(n)
+func solveResource(n string, subj *Subject) (string, error) {
+	u, bgm, isrss, err := RC.Scrape(n)
 	if err != nil {
-		return err
+		return "", err
 	}
 	subj.ResourceUrl = u
 	if isrss {
@@ -172,7 +178,7 @@ func solveResource(n string, subj *Subject) error {
 	} else {
 		subj.ResourceTyp = Torrent
 	}
-	return nil
+	return bgm, nil
 }
 
 func download(subj *Subject) error {

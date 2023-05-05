@@ -13,7 +13,7 @@ import (
 
 func BgmTVInfoScrape(sid int) (tips map[string]string, err error) {
 	url := infoBaseUrl + fmt.Sprintf(InfoAPIs["subject"], sid)
-	tips, err = doScrape(url)
+	tips, err = DoScrape(url)
 	return
 }
 
@@ -23,11 +23,11 @@ func InfoScrape(searchstr string) (tips map[string]string, err error) {
 		return tips, err
 	}
 	url := infoBaseUrl + p
-	tips, err = doScrape(url)
+	tips, err = DoScrape(url)
 	return
 }
 
-func doScrape(url string) (tips map[string]string, err error) {
+func DoScrape(url string) (tips map[string]string, err error) {
 	tips = make(map[string]string)
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
