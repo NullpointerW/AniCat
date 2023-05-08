@@ -15,7 +15,7 @@ func route(c *cmd.Command) {
 		subject.Create <- p
 		c.Err = p.Error()
 	case cmd.Del:
-		i, err := strconv.Atoi(s.N)
+		i, err := strconv.Atoi(c.N)
 		if err != nil {
 			c.Err = err
 			return
