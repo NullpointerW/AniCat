@@ -33,8 +33,6 @@ func Listen() {
 	}
 }
 
-
-
 func main() {
 	Listen()
 }
@@ -44,10 +42,15 @@ func process(c *N.Conn) {
 	for {
 		if msg, err := c.Read(); err == nil {
 			log.Printf("msg_len:%d _:%s \n", len(msg), msg)
-			rep := cmd.Parse(msg)
+			rep, err := cmd.Parse(msg)
+			if err != nil {
+				log.Printf("conn closed case inner error: %s", err)
+				c.TcpConn.Close()
+			}
 			c.Write(rep.N)
 		} else {
 			log.Printf("conn closed: %s", err)
+			c.TcpConn.Close()
 		}
 	}
 }
