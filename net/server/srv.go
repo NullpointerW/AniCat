@@ -60,7 +60,17 @@ func process(c *N.Conn) {
 				c.Write(rep.N)
 				continue
 			}
-			c.Write("ok")
+			route(&rep)
+			if rep.Err != nil {
+				s := fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+				c.Write(s)
+				continue
+			}
+			if rep.Opt == cmd.Ls {
+				c.Write(rep.N)
+			} else {
+				c.Write("OK")
+			}
 		} else {
 			log.Printf("conn closed: %s", err)
 			c.TcpConn.Close()
