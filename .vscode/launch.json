@@ -13,11 +13,11 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "srv",
+      "name": "mikan",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/net/server"
+      "program": "${workspaceFolder}"
     }
   ]
 }

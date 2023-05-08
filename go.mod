@@ -30,6 +30,7 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/kennygrant/sanitize v1.2.4 // indirect
+	github.com/liushuochen/gotable v0.0.0-20221119160816-1113793e7092
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	github.com/tidwall/gjson v1.14.4

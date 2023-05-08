@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 
-	// CFG "github.com/NullpointerW/mikanani/conf"
+	CFG "github.com/NullpointerW/mikanani/conf"
 	N "github.com/NullpointerW/mikanani/net"
 	"github.com/NullpointerW/mikanani/net/cmd"
 )
 
 func Listen() {
-	p := 8007
+	p := CFG.Env.Port
 	if p == 0 {
 		p = 8080
 	}
@@ -33,10 +33,6 @@ func Listen() {
 			TcpConn: c,
 		})
 	}
-}
-
-func main() {
-	Listen()
 }
 
 func process(c *N.Conn) {

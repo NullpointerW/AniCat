@@ -1,6 +1,6 @@
 package resource
 
-const resourcesBaseUrl = `https://mikanani.me`
+const resourcesBaseUrl = `https://mikanime.tv`
 
 var ResourceAPIs = map[string]string{
 	"search": "/Home/Search?searchstr=",

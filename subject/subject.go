@@ -94,7 +94,7 @@ func CreateSubject(n string) error {
 	}
 
 	sid, _ := strconv.Atoi(tips[IC.SubjId])
-	if Manager.GetSubject(sid) != nil {
+	if Manager.Get(sid) != nil {
 		return errs.Custom("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
