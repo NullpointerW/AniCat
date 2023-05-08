@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"strconv"
+	"strings"
 
 	// CFG "github.com/NullpointerW/mikanani/conf"
 	N "github.com/NullpointerW/mikanani/net"
@@ -42,12 +44,27 @@ func process(c *N.Conn) {
 	for {
 		if msg, err := c.Read(); err == nil {
 			log.Printf("msg_len:%d _:%s \n", len(msg), msg)
-			rep, err := cmd.Parse(msg)
-			if err != nil {
-				log.Printf("conn closed case inner error: %s", err)
-				c.TcpConn.Close()
+			if len(msg) == 0 {
+				c.Write("PONG")
+				continue
 			}
-			c.Write(rep.N)
+			msg = strings.ToLower(msg)
+			cmds := strings.Fields(msg)
+			if len(cmds) == 0 {
+				c.Write("PONG")
+				continue
+			}
+			rep := cmd.Parse(cmds)
+			if rep.Err != nil {
+				s := fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+				c.Write(s)
+				continue
+			}
+			if rep.Opt == cmd.Help {
+				c.Write(rep.N)
+				continue
+			}
+			c.Write("ok")
 		} else {
 			log.Printf("conn closed: %s", err)
 			c.TcpConn.Close()

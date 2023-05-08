@@ -9,40 +9,34 @@ import (
 	"strconv"
 
 	N "github.com/NullpointerW/mikanani/net"
-)
-
-var (
-	greenBg = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
-	redBg   = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
-	cls     = "\033[2J\033[H"
-	reset   = string([]byte{27, 91, 48, 109})
+	"github.com/NullpointerW/mikanani/net/cmd"
 )
 
 func main() {
 	r := bufio.NewReader(os.Stdin)
-	var p string
+	var port string
 	for {
-		fmt.Println(greenBg, "PORT:", reset)
+		fmt.Println(cmd.GreenBg, "PORT:", cmd.Reset)
 		l, err := r.ReadString('\n')
 		if err != nil {
 			panic(err)
 		}
-		pstr := string(N.DropCR([]byte(l[:len(l)-1])))
-		_, err = strconv.Atoi(pstr)
+		p := string(N.DropCR([]byte(l[:len(l)-1])))
+		_, err = strconv.Atoi(p)
 		if err != nil {
-			fmt.Println(redBg, err, reset)
+			fmt.Println(cmd.RedBg, err, cmd.Reset)
 			_, _ = r.ReadString('\n')
-			fmt.Print(cls)
+			fmt.Print(cmd.Cls)
 			continue
 		}
-		p = ":" + p
-		log.Print(cls)
+		port = ":" + p
+		log.Print(cmd.Cls)
 		break
 	}
 
-	c, err := net.Dial("tcp", p)
+	c, err := net.Dial("tcp", port)
 	if err != nil {
-		log.Fatalln(redBg, err, reset)
+		log.Fatalln(cmd.RedBg, err, cmd.Reset)
 	}
 	s := bufio.NewScanner(c)
 	s.Split(N.ScanCRLF)
@@ -55,5 +49,5 @@ func main() {
 		}
 		c.Write([]byte(l + N.CRLF))
 	}
-	log.Fatalln(redBg, s.Err(), reset)
+	log.Fatalln(cmd.RedBg, s.Err(), cmd.Reset)
 }

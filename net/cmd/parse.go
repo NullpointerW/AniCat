@@ -1,15 +1,23 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/jessevdk/go-flags"
 )
 
+var (
+	GreenBg = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
+	RedBg   = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
+	Cls     = "\033[2J\033[H"
+	Reset   = string([]byte{27, 91, 48, 109})
+)
+
 const (
-	usageHelp = `mikan  <command> [anine_name]
-	             The commands are:
+	usageHelp = `
+
+	Usage:
+	             mikan  <command> [anine-name]
+	The commands are:
 
 	             add    add a anine-subject
 	             rm     delete a anine-subject
@@ -53,9 +61,7 @@ func optionMode(o string) (Option, bool) {
 	}
 }
 
-func Parse(cmd string) (reply Command) {
-	cmd = strings.ToLower(cmd)
-	cmds := strings.Fields(cmd)
+func Parse(cmds []string) (reply Command) {
 	sfxok := cmds[0] == "mikan"
 	if !sfxok {
 		reply.Err = errs.Custom("%w:%s", errs.ErrUnknownCommand, cmds[0])
