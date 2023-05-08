@@ -37,8 +37,8 @@ func route(c *cmd.Command) {
 			if s.Terminate {
 				compl = "Y"
 			}
-			tb.AddRow([]string{sid,s.Typ.String(),s.Name,epi,fin,compl})
+			tb.AddRow([]string{sid, s.Typ.String(), s.Name, epi, fin, compl})
 		}
-		c.N = tb.String()
+		c.N = "\n" + tb.String()
 	}
 }

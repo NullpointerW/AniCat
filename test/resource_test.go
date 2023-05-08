@@ -16,7 +16,7 @@ func TestCrwal(t *testing.T) {
 	}
 	fmt.Printf("name:%s|is rss_resource :%v|url:%s\n", n, isrss, url)
 	fmt.Println("====================================")
-	n = "lycoris Recoil"
+	n = "总之就是非常可爱第二季"
 	url, bgm, isrss, err := R.Scrape(n)
 	if err != nil {
 		t.Error(err)

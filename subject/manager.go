@@ -1,7 +1,7 @@
 package subject
 
 import (
-	"log"
+	// "log"
 	"sync"
 )
 
@@ -84,10 +84,9 @@ func StartManagement() {
 			n := p.arg.(string)
 			err := CreateSubject(n)
 			if err != nil {
-				log.Println(err)
-				p.wg.Done()
-				p.wg.Wait()
+				p.err = err
 			}
+			p.wg.Done()
 		case p := <-Delete:
 			i := p.arg.(int)
 			s := Manager.Get(i)
@@ -96,8 +95,9 @@ func StartManagement() {
 				Manager.Remove(s)
 				err := rmFolder(s)
 				if err != nil {
-					log.Println(err)
+					p.err = err
 				}
+				p.wg.Done()
 			}
 		}
 	}

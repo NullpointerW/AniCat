@@ -11,8 +11,6 @@ import (
 	CFG "github.com/NullpointerW/mikanani/conf"
 )
 
-
-
 var HOME string = CFG.SubjPath
 
 func Scan() {
@@ -20,7 +18,8 @@ func Scan() {
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
 			if f.IsDir() && strings.HasSuffix(f.Name(), FolderSuffix) {
-				if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + jsonfileName); err != nil {
+				log.Println("scan:found subj:" + home + `/` + f.Name() + `/` + jsonfileName)
+				if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + jsonfileName); err == nil {
 					var s Subject
 					err := json.Unmarshal(jsraw, &s)
 					if err != nil {
