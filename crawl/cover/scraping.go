@@ -47,12 +47,11 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		defer resp.Body.Close()
 		defer f.Close()
 		wn, e := io.Copy(f, resp.Body)
-		log.Printf("cover file downloaded size:%d",resp.ContentLength)
+		log.Printf("cover file downloaded size:%d", wn)
 		if e != nil {
 			fmt.Println(e)
 			err = e
 		}
-		fmt.Println(wn)
 	})
 
 	c.OnRequest(func(r *colly.Request) {

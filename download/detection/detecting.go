@@ -17,10 +17,10 @@ import (
 func Detect() {
 	for {
 		sync, err := DL.Qbt.GetMainData()
-		log.Printf("rid::%d \n", sync.Rid)
+		// log.Printf("rid::%d \n", sync.Rid)
 		if err == nil {
 			for _, torr := range sync.Torrents {
-				log.Printf("%#+v \n", torr)
+				// log.Printf("%#+v \n", torr)
 				if torr.Progress == 1 {
 					var (
 						sid int

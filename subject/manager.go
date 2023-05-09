@@ -43,8 +43,9 @@ var Manager = SubjectManager{
 }
 
 type SubjectManager struct {
-	mu   *sync.Mutex
-	sto  map[int]*Subject
+	mu  *sync.Mutex
+	sto map[int]*Subject
+	// a snapshot copy from the last list()-calling make caller fast get list
 	copy []Subject
 }
 
@@ -53,7 +54,6 @@ func (m *SubjectManager) Add(s *Subject) {
 	defer m.mu.Unlock()
 	m.sto[s.SubjId] = s
 	m.copy = nil
-
 }
 
 func (m *SubjectManager) Remove(s *Subject) {
