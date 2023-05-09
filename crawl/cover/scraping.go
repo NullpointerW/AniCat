@@ -12,7 +12,6 @@ import (
 	CR "github.com/NullpointerW/mikanani/crawl"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
-	"github.com/schollz/progressbar/v3"
 	"github.com/tidwall/gjson"
 )
 
@@ -40,11 +39,6 @@ func TouchCoverImg(fpath, cover string) (err error) {
 			err = e
 		}
 
-		bar := progressbar.DefaultBytes(
-			resp.ContentLength,
-			"downloading",
-		)
-
 		f, e := os.Create(fpath)
 		if e != nil {
 			log.Fatal(e)
@@ -52,7 +46,8 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		}
 		defer resp.Body.Close()
 		defer f.Close()
-		wn, e := io.Copy(io.MultiWriter(f, bar), resp.Body)
+		wn, e := io.Copy(f, resp.Body)
+		log.Printf("cover file downloaded size:%d",resp.ContentLength)
 		if e != nil {
 			fmt.Println(e)
 			err = e

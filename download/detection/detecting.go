@@ -17,14 +17,15 @@ import (
 func Detect() {
 	for {
 		sync, err := DL.Qbt.GetMainData()
+		log.Printf("rid::%d \n", sync.Rid)
 		if err == nil {
 			for _, torr := range sync.Torrents {
+				log.Printf("%#+v \n", torr)
 				if torr.Progress == 1 {
 					var (
 						sid int
 						err error
 					)
-					log.Printf("%#+v \n",torr)
 					log.Printf("detcting---->torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
 					if strings.Contains(torr.Tags, subject.QbtTag_prefix) {
 						s := strings.ReplaceAll(torr.Tags, subject.QbtTag_prefix, "")
