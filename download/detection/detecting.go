@@ -85,7 +85,7 @@ func send(sid int, torr qbt.Torrent) error {
 		return nil
 	}
 
-	log.Printf("torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
+	log.Printf("pushing--->torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
 
 	select {
 	case <-s.Exited:
