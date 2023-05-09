@@ -59,7 +59,7 @@ func initFolder(subject *Subject) (err error) {
 }
 
 func rmFolder(s *Subject) error {
-	return os.Remove(s.Path)
+	return os.RemoveAll(s.Path)
 }
 
 func (s *Subject) writeJson() (err error) {

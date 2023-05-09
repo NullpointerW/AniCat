@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+type SubjC struct {
+	N string
+	Extra
+}
+
 type Pip struct {
 	arg any
 	err error
@@ -81,8 +86,8 @@ func StartManagement() {
 	for {
 		select {
 		case p := <-Create:
-			n := p.arg.(string)
-			err := CreateSubject(n)
+			sc := p.arg.(SubjC)
+			err := CreateSubject(sc.N, &sc.Extra)
 			if err != nil {
 				p.err = err
 			}
@@ -97,8 +102,9 @@ func StartManagement() {
 				if err != nil {
 					p.err = err
 				}
-				p.wg.Done()
+
 			}
+			p.wg.Done()
 		}
 	}
 

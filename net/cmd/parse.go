@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/jessevdk/go-flags"
 )
@@ -33,7 +35,7 @@ type Command struct {
 		SubtitleGroup  string `short:"g" long:"group" required:"false"`
 		MustContain    string `long:"mc"   required:"false"`
 		MustNotContain string `long:"mn"   required:"false"`
-		useRegex       bool   `long:"rg"  required:"false"`
+		UseRegex       bool   `long:"rg"   required:"false"`
 	}
 	Err error
 }
@@ -82,11 +84,30 @@ func Parse(cmds []string) (reply Command) {
 			reply.Err = errs.Custom("%w:%s", errs.ErrMissingCommandArgument, `Use "mikan help " for more information about a command.`)
 			return
 		}
-		reply.N = cmds[2]
+		if opt == Del || (opt == Add && len(cmds) == 3) {
+			reply.N = cmds[2]
+			return
+		}
 		if len(cmds) > 3 && opt == Add {
 			ext := cmds[3:]
-			_, reply.Err = flags.ParseArgs(&reply.Flag, ext)
-			reply.Flag.Using = true
+			e := 3
+			for _, n := range ext {
+				if strings.HasPrefix(n, "-") || strings.HasPrefix(n, "--") {
+					break
+				}
+				e++
+			}
+			n := cmds[2:e]
+			reply.N = strings.Join(n, " ")
+			s := e - 3
+			if s < len(ext) {
+				ext = ext[s:]
+				_, reply.Err = flags.ParseArgs(&reply.Flag, ext)
+				// for _, a := range ext {
+				// 	reply.Flag.UseRegex = (a == "-rg" || a == "--rg")
+				// }
+				reply.Flag.Using = true
+			}
 			return
 		}
 	}

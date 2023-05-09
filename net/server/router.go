@@ -11,7 +11,14 @@ import (
 func route(c *cmd.Command) {
 	switch c.Opt {
 	case cmd.Add:
-		p := subject.NewPip(c.N)
+		sc := subject.SubjC{}
+		if c.Flag.Using {
+			sc.RssOption.UseRegex = c.Flag.UseRegex
+			sc.RssOption.MustContain = c.Flag.MustContain
+			sc.RssOption.MustNotContain = c.Flag.MustNotContain
+		}
+		sc.N = c.N
+		p := subject.NewPip(sc)
 		subject.Create <- p
 		c.Err = p.Error()
 	case cmd.Del:
@@ -21,7 +28,7 @@ func route(c *cmd.Command) {
 			return
 		}
 		p := subject.NewPip(i)
-		subject.Create <- p
+		subject.Delete <- p
 		c.Err = p.Error()
 	case cmd.Ls:
 		ls := subject.Manager.List()
@@ -30,7 +37,10 @@ func route(c *cmd.Command) {
 			sid := strconv.Itoa(s.SubjId)
 			fin := "updating"
 			compl := "N"
-			epi := strconv.Itoa(s.Episode)
+			epi := "*"
+			if s.Episode != 0 {
+				epi = strconv.Itoa(s.Episode)
+			}
 			if s.Finished {
 				fin = "fin"
 			}

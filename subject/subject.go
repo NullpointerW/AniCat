@@ -71,7 +71,7 @@ func (s *Subject) RssPath() string {
 	return s.QbtTag()
 }
 
-func CreateSubject(n string) error {
+func CreateSubject(n string, ext *Extra) error {
 	subject := new(Subject)
 
 	// for testing
@@ -114,11 +114,11 @@ func CreateSubject(n string) error {
 		return err
 	}
 
-	err = download(subject)
+	err = download(subject,ext)
 	if err != nil {
 		return err
 	}
-	
+
 	// create Info-Json after init completed
 	subject.writeJson()
 
@@ -129,12 +129,12 @@ func CreateSubject(n string) error {
 
 func (subj *Subject) Loadfileds(tips map[string]string) error {
 	subj.Name = tips[IC.SubjName]
-	if subj.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode]); subj.Episode > 1 {
+	if _, e := tips[IC.SubjStartTime]; e {
 		subj.Typ = TV
 	} else {
 		subj.Typ = MOVIE
 	}
-
+	subj.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode])
 	if subj.Typ == TV {
 		subj.StartTime = tips[IC.SubjStartTime]
 		if et, e := tips[IC.SubjectEndTime]; e {
@@ -182,7 +182,7 @@ func solveResource(n string, subj *Subject) (string, error) {
 	return bgm, nil
 }
 
-func download(subj *Subject) error {
+func download(subj *Subject, ext *Extra) error {
 	if subj.ResourceTyp == Torrent {
 		h, err := torrent.Add(subj.ResourceUrl, subj.Path, subj.QbtTag())
 		if err != nil {
@@ -190,11 +190,17 @@ func download(subj *Subject) error {
 		}
 		subj.TorrentHash = h
 	} else {
-		err := rss.Download(qbt.AutoDLRule{
+		r := qbt.AutoDLRule{
 			Enabled:       true,
 			AffectedFeeds: []string{subj.ResourceUrl},
 			SavePath:      subj.Path,
-		}, subj.RssPath())
+		}
+		if ext!=nil{
+			r.UseRegex=ext.RssOption.UseRegex
+			r.MustContain=ext.RssOption.MustContain
+			r.MustNotContain=ext.RssOption.MustNotContain
+		}
+		err := rss.Download(r, subj.RssPath())
 		if err != nil {
 			return err
 		}

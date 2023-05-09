@@ -24,6 +24,8 @@ func Detect() {
 						sid int
 						err error
 					)
+					log.Printf("%#+v \n",torr)
+					log.Printf("detcting---->torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
 					if strings.Contains(torr.Tags, subject.QbtTag_prefix) {
 						s := strings.ReplaceAll(torr.Tags, subject.QbtTag_prefix, "")
 						sid, err = strconv.Atoi(s)
@@ -61,7 +63,7 @@ func Detect() {
 		} else {
 			log.Println(err)
 		}
-		time.Sleep(5 * time.Minute)
+		time.Sleep(20 * time.Second)
 	}
 
 }
@@ -75,6 +77,9 @@ func send(sid int, torr qbt.Torrent) error {
 	if s.Terminate {
 		return nil
 	}
+
+	log.Printf("torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
+
 	select {
 	case <-s.Exited:
 	default:
