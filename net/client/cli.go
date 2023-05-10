@@ -14,13 +14,18 @@ import (
 
 func main() {
 	r := bufio.NewReader(os.Stdin)
+	defer func() {
+		r.ReadString('\n')
+	}()
 	var port string
 	for {
 		fmt.Println(cmd.GreenBg, "PORT:", cmd.Reset)
 		l, err := r.ReadString('\n')
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			exit(r)
 		}
+		fmt.Println("not exit")
 		p := string(N.DropCR([]byte(l[:len(l)-1])))
 		_, err = strconv.Atoi(p)
 		if err != nil {
@@ -36,7 +41,8 @@ func main() {
 
 	c, err := net.Dial("tcp", port)
 	if err != nil {
-		log.Fatalln(cmd.RedBg, err, cmd.Reset)
+		log.Println(cmd.RedBg, err, cmd.Reset)
+		exit(r)
 	}
 	s := bufio.NewScanner(c)
 	s.Split(N.ScanCRLF)
@@ -49,5 +55,10 @@ func main() {
 		}
 		c.Write([]byte(l + N.CRLF))
 	}
-	log.Fatalln(cmd.RedBg, s.Err(), cmd.Reset)
+	log.Println(cmd.RedBg, s.Err(), cmd.Reset)
+}
+
+func exit(r *bufio.Reader) {
+	r.ReadString('\n')
+	os.Exit(1)
 }
