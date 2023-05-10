@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"strings"
 
 	CFG "github.com/NullpointerW/mikanani/conf"
 	N "github.com/NullpointerW/mikanani/net"
@@ -45,8 +44,7 @@ func process(c *N.Conn) {
 				c.Write("PONG")
 				continue
 			}
-			msg = strings.ToLower(msg)
-			cmds := strings.Fields(msg)
+			cmds := cmd.ParseArgs(msg)
 			if len(cmds) == 0 {
 				c.Write("PONG")
 				continue

@@ -82,6 +82,7 @@ func Parse(cmds []string) (reply Command) {
 			s := e - 3
 			if s < len(ext) {
 				ext = ext[s:]
+				ext = ParseFlagArgs(ext)
 				_, reply.Err = flags.ParseArgs(&reply.Flag, ext)
 				reply.Flag.Using = true
 			}
@@ -94,7 +95,27 @@ func Parse(cmds []string) (reply Command) {
 	return
 }
 
-func ParseArgs(s string){
-
+func ParseArgs(s string) []string {
+	s = strings.ToLower(s)
+	return strings.Fields(s)
 }
 
+func ParseFlagArgs(flag []string) (f []string) {
+	argument := ""
+	for i, a := range flag {
+		arg := !(strings.HasPrefix(a, "-") || strings.HasPrefix(a, "--"))
+		if arg {
+			argument += " " + a
+			if len(flag)-1 == i {
+				f = append(f, argument)
+			}
+		} else {
+			if argument != "" {
+				f = append(f, argument)
+				argument = ""
+			}
+			f = append(f, a)
+		}
+	}
+	return
+}
