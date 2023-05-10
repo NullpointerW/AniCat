@@ -69,3 +69,19 @@ func DLcompl(h string) (bool, error) {
 	}
 	return torr.Progress == 1, nil
 }
+
+func DelTorrs(p string) error {
+	torrs, err := GetViaPath(p)
+	if err != nil {
+		return err
+	}
+	var hs []string
+	for _, torr := range torrs {
+		hs = append(hs, torr.Hash)
+	}
+	return DL.Qbt.DelTorrentsFs(hs...)
+}
+
+func DelTag(t string) error {
+	return DL.Qbt.DelTags(t)
+}

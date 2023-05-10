@@ -2,9 +2,7 @@ module github.com/NullpointerW/mikanani
 
 go 1.20
 
-require (
-	github.com/gocolly/colly v1.2.0
-)
+require github.com/gocolly/colly v1.2.0
 
 require github.com/davecgh/go-spew v1.1.1 // indirect
 
@@ -17,7 +15,7 @@ require (
 )
 
 require (
-	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.6
+	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.7-0.20230510082336-5728b2d7fd0b
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/antchfx/htmlquery v1.3.0

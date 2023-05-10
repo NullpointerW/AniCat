@@ -26,3 +26,12 @@ func GetMatchedArts(rssPath string) (arts []string, err error) {
 	}
 	return arts, nil
 }
+
+func RmRss(rssPath string) error {
+	err := DL.Qbt.RemoveItem(rssPath)
+	if err != nil {
+		return err
+	}
+	adlrn := RuleNamePrefix + rssPath
+	return DL.Qbt.RmAutoDLRule(adlrn)
+}

@@ -2,13 +2,15 @@ package subject
 
 import (
 	"encoding/json"
+	CFG "github.com/NullpointerW/mikanani/conf"
+	"github.com/NullpointerW/mikanani/download/rss"
+	TORR "github.com/NullpointerW/mikanani/download/torrent"
+	"github.com/NullpointerW/mikanani/errs"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	CFG "github.com/NullpointerW/mikanani/conf"
 )
 
 var HOME string = CFG.Env.SubjPath
@@ -67,6 +69,22 @@ func (s *Subject) writeJson() (err error) {
 	fldrp := s.Path
 	err = os.WriteFile(fldrp+"/"+jsonfileName, b, os.ModePerm)
 	return err
+}
+
+func (s *Subject) RmRes() error {
+	wrap := errs.ErrWrapper{}
+	if s.ResourceTyp == RSS {
+		wrap.Handle(func() error {
+			return rss.RmRss(s.RssPath())
+		})
+	}
+	wrap.Handle(func() error {
+		return TORR.DelTorrs(s.Path)
+	})
+	wrap.Handle(func() error {
+		return TORR.DelTag(s.QbtTag())
+	})
+	return wrap.Error()
 }
 
 func trimPath(n string) string {
