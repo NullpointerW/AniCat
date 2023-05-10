@@ -31,6 +31,7 @@ func (s *Subject) runtimeInit(reload bool) {
 
 func (s *Subject) run(ctx context.Context, reload bool) {
 	if reload {
+		util.Debugf("subj reload sid:%d", s.SubjId)
 		s.checkDL()
 	}
 	t := time.NewTicker(util.Day)
@@ -40,9 +41,11 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 			err := s.push(torr)
 			log.Println(err)
 		case <-ctx.Done():
+			util.Debugf("subj exited sid:%d", s.SubjId)
 			exit(s)
 			return
 		case <-t.C:
+			util.Debugf("subj update mission started sid:%d", s.SubjId)
 			s.update()
 		}
 	}
@@ -114,6 +117,7 @@ func (s *Subject) RssDLSynced() (bool, error) {
 		return false, nil
 	}
 	llen := len(hs)
+	util.Debugf("subj sid:%d total series:%d local series:%d ", s.SubjId, tlen, llen)
 	return llen >= tlen, nil
 }
 
@@ -126,6 +130,7 @@ func (s *Subject) push(torr qbt.Torrent) error {
 }
 
 func (s *Subject) terminate() {
+	util.Debugf("subj sid:%d terminate ", s.SubjId)
 	s.Terminate, s.Finished = true, true
 	s.writeJson()
 	s.exit()

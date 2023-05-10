@@ -11,7 +11,7 @@ var (
 	ErrSubjectAlreadyExisted = errors.New("subject already existed")
 	ErrSubjectNotFound       = errors.New("subject not found")
 	ErrBgmUrlNotFoundOnMikan = errors.New("bgm url not found on mikanani")
-
+	// command error
 	ErrUnknownCommand         = errors.New("unknown command")
 	ErrMissingCommandArgument = errors.New("missing command argument")
 )

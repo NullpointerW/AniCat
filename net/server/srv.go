@@ -10,6 +10,7 @@ import (
 	CFG "github.com/NullpointerW/mikanani/conf"
 	N "github.com/NullpointerW/mikanani/net"
 	"github.com/NullpointerW/mikanani/net/cmd"
+	"github.com/NullpointerW/mikanani/util"
 )
 
 func Listen() {
@@ -39,7 +40,7 @@ func process(c *N.Conn) {
 	c.Write("PONG")
 	for {
 		if msg, err := c.Read(); err == nil {
-			log.Printf("msg_len:%d _:%s \n", len(msg), msg)
+			util.Debugf("msg_len:%d cmd:%s \n", len(msg), msg)
 			if len(msg) == 0 {
 				c.Write("PONG")
 				continue

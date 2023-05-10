@@ -7,26 +7,6 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-var (
-	GreenBg = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
-	RedBg   = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
-	Cls     = "\033[2J\033[H"
-	Reset   = string([]byte{27, 91, 48, 109})
-)
-
-const (
-	usageHelp = `
-
-	Usage:
-	             mikan  <command> [anine-name]
-	The commands are:
-
-	             add    add a anine-subject
-	             rm     delete a anine-subject
-	             ls     show all anine-subjects   
-	             `
-)
-
 type Command struct {
 	N    string
 	Opt  Option
@@ -103,9 +83,6 @@ func Parse(cmds []string) (reply Command) {
 			if s < len(ext) {
 				ext = ext[s:]
 				_, reply.Err = flags.ParseArgs(&reply.Flag, ext)
-				// for _, a := range ext {
-				// 	reply.Flag.UseRegex = (a == "-rg" || a == "--rg")
-				// }
 				reply.Flag.Using = true
 			}
 			return
@@ -116,3 +93,8 @@ func Parse(cmds []string) (reply Command) {
 	}
 	return
 }
+
+func ParseArgs(s string){
+
+}
+

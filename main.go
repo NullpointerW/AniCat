@@ -1,11 +1,6 @@
 package main
 
 import (
-	// "bufio"
-	// "fmt"
-	// "os"
-
-	// CFG "github.com/NullpointerW/mikanani/conf"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,10 +8,11 @@ import (
 	"github.com/NullpointerW/mikanani/download/detection"
 	netsrv "github.com/NullpointerW/mikanani/net/server"
 	"github.com/NullpointerW/mikanani/subject"
+	"github.com/NullpointerW/mikanani/util"
 )
 
 func init() {
-
+	util.DebugEnv()
 }
 
 func main() {

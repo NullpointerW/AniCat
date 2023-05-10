@@ -11,7 +11,7 @@ import (
 	CFG "github.com/NullpointerW/mikanani/conf"
 )
 
-var HOME string = CFG.SubjPath
+var HOME string = CFG.Env.SubjPath
 
 func Scan() {
 	home := trimPath(HOME)
@@ -70,5 +70,5 @@ func (s *Subject) writeJson() (err error) {
 }
 
 func trimPath(n string) string {
-	return strings.TrimSuffix(strings.TrimSuffix(CFG.SubjPath, "\\"), "/")
+	return strings.TrimSuffix(strings.TrimSuffix(CFG.Env.SubjPath, "\\"), "/")
 }

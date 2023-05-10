@@ -18,6 +18,8 @@ type Environment struct {
 		Password     string `yaml:"password"`
 		LocalConnect bool   `yaml:"localed"`
 	} `yaml:"qbittorrent"`
+	Proxies  []string `yaml:"proxies"`
+	SubjPath string   `yaml:"path"`
 }
 
 func init() {
@@ -26,4 +28,5 @@ func init() {
 	b, err := os.ReadFile(EnvPath)
 	errs.PanicErr(err)
 	errs.PanicErr(yaml.Unmarshal(b, &Env))
+	log.Printf("env:\n%#+v\n", Env)
 }
