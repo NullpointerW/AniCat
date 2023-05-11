@@ -73,6 +73,7 @@ func process(c *N.Conn) {
 		} else {
 			log.Printf("conn closed: %s", err)
 			c.TcpConn.Close()
+			break
 		}
 	}
 }

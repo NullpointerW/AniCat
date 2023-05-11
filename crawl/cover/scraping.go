@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	CR "github.com/NullpointerW/mikanani/crawl"
+	"github.com/NullpointerW/mikanani/errs"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"github.com/tidwall/gjson"
@@ -51,6 +52,9 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		if e != nil {
 			fmt.Println(e)
 			err = e
+		}
+		if wn==0{
+			err=errs.ErrCoverDownLoadZeroSize
 		}
 	})
 

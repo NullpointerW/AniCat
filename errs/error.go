@@ -14,6 +14,7 @@ var (
 	// command error
 	ErrUnknownCommand         = errors.New("unknown command")
 	ErrMissingCommandArgument = errors.New("missing command argument")
+	ErrCoverDownLoadZeroSize  = errors.New("cover file download zero size")
 )
 
 func Custom(format string, a ...any) error {

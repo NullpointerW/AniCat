@@ -1,6 +1,9 @@
 package util
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 var debug bool
 
@@ -10,12 +13,12 @@ func DebugEnv() {
 
 func Debugln(v ...any) {
 	if debug {
-		log.Println(v...)
+		log.Output(2, fmt.Sprintln(v...))
 	}
 }
 
 func Debugf(format string, v ...any) {
 	if debug {
-		log.Printf(format, v...)
+		log.Output(2, fmt.Sprintf(format, v...))
 	}
 }

@@ -37,15 +37,21 @@ func Scrape(searchstr string) (url, bgmUrl string, isrss bool, err error) {
 			t := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[3]`)
 			torr := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[4]/a/@href`)
 			mglink := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][1]/td[1]/a[2]/@data-clipboard-text`)
-			log.Printf("\nfile_name:%s\nsize:%s\nupdate_time=%s\ntorrent:%s\nmagnet:%s\n",
-				htmlquery.InnerText(fn),
-				htmlquery.InnerText(size),
-				htmlquery.InnerText(t),
-				htmlquery.InnerText(torr),
-				htmlquery.InnerText(mglink),
-			)
-			url = htmlquery.InnerText(mglink)
-			isrss = false
+			nf := fn == nil || size == nil || t == nil || torr == nil || mglink == nil
+			if !nf {
+				log.Printf("\nfile_name:%s\nsize:%s\nupdate_time=%s\ntorrent:%s\nmagnet:%s\n",
+					htmlquery.InnerText(fn),
+					htmlquery.InnerText(size),
+					htmlquery.InnerText(t),
+					htmlquery.InnerText(torr),
+					htmlquery.InnerText(mglink),
+				)
+				url = htmlquery.InnerText(mglink)
+				isrss = false
+			} else {
+				err = errs.Custom("%w:name:%s", errs.ErrCrawlNotFound, searchstr)
+			}
+
 		}
 	})
 
@@ -53,8 +59,9 @@ func Scrape(searchstr string) (url, bgmUrl string, isrss bool, err error) {
 		fmt.Println("Visiting", r.URL)
 	})
 
-	c.OnError(func(_ *colly.Response, err error) {
-		log.Println("Something went wrong:", err)
+	c.OnError(func(_ *colly.Response, e error) {
+		log.Println("Something went wrong:", e)
+		err = e
 	})
 
 	CR.SetProxy(c)

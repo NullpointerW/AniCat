@@ -87,7 +87,7 @@ func CreateSubject(n string, ext *Extra) error {
 	if bgmurl != "" {
 		tips, err = IC.DoScrape(bgmurl)
 	} else {
-		tips, err = IC.InfoScrape(n)
+		tips, err = IC.Scrape(n)
 	}
 	if err != nil {
 		return err
@@ -110,11 +110,17 @@ func CreateSubject(n string, ext *Extra) error {
 
 	cp := subject.Path + "/" + CoverFN
 	err = CC.DOUBANCoverScraper.Scrape(cp, n)
+	
 	if err != nil {
-		return err
+		for err == errs.ErrCoverDownLoadZeroSize{
+			err = CC.DOUBANCoverScraper.Scrape(cp, n)
+		}
+		if err!=nil{
+			return err
+		}
 	}
 
-	err = download(subject,ext)
+	err = download(subject, ext)
 	if err != nil {
 		return err
 	}
@@ -195,10 +201,10 @@ func download(subj *Subject, ext *Extra) error {
 			AffectedFeeds: []string{subj.ResourceUrl},
 			SavePath:      subj.Path,
 		}
-		if ext!=nil{
-			r.UseRegex=ext.RssOption.UseRegex
-			r.MustContain=ext.RssOption.MustContain
-			r.MustNotContain=ext.RssOption.MustNotContain
+		if ext != nil {
+			r.UseRegex = ext.RssOption.UseRegex
+			r.MustContain = ext.RssOption.MustContain
+			r.MustNotContain = ext.RssOption.MustNotContain
 		}
 		err := rss.Download(r, subj.RssPath())
 		if err != nil {

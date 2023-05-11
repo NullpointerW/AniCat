@@ -17,7 +17,7 @@ func BgmTVInfoScrape(sid int) (tips map[string]string, err error) {
 	return
 }
 
-func InfoScrape(searchstr string) (tips map[string]string, err error) {
+func Scrape(searchstr string) (tips map[string]string, err error) {
 	p, err := InfoPageScrape(searchstr)
 	if err != nil {
 		return tips, err

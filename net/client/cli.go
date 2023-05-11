@@ -25,7 +25,6 @@ func main() {
 			log.Println(err)
 			exit(r)
 		}
-		fmt.Println("not exit")
 		p := string(N.DropCR([]byte(l[:len(l)-1])))
 		_, err = strconv.Atoi(p)
 		if err != nil {
@@ -35,7 +34,7 @@ func main() {
 			continue
 		}
 		port = ":" + p
-		log.Print(cmd.Cls)
+		fmt.Print(cmd.Cls)
 		break
 	}
 
@@ -48,6 +47,7 @@ func main() {
 	s.Split(N.ScanCRLF)
 	for s.Scan() {
 		log.Println(s.Text())
+		fmt.Print(cmd.Cyan, cmd.Cursor, cmd.Reset)
 		l, err := r.ReadString('\n')
 		l = string(N.DropCR([]byte(l[:len(l)-1])))
 		if err != nil {

@@ -40,6 +40,7 @@ func Get(h string) (torr qbt.Torrent, err error) {
 }
 
 func GetViaPath(path string) (hits []qbt.Torrent, err error) {
+	path=util.FileSeparatorConv(path)
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
 		"filter": "all",
 	})
@@ -52,6 +53,7 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 
 	for _, t := range torrs {
 		p := util.FileSeparatorConv(t.SavePath)
+		util.Debugln("torr_save_path:",p)
 		if p == path {
 			hits = append(hits, t)
 		}
@@ -71,6 +73,7 @@ func DLcompl(h string) (bool, error) {
 }
 
 func DelTorrs(p string) error {
+	// util.Debugln("abs_path:", p)
 	torrs, err := GetViaPath(p)
 	if err != nil {
 		return err

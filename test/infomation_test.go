@@ -2,8 +2,9 @@ package test
 
 import (
 	"fmt"
-	I "github.com/NullpointerW/mikanani/crawl/information"
 	"testing"
+
+	I "github.com/NullpointerW/mikanani/crawl/information"
 )
 
 func TestInfoSearch(t *testing.T) {
@@ -11,7 +12,7 @@ func TestInfoSearch(t *testing.T) {
 }
 
 func TestInfoScraping(t *testing.T) {
-	tip, err := I.InfoScrape("铃芽之旅")
+	tip, err := I.Scrape("铃芽之旅")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()

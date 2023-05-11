@@ -98,6 +98,7 @@ func StartManagement() {
 			if s != nil {
 				s.exit()
 				Manager.Remove(s)
+				s.RmRes()
 				err := rmFolder(s)
 				if err != nil {
 					p.err = err

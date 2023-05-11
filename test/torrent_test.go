@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	TORR "github.com/NullpointerW/mikanani/download/torrent"
+	"github.com/NullpointerW/mikanani/util"
 )
 
 func TestDL(t *testing.T) {
@@ -27,7 +28,8 @@ func TestDLcompl(t *testing.T) {
 }
 
 func TestGetViaPath(t *testing.T) {
-	ts, err := TORR.GetViaPath("C:/Users/W/Downloads")
+	util.DebugEnv()
+	ts, err := TORR.GetViaPath("D:\\mikan-subj\\3375@mikan")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
