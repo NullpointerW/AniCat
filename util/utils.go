@@ -22,6 +22,10 @@ func ParseTime(strd string) (time.Time, error) {
 	return t, nil
 }
 
+func ParseTimeStr(t time.Time) string {
+	return t.Format(YMDParseLayout)
+}
+
 func FileSeparatorConv(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
 }

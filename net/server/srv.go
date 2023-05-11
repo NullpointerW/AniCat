@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	CFG "github.com/NullpointerW/mikanani/conf"
+	"github.com/NullpointerW/mikanani/errs"
 	N "github.com/NullpointerW/mikanani/net"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/util"
@@ -61,7 +62,13 @@ func process(c *N.Conn) {
 			}
 			route(&rep)
 			if rep.Err != nil {
-				s := fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+				var s string
+				if rep.Err == errs.WarnRssRuleNotMatched {
+					s = fmt.Sprintln(cmd.YellowBg, rep.Err.Error(), cmd.Reset)
+				} else {
+					s = fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+				}
+
 				c.Write(s)
 				continue
 			}

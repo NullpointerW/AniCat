@@ -7,14 +7,17 @@ import (
 
 var (
 	ErrCrawlNotFound         = errors.New("content not crawled")
-	ErrTorrnetNotFound       = errors.New("torrnet not found")
-	ErrSubjectAlreadyExisted = errors.New("subject already existed")
-	ErrSubjectNotFound       = errors.New("subject not found")
-	ErrBgmUrlNotFoundOnMikan = errors.New("bgm url not found on mikanani")
+	ErrCoverDownLoadZeroSize = errors.New("cover file download zero size after multiple attempts")
+
+	ErrTorrnetNotFound           = errors.New("there are no torrent files on qbt")
+	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
+	ErrSubjectAlreadyExisted     = errors.New("subject already existed")
+	ErrSubjectNotFound           = errors.New("subject not found")
+	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on mikanani")
+	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-download rule!")
 	// command error
 	ErrUnknownCommand         = errors.New("unknown command")
 	ErrMissingCommandArgument = errors.New("missing command argument")
-	ErrCoverDownLoadZeroSize  = errors.New("cover file download zero size")
 )
 
 func Custom(format string, a ...any) error {

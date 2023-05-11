@@ -34,7 +34,7 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 		util.Debugf("subj reload sid:%d", s.SubjId)
 		s.checkDL()
 	}
-	t := time.NewTicker(util.Day)
+	t := time.NewTicker(30 * time.Minute)
 	for {
 		select {
 		case torr := <-s.PushChan:
@@ -46,7 +46,10 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 			return
 		case <-t.C:
 			util.Debugf("subj update mission started sid:%d", s.SubjId)
-			s.update()
+			err := s.update()
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 
@@ -73,28 +76,34 @@ func exit(s *Subject) {
 
 func (s *Subject) checkDL() (err error) {
 	if s.ResourceTyp == Torrent {
+		util.Debugln("subj:", s.SubjId, "is torr typ,start check DL")
 		compl, err := TORR.DLcompl(s.TorrentHash)
 		if err != nil {
 			return err
 		} else if compl {
+			util.Debugln("subj:", s.SubjId, "DL fin terminate now")
 			s.terminate()
 			return err
 		}
 	} else if s.ResourceTyp == RSS && s.Finished {
+		util.Debugln("subj:", s.SubjId, "is rss typ,start check DL")
 		if s.Typ == TV && s.EndTime != "" {
+			util.Debugln("subj:", s.SubjId, "is TV and epi fin ")
 			e, err := util.ParseTime(s.EndTime)
+			util.Debugln("subj:", s.SubjId, "epi endtime is ", util.ParseTimeStr(e))
 			if err != nil {
 				return err
 			}
 			if time.Since(e) >= util.Day {
+				util.Debugln("subj:", s.SubjId, "The time elapsed since the end of the anime is more than 1 day. ")
 				goto checkSync
 			}
+			util.Debugln("subj:", s.SubjId, "The time elapsed DAY between the end of the anime and now is", time.Since(e).Hours()/24)
 		} else if s.Typ == MOVIE {
 			goto checkSync
 		}
-	} else {
-		return
 	}
+	return
 checkSync:
 	sync, err := s.RssDLSynced()
 	if err != nil {
@@ -106,15 +115,21 @@ checkSync:
 	return
 }
 
+// call only when the subject epis is fin
 func (s *Subject) RssDLSynced() (bool, error) {
 	arts, err := rss.GetMatchedArts(s.RssPath())
 	if err != nil {
 		return false, nil
 	}
 	tlen := len(arts)
+	if tlen == 0 {
+		log.Println("there is no arts matched , check the rss match rule!")
+		return true, nil
+	}
+	util.Debugln("rss total len is", tlen)
 	hs, err := TORR.GetViaPath(s.Path)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 	llen := len(hs)
 	util.Debugf("subj sid:%d total series:%d local series:%d ", s.SubjId, tlen, llen)

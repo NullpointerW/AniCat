@@ -8,9 +8,11 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	CR "github.com/NullpointerW/mikanani/crawl"
 	"github.com/NullpointerW/mikanani/errs"
+	"github.com/NullpointerW/mikanani/util"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"github.com/tidwall/gjson"
@@ -22,39 +24,47 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		return err
 	}
 	c := CR.NewCollector()
+	c.SetRequestTimeout(5 * time.Second)
+
+	c.OnRequest(func(r *colly.Request) {
+		agent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+		r.Headers.Set("User-Agent", agent)
+		util.Debugf("%#+v", r.Headers)
+	})
 	c.OnResponse(func(r *colly.Response) {
 		exp := coverXpathExp
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
-			log.Fatal(e)
+			err = e
+			return
 		}
 		a := htmlquery.FindOne(doc, exp)
 		m := htmlquery.InnerText(a)
 		dl := strings.ReplaceAll(m, `/m/`, `/l/`)
-		fmt.Println(dl)
+		fmt.Println("cover file url:", dl)
 		//download
 
 		resp, e := http.Get(dl)
 		if e != nil {
-			log.Fatal(e)
 			err = e
+			return
 		}
 
 		f, e := os.Create(fpath)
 		if e != nil {
-			log.Fatal(e)
 			err = e
+			return
 		}
 		defer resp.Body.Close()
 		defer f.Close()
 		wn, e := io.Copy(f, resp.Body)
 		log.Printf("cover file downloaded size:%d", wn)
 		if e != nil {
-			fmt.Println(e)
 			err = e
+			return
 		}
-		if wn==0{
-			err=errs.ErrCoverDownLoadZeroSize
+		if wn == 0 {
+			err = errs.ErrCoverDownLoadZeroSize
 		}
 	})
 
@@ -62,8 +72,8 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		fmt.Println("Visiting", r.URL)
 	})
 
-	c.OnError(func(_ *colly.Response, err error) {
-		log.Println("Something went wrong:", err)
+	c.OnError(func(_ *colly.Response, e error) {
+		err = e
 	})
 
 	c.Visit(u)

@@ -110,12 +110,18 @@ func CreateSubject(n string, ext *Extra) error {
 
 	cp := subject.Path + "/" + CoverFN
 	err = CC.DOUBANCoverScraper.Scrape(cp, n)
-	
+
 	if err != nil {
-		for err == errs.ErrCoverDownLoadZeroSize{
+		retry := 0
+		for err == errs.ErrCoverDownLoadZeroSize {
+			retry++
+			if retry >= 3 {
+				return err
+			}
+			time.Sleep(500 * time.Millisecond)
 			err = CC.DOUBANCoverScraper.Scrape(cp, n)
 		}
-		if err!=nil{
+		if err != nil {
 			return err
 		}
 	}
@@ -129,6 +135,14 @@ func CreateSubject(n string, ext *Extra) error {
 	subject.writeJson()
 
 	subject.runtimeInit(false)
+
+	if subject.ResourceTyp == RSS {
+		time.Sleep(1500 * time.Millisecond) // wait for qbt
+		a, err := rss.GetMatchedArts(subject.RssPath())
+		if err == nil && len(a) == 0 {
+			return errs.WarnRssRuleNotMatched
+		}
+	}
 
 	return nil
 }

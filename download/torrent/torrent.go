@@ -48,7 +48,7 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 		return hits, err
 	}
 	if len(torrs) == 0 {
-		return hits, errs.Custom("%w:there is no any torrents on qbt", errs.ErrTorrnetNotFound)
+		return hits, errs.ErrTorrnetNotFound
 	}
 
 	for _, t := range torrs {
@@ -59,7 +59,7 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 		}
 	}
 	if len(hits) == 0 {
-		return hits, errs.Custom("%w:no torrents found for \"%s\" wtih save path", errs.ErrTorrnetNotFound, path)
+		return hits, errs.Custom("%w,No torrs found on savepath:%s",errs.ErrTorrnetOnSavePathNotFound,path)
 	}
 	return
 }
