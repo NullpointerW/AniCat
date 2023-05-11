@@ -12,7 +12,22 @@ import (
 	"github.com/gocolly/colly"
 )
 
-func Scrape(searchstr string) (url, bgmUrl string, isrss bool, err error) {
+type Option struct {
+	O     Opt
+	Index int
+	Group string
+}
+
+type RssGroup struct {
+	Name string
+	Item struct {
+		Name       string
+		Size       string
+		UpdateTime string
+	}
+}
+
+func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err error) {
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
@@ -71,29 +86,43 @@ func Scrape(searchstr string) (url, bgmUrl string, isrss bool, err error) {
 	return
 }
 
-func scrapeRssEndPoint(endpoint string) (rssep, bgmurl string, err error) {
+func scrapeRssEndPoint(endpoint string, opt Option) (res, bgmurl string, err error) {
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
 			err = e
 		}
-		xpathExp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text'][1]/a[@class='mikan-rss']/@href`
-		bgmXpathExp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='pull-left leftbar-container']/p[@class='bangumi-info'][last()]/a/@href`
-		a := htmlquery.FindOne(doc, xpathExp)
-		if a == nil {
-			err = errs.ErrCrawlNotFound
-			return
+		var xpathExp string
+		if opt.O == 0 {
+			if opt.Group == "" {
+				xpathExp = `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text'][1]/a[@class='mikan-rss']/@href`
+			}
+			bgmXpathExp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='pull-left leftbar-container']/p[@class='bangumi-info'][last()]/a/@href`
+			a := htmlquery.FindOne(doc, xpathExp)
+			if a == nil {
+				err = errs.ErrCrawlNotFound
+				return
+			} else {
+				res = htmlquery.InnerText(a)
+			}
+			a = htmlquery.FindOne(doc, bgmXpathExp)
+			if a == nil {
+				err = errs.ErrBgmUrlNotFoundOnMikan
+				return
+			} else {
+				bgmurl = htmlquery.InnerText(a)
+			}
 		} else {
-			rssep = htmlquery.InnerText(a)
+			switch opt.O {
+			case Ls:
+			case LSGroup:
+			default:
+				err=errs.ErrUnknownResCrawlOption
+				
+			}
 		}
-		a = htmlquery.FindOne(doc, bgmXpathExp)
-		if a == nil {
-			err = errs.ErrBgmUrlNotFoundOnMikan
-			return
-		} else {
-			bgmurl = htmlquery.InnerText(a)
-		}
+
 	})
 
 	c.OnRequest(func(r *colly.Request) {

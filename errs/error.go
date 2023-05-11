@@ -8,6 +8,7 @@ import (
 var (
 	ErrCrawlNotFound         = errors.New("content not crawled")
 	ErrCoverDownLoadZeroSize = errors.New("cover file download zero size after multiple attempts")
+	ErrUnknownResCrawlOption = errors.New("unknown resource crawl option")
 
 	ErrTorrnetNotFound           = errors.New("there are no torrent files on qbt")
 	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
