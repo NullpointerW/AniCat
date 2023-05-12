@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	ErrCrawlNotFound         = errors.New("content not crawled")
-	ErrCoverDownLoadZeroSize = errors.New("cover file download zero size after multiple attempts")
-	ErrUnknownResCrawlOption = errors.New("unknown resource crawl option")
+	ErrCrawlNotFound            = errors.New("content not crawled")
+	ErrCoverDownLoadZeroSize    = errors.New("cover file download zero size after multiple attempts")
+	ErrUnknownResCrawlLsType    = errors.New("unknown resource ls crawl type")
+	ErrLsGroupUnavailableOnTorr = errors.New("command `ls group` is unavailableOnTorrent type")
 
 	ErrTorrnetNotFound           = errors.New("there are no torrent files on qbt")
 	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
