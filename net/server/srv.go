@@ -52,7 +52,12 @@ func process(c *N.Conn) {
 			}
 			rep := cmd.Parse(cmds)
 			if rep.Err != nil {
-				s := fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+				s := ""
+				if rep.Err == errs.ErrAddCommandMissingHelping {
+					s = rep.N
+				} else {
+					s = fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+				}
 				c.Write(s)
 				continue
 			}
@@ -72,7 +77,7 @@ func process(c *N.Conn) {
 				c.Write(s)
 				continue
 			}
-			if rep.Opt == cmd.Ls {
+			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup {
 				c.Write(rep.N)
 			} else {
 				c.Write("OK")

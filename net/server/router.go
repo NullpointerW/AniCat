@@ -3,6 +3,8 @@ package server
 import (
 	"strconv"
 
+	CR "github.com/NullpointerW/mikanani/crawl/resource"
+	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/subject"
 	"github.com/liushuochen/gotable"
@@ -16,6 +18,8 @@ func route(c *cmd.Command) {
 			sc.RssOption.UseRegex = c.Flag.UseRegex
 			sc.RssOption.MustContain = c.Flag.MustContain
 			sc.RssOption.MustNotContain = c.Flag.MustNotContain
+			sc.RssOption.SubtitleGroup=c.Flag.SubtitleGroup
+			sc.TorrOption.Index=c.Flag.Index
 		}
 		sc.N = c.N
 		p := subject.NewPip(sc)
@@ -50,5 +54,38 @@ func route(c *cmd.Command) {
 			tb.AddRow([]string{sid, s.Typ.String(), s.Name, epi, fin, compl})
 		}
 		c.N = "\n" + tb.String()
+	case cmd.LsItems:
+		l, err := CR.ListScrape(c.N, CR.Ls)
+		if err != nil {
+			c.Err = err
+			return
+		}
+		ls := ""
+		rgs, RssGroupSlice := l.([]CR.RssGroup)
+		its, ItemSlice := l.([]CR.Item)
+		if RssGroupSlice {
+			ls += "\n"
+			for _, rg := range rgs {
+				ls += rg.Name
+				ls += createItemLStb(rg.Items)
+			}
+		} else if ItemSlice {
+			tb, _ := gotable.Create("index", "name", "size", "updateTime")
+			for i, it := range its {
+				tb.AddRow([]string{strconv.Itoa(i + 1), it.Name, it.Size, it.UpdateTime})
+			}
+			ls = "\n" + tb.String()
+		} else {
+			c.Err = errs.ErrUndefinedCrawlListType
+		}
+		c.N = ls
 	}
+}
+
+func createItemLStb(its []CR.Item) string {
+	tb, _ := gotable.Create("name", "size", "updateTime")
+	for _, it := range its {
+		tb.AddRow([]string{it.Name, it.Size, it.UpdateTime})
+	}
+	return "\n" + tb.String() + "\n"
 }

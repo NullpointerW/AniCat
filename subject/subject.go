@@ -52,9 +52,11 @@ type Subject struct {
 }
 
 type Extra struct {
-	SubtitleGroup string
-	Index         int
-	RssOption     struct {
+	TorrOption struct {
+		Index int
+	}
+	RssOption struct {
+		SubtitleGroup  string
 		MustContain    string
 		MustNotContain string
 		UseRegex       bool
@@ -192,8 +194,8 @@ func (s *Subject) FetchInfo() error {
 func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	opt := RC.Option{}
 	if ext != nil {
-		opt.Group = ext.SubtitleGroup
-		opt.Index = ext.Index
+		opt.Group = ext.RssOption.SubtitleGroup
+		opt.Index = ext.TorrOption.Index
 	}
 	u, bgm, isrss, err := RC.Scrape(n, opt)
 	if err != nil {

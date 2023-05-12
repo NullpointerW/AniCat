@@ -16,6 +16,7 @@ type Command struct {
 		MustContain    string `long:"mc"   required:"false"`
 		MustNotContain string `long:"mn"   required:"false"`
 		UseRegex       bool   `long:"rg"   required:"false"`
+		Index          int    `short:"i" long:"index" required:"false"`
 	}
 	Err error
 }
@@ -25,6 +26,8 @@ const (
 	Add Option = iota
 	Del
 	Ls
+	LsItems
+	LsGroup
 	Help
 )
 
@@ -36,6 +39,10 @@ func optionMode(o string) (Option, bool) {
 		return Del, true
 	case "ls":
 		return Ls, true
+	case "lsi":
+		return LsItems, true
+	case "lsg":
+		return LsGroup, true
 	case "h", "help", "":
 		return Help, true
 	default:
@@ -61,6 +68,11 @@ func Parse(cmds []string) (reply Command) {
 	reply.Opt = opt
 	if opt != Help && opt != Ls {
 		if len(cmds) < 3 {
+			if opt == Add {
+				reply.N = addCMDUsageHelp
+				reply.Err = errs.ErrAddCommandMissingHelping
+				return
+			}
 			reply.Err = errs.Custom("%w:%s", errs.ErrMissingCommandArgument, `Use "mikan help " for more information about a command.`)
 			return
 		}
@@ -86,6 +98,10 @@ func Parse(cmds []string) (reply Command) {
 				_, reply.Err = flags.ParseArgs(&reply.Flag, ext)
 				reply.Flag.Using = true
 			}
+			return
+		} else { // lsi , lsg
+			args := cmds[2:]
+			reply.N = strings.Join(args, " ")
 			return
 		}
 	}

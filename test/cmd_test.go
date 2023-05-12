@@ -14,9 +14,13 @@ func TestParseCmd(t *testing.T) {
 }
 
 func TestStrParse(t *testing.T) {
-	str := `mikan add bilor  简中 1080p --mn 骄傲`
+	str := `mikan lsi 骄傲 威威`
 	cmds := cmd.ParseArgs(str)
 	r := cmd.Parse(cmds)
 	fmt.Printf("%#+v \n", r)
 	fmt.Println(r.Err)
+}
+
+func TestPrintHelp(t *testing.T) {
+	fmt.Print(cmd.TestingString())
 }
