@@ -123,10 +123,12 @@ func ParseFlagArgs(flag []string) (f []string) {
 		if arg {
 			argument += " " + a
 			if len(flag)-1 == i {
+				argument = strings.TrimPrefix(argument, " ")
 				f = append(f, argument)
 			}
 		} else {
 			if argument != "" {
+				argument = strings.TrimPrefix(argument, " ")
 				f = append(f, argument)
 				argument = ""
 			}

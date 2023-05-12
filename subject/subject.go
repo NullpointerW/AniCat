@@ -195,6 +195,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	opt := RC.Option{}
 	if ext != nil {
 		opt.Group = ext.RssOption.SubtitleGroup
+		util.Debugln("SubtitleGroup",opt.Group)
 		opt.Index = ext.TorrOption.Index
 	}
 	u, bgm, isrss, err := RC.Scrape(n, opt)

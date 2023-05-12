@@ -3,6 +3,7 @@ package resource
 import (
 	"fmt"
 	"log"
+
 	"strings"
 
 	CR "github.com/NullpointerW/mikanani/crawl"
@@ -104,7 +105,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 			var hitgrp *html.Node
 			for _, d := range ds {
 				grpn := htmlquery.FindOne(d, `/a[1]`)
-				if grpn == nil {
+				if grpn == nil || htmlquery.InnerText(grpn) == "" {
 					grpn = htmlquery.FindOne(d, `/div[@class='dropdown']/div[@class='dropdown-toggle material-dropdown__btn']/span[1]`)
 				}
 				if grpn == nil {
@@ -113,6 +114,10 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 				} else {
 					actl := strings.ToLower(htmlquery.InnerText(grpn))
 					expt := strings.ToLower(opt.Group)
+					util.Debugln("expt_has space ", strings.Contains(opt.Group, " "))
+					util.Debugln("actl_has space ", strings.Contains(actl, " "))
+					util.Debugln("expt_group ", opt.Group, "actl_group ", actl)
+
 					if expt == actl {
 						hitgrp = d
 						break
@@ -246,7 +251,8 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 		for i, d := range ds {
 			rg := RssGroup{}
 			grpn := htmlquery.FindOne(d, `/a[1]`)
-			if grpn == nil {
+			util.Debugln("group:", htmlquery.InnerText(grpn))
+			if grpn == nil || htmlquery.InnerText(grpn) == "" {
 				grpn = htmlquery.FindOne(d, `/div[@class='dropdown']/div[@class='dropdown-toggle material-dropdown__btn']/span[1]`)
 			}
 			if grpn == nil {
