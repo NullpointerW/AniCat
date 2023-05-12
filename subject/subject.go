@@ -53,6 +53,7 @@ type Subject struct {
 
 type Extra struct {
 	SubtitleGroup string
+	Index         int
 	RssOption     struct {
 		MustContain    string
 		MustNotContain string
@@ -77,7 +78,7 @@ func CreateSubject(n string, ext *Extra) error {
 	// for testing
 	fmt.Printf("%#+v", *subject)
 
-	bgmurl, err := solveResource(n, subject)
+	bgmurl, err := solveResource(n, subject, ext)
 	if err != nil {
 		return err
 	}
@@ -188,8 +189,13 @@ func (s *Subject) FetchInfo() error {
 	return wrap.Error()
 }
 
-func solveResource(n string, subj *Subject) (string, error) {
-	u, bgm, isrss, err := RC.Scrape(n)
+func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
+	opt := RC.Option{}
+	if ext != nil {
+		opt.Group = ext.SubtitleGroup
+		opt.Index = ext.Index
+	}
+	u, bgm, isrss, err := RC.Scrape(n, opt)
 	if err != nil {
 		return "", err
 	}

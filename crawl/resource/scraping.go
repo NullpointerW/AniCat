@@ -54,10 +54,6 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 				opt.Index = 1
 			}
 			mglinkTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[1]/a[2]/@data-clipboard-text`
-			fn := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[1]/a[@class='magnet-link-wrap']`)
-			size := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[2]`)
-			t := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[3]`)
-			torr := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[4]/a/@href`)
 			mglink := htmlquery.FindOne(doc, fmt.Sprintf(mglinkTemp, opt.Index))
 
 			if mglink != nil {
@@ -236,6 +232,10 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 			err = e
 			return
 		}
+		if t != Ls && t != LSGroup {
+			err = errs.ErrUnknownResCrawlLsType
+			return
+		}
 		trsTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn'][%d]/tbody/tr`
 		itnExp := `/td[1]/a[@class='magnet-link-wrap']`
 		szExp := `/td[2]`
@@ -271,6 +271,14 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 		}
 		if len(rgs) == 0 {
 			err = errs.ErrCrawlNotFound
+			return
+		}
+		if t == LSGroup {
+			var rgnls []string
+			for _, rg := range rgs {
+				rgnls = append(rgnls, rg.Name)
+			}
+			res = rgnls
 			return
 		}
 		res = rgs
