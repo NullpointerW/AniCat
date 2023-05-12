@@ -1,13 +1,16 @@
 package server
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/subject"
 	"github.com/liushuochen/gotable"
+	"github.com/olekukonko/tablewriter"
 )
 
 func route(c *cmd.Command) {
@@ -18,8 +21,8 @@ func route(c *cmd.Command) {
 			sc.RssOption.UseRegex = c.Flag.UseRegex
 			sc.RssOption.MustContain = c.Flag.MustContain
 			sc.RssOption.MustNotContain = c.Flag.MustNotContain
-			sc.RssOption.SubtitleGroup=c.Flag.SubtitleGroup
-			sc.TorrOption.Index=c.Flag.Index
+			sc.RssOption.SubtitleGroup = c.Flag.SubtitleGroup
+			sc.TorrOption.Index = c.Flag.Index
 		}
 		sc.N = c.N
 		p := subject.NewPip(sc)
@@ -64,11 +67,28 @@ func route(c *cmd.Command) {
 		rgs, RssGroupSlice := l.([]CR.RssGroup)
 		its, ItemSlice := l.([]CR.Item)
 		if RssGroupSlice {
-			ls += "\n"
+			// ls += "\n"
+			// for _, rg := range rgs {
+			// 	ls += rg.Name
+			// 	ls += createItemLStb(rg.Items)
+			// }
+			var row [][]string
+			tableString := &strings.Builder{}
+			table := tablewriter.NewWriter(tableString)
+			table.SetHeader([]string{"group", "name", "size", "updateTime"})
 			for _, rg := range rgs {
-				ls += rg.Name
-				ls += createItemLStb(rg.Items)
+				for _, i := range rg.Items {
+					r := []string{rg.Name, i.Name, i.Size, i.UpdateTime}
+					row = append(row, r)
+				}
 			}
+			table.SetAutoMergeCells(true)
+			table.SetRowLine(true)
+			table.AppendBulk(row)
+			table.SetAutoWrapText(false)
+			table.SetColWidth(60)
+			table.Render()
+			ls = "\n" + tableString.String()
 		} else if ItemSlice {
 			tb, _ := gotable.Create("index", "name", "size", "updateTime")
 			for i, it := range its {
@@ -78,6 +98,7 @@ func route(c *cmd.Command) {
 		} else {
 			c.Err = errs.ErrUndefinedCrawlListType
 		}
+		fmt.Print(ls)
 		c.N = ls
 	}
 }
