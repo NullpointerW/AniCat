@@ -18,7 +18,12 @@ func main() {
 		r.ReadString('\n')
 	}()
 	var port string
+	debugMode:=true
 	for {
+		if debugMode{
+			port=":8080"
+			break
+		}
 		fmt.Println(cmd.GreenBg, "PORT:", cmd.Reset)
 		l, err := r.ReadString('\n')
 		if err != nil {

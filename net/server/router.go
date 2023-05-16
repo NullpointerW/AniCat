@@ -3,14 +3,15 @@ package server
 import (
 	"fmt"
 	"strconv"
+
 	// "strings"
 
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
+	"github.com/NullpointerW/mikanani/net/cmd/view"
 	"github.com/NullpointerW/mikanani/subject"
 	"github.com/liushuochen/gotable"
-	// "github.com/olekukonko/tablewriter"
 )
 
 func route(c *cmd.Command) {
@@ -67,35 +68,9 @@ func route(c *cmd.Command) {
 		rgs, RssGroupSlice := l.([]CR.RssGroup)
 		its, ItemSlice := l.([]CR.Item)
 		if RssGroupSlice {
-			// ls += "\n"
-			// for _, rg := range rgs {
-			// 	ls += rg.Name
-			// 	ls += createItemLStb(rg.Items)
-			// }
-			// var row [][]string
-			// tableString := &strings.Builder{}
-			// table := tablewriter.NewWriter(tableString)
-			// table.SetHeader([]string{"group", "name", "size", "updateTime"})
-			// for _, rg := range rgs {
-			// 	for _, i := range rg.Items {
-			// 		r := []string{rg.Name, i.Name, i.Size, i.UpdateTime}
-			// 		row = append(row, r)
-			// 	}
-			// }
-			// table.SetAutoMergeCells(true)
-			// table.SetRowLine(true)
-			// table.AppendBulk(row)
-			// table.SetAutoWrapText(false)
-			// table.SetColWidth(60)
-			// table.Render()
-			// ls = "\n" + tableString.String()
-			ls = cmd.MergTb.RssGroup(rgs)
+			ls = view.TableRender.RssGroup(rgs)
 		} else if ItemSlice {
-			tb, _ := gotable.Create("index", "name", "size", "updateTime")
-			for i, it := range its {
-				tb.AddRow([]string{strconv.Itoa(i + 1), it.Name, it.Size, it.UpdateTime})
-			}
-			ls = "\n" + tb.String()
+			ls = view.TableRender.TorrList(its)
 		} else {
 			c.Err = errs.ErrUndefinedCrawlListType
 		}
