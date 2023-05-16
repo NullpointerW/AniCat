@@ -131,9 +131,14 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	llen := len(hs)
-	util.Debugf("subj sid:%d total series:%d local series:%d ", s.SubjId, tlen, llen)
-	return llen >= tlen, nil
+	c := 0
+	for _, h := range hs {
+		if h.Progress == 1 {
+			c++
+		}
+	}
+	util.Debugf("subj sid:%d total series:%d local series:%d,local cmpl series:%d ", s.SubjId, tlen, len(hs),c)
+	return c >= tlen, nil
 }
 
 func (s *Subject) push(torr qbt.Torrent) error {
