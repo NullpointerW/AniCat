@@ -1,5 +1,13 @@
 package cmd
 
+import (
+	"strings"
+
+	CR "github.com/NullpointerW/mikanani/crawl/resource"
+	"github.com/liushuochen/gotable"
+	"github.com/olekukonko/tablewriter"
+)
+
 var (
 	GreenBg  = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
 	RedBg    = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
@@ -10,6 +18,55 @@ var (
 	// $
 	Cursor = "\033[?25h$"
 )
+
+type Table interface {
+	RssGroup(rgs []CR.RssGroup) string
+}
+
+var (
+	MergTb Table = mergTb{}
+	Tb     Table = tb{}
+)
+
+type mergTb struct{}
+
+func (_ mergTb) RssGroup(rgs []CR.RssGroup) string {
+	var row [][]string
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter(tableString)
+	table.SetHeader([]string{"group", "name", "size", "updateTime"})
+	for _, rg := range rgs {
+		for _, i := range rg.Items {
+			r := []string{rg.Name, i.Name, i.Size, i.UpdateTime}
+			row = append(row, r)
+		}
+	}
+	table.SetAutoMergeCells(true)
+	table.SetRowLine(true)
+	table.AppendBulk(row)
+	table.SetAutoWrapText(false)
+	table.SetColWidth(60)
+	table.Render()
+	return "\n" + tableString.String()
+}
+
+type tb struct{}
+
+func (_ tb) RssGroup(rgs []CR.RssGroup) string {
+	createItemLStb := func(its []CR.Item) string {
+		tb, _ := gotable.Create("name", "size", "updateTime")
+		for _, it := range its {
+			tb.AddRow([]string{it.Name, it.Size, it.UpdateTime})
+		}
+		return "\n" + tb.String() + "\n"
+	}
+	ls := "\n"
+	for _, rg := range rgs {
+		ls += rg.Name
+		ls += createItemLStb(rg.Items)
+	}
+	return ls
+}
 
 const (
 	usageHelp = "\n   Usage:\n         " +

@@ -256,10 +256,13 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 				grpn = htmlquery.FindOne(d, `/div[@class='dropdown']/div[@class='dropdown-toggle material-dropdown__btn']/span[1]`)
 			}
 			if grpn == nil {
-				util.Debugf("%v not scrap group name", d)
-				continue
+				rg.Name = strings.Fields(htmlquery.InnerText(d))[0]
+				util.Debugf("%v not scrap group name", rg.Name)
+				// continue
+			} else {
+				rg.Name = htmlquery.InnerText(grpn)
 			}
-			rg.Name = htmlquery.InnerText(grpn)
+
 			trs := htmlquery.Find(doc, fmt.Sprintf(trsTemp, i+1))
 			var its []Item
 			for _, tr := range trs {

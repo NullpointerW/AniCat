@@ -3,14 +3,14 @@ package server
 import (
 	"fmt"
 	"strconv"
-	"strings"
+	// "strings"
 
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/subject"
 	"github.com/liushuochen/gotable"
-	"github.com/olekukonko/tablewriter"
+	// "github.com/olekukonko/tablewriter"
 )
 
 func route(c *cmd.Command) {
@@ -72,23 +72,24 @@ func route(c *cmd.Command) {
 			// 	ls += rg.Name
 			// 	ls += createItemLStb(rg.Items)
 			// }
-			var row [][]string
-			tableString := &strings.Builder{}
-			table := tablewriter.NewWriter(tableString)
-			table.SetHeader([]string{"group", "name", "size", "updateTime"})
-			for _, rg := range rgs {
-				for _, i := range rg.Items {
-					r := []string{rg.Name, i.Name, i.Size, i.UpdateTime}
-					row = append(row, r)
-				}
-			}
-			table.SetAutoMergeCells(true)
-			table.SetRowLine(true)
-			table.AppendBulk(row)
-			table.SetAutoWrapText(false)
-			table.SetColWidth(60)
-			table.Render()
-			ls = "\n" + tableString.String()
+			// var row [][]string
+			// tableString := &strings.Builder{}
+			// table := tablewriter.NewWriter(tableString)
+			// table.SetHeader([]string{"group", "name", "size", "updateTime"})
+			// for _, rg := range rgs {
+			// 	for _, i := range rg.Items {
+			// 		r := []string{rg.Name, i.Name, i.Size, i.UpdateTime}
+			// 		row = append(row, r)
+			// 	}
+			// }
+			// table.SetAutoMergeCells(true)
+			// table.SetRowLine(true)
+			// table.AppendBulk(row)
+			// table.SetAutoWrapText(false)
+			// table.SetColWidth(60)
+			// table.Render()
+			// ls = "\n" + tableString.String()
+			ls = cmd.MergTb.RssGroup(rgs)
 		} else if ItemSlice {
 			tb, _ := gotable.Create("index", "name", "size", "updateTime")
 			for i, it := range its {
