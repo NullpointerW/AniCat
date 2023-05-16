@@ -28,7 +28,12 @@ func TouchCoverImg(fpath, cover string) (err error) {
 
 	c.OnRequest(func(r *colly.Request) {
 		agent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+
 		r.Headers.Set("User-Agent", agent)
+		r.Headers.Set("Sec-Ch-Ua", `"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"`)
+		r.Headers.Set("Sec-Ch-Ua-Platform", `"Android"`)
+		r.Headers.Set("Sec-Ch-Ua-Mobile", "?1")
+
 		util.Debugf("%#+v", r.Headers)
 	})
 	c.OnResponse(func(r *colly.Response) {
