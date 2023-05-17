@@ -27,8 +27,9 @@ const (
 	Del
 	Ls
 	LsItems
-	LsGroup
+	LsGroup // reserved command
 	Help
+	SavePath 
 )
 
 func optionMode(o string) (Option, bool) {

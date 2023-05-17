@@ -68,7 +68,7 @@ func process(c *N.Conn) {
 			route(&rep)
 			if rep.Err != nil {
 				var s string
-				if rep.Err == errs.WarnRssRuleNotMatched {
+				if rep.Err == errs.WarnRssRuleNotMatched || rep.Err == errs.WarnReservedCommand_lsg {
 					s = fmt.Sprintln(cmd.YellowBg, rep.Err.Error(), cmd.Reset)
 				} else {
 					s = fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)

@@ -40,24 +40,7 @@ func route(c *cmd.Command) {
 		c.Err = p.Error()
 	case cmd.Ls:
 		ls := subject.Manager.List()
-		tb, _ := gotable.Create("sid", "type", "name", "episode", "status", "compl")
-		for _, s := range ls {
-			sid := strconv.Itoa(s.SubjId)
-			fin := "updating"
-			compl := "N"
-			epi := "*"
-			if s.Episode != 0 {
-				epi = strconv.Itoa(s.Episode)
-			}
-			if s.Finished {
-				fin = "fin"
-			}
-			if s.Terminate {
-				compl = "Y"
-			}
-			tb.AddRow([]string{sid, s.Typ.String(), s.Name, epi, fin, compl})
-		}
-		c.N = "\n" + tb.String()
+		c.N = view.TableRender.Ls(ls)
 	case cmd.LsItems:
 		l, err := CR.ListScrape(c.N, CR.Ls)
 		if err != nil {
@@ -75,6 +58,8 @@ func route(c *cmd.Command) {
 			c.Err = errs.ErrUndefinedCrawlListType
 		}
 		c.N = ls
+	case cmd.LsGroup:
+		c.Err = errs.WarnReservedCommand_lsg
 	}
 }
 

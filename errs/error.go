@@ -22,6 +22,7 @@ var (
 	ErrUnknownCommand           = errors.New("unknown command")
 	ErrMissingCommandArgument   = errors.New("missing command argument")
 	ErrAddCommandMissingHelping = errors.New("")
+	WarnReservedCommand_lsg     = errors.New("the command 'lsg' is currently unavailable. use 'lsi' to  view the list of subtitle groups ")
 )
 
 func Custom(format string, a ...any) error {

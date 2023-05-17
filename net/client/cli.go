@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -12,28 +13,34 @@ import (
 	"github.com/NullpointerW/mikanani/net/cmd"
 )
 
+var debugMode bool
+
+func init() {
+	flag.BoolVar(&debugMode, "d", false, "debug mode")
+	flag.Parse()
+}
+
 func main() {
 	r := bufio.NewReader(os.Stdin)
 	defer func() {
 		r.ReadString('\n')
 	}()
 	var port string
-	debugMode:=true
 	for {
-		if debugMode{
-			port=":8080"
+		if debugMode {
+			port = ":8080"
 			break
 		}
 		fmt.Println(cmd.GreenBg, "PORT:", cmd.Reset)
 		l, err := r.ReadString('\n')
 		if err != nil {
-			log.Println(err)
+			log.Println(cmd.Red, err, cmd.Reset)
 			exit(r)
 		}
 		p := string(N.DropCR([]byte(l[:len(l)-1])))
 		_, err = strconv.Atoi(p)
 		if err != nil {
-			fmt.Println(cmd.RedBg, err, cmd.Reset)
+			fmt.Println(cmd.Red, err, cmd.Reset)
 			_, _ = r.ReadString('\n')
 			fmt.Print(cmd.Cls)
 			continue
@@ -45,7 +52,7 @@ func main() {
 
 	c, err := net.Dial("tcp", port)
 	if err != nil {
-		log.Println(cmd.RedBg, err, cmd.Reset)
+		log.Println(cmd.Red, err, cmd.Reset)
 		exit(r)
 	}
 	s := bufio.NewScanner(c)
@@ -62,7 +69,7 @@ func main() {
 		}
 		c.Write([]byte(l + N.CRLF))
 	}
-	log.Println(cmd.RedBg, s.Err(), cmd.Reset)
+	log.Println(cmd.Red, s.Err(), cmd.Reset)
 }
 
 func exit(r *bufio.Reader) {
