@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	// "fmt"
 	"strconv"
 
 	// "strings"
@@ -74,7 +74,6 @@ func route(c *cmd.Command) {
 		} else {
 			c.Err = errs.ErrUndefinedCrawlListType
 		}
-		fmt.Print(ls)
 		c.N = ls
 	}
 }

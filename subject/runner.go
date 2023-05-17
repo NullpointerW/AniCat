@@ -123,10 +123,10 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	}
 	tlen := len(arts)
 	if tlen == 0 {
-		log.Println("there is no arts matched , check the rss match rule!")
+		log.Println("there is no arts matched , check the rss match rule!","sid:",s.SubjId)
 		return true, nil
 	}
-	util.Debugln("rss total len is", tlen)
+	util.Debugln("rss total len is", tlen,"sid is",s.SubjId)
 	hs, err := TORR.GetViaPath(s.Path)
 	if err != nil {
 		return false, err
