@@ -1,13 +1,11 @@
 package cmd
 
-import (
-	
-)
+import ()
 
 var (
 	GreenBg  = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
 	RedBg    = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
-	Red          = string([]byte{27, 91, 57, 49, 109})
+	Red      = string([]byte{27, 91, 57, 49, 109})
 	Cyan     = string([]byte{27, 91, 51, 54, 109})
 	YellowBg = string([]byte{27, 91, 57, 48, 59, 52, 51, 109})
 	Cls      = "\033[2J\033[H"
@@ -15,8 +13,6 @@ var (
 	// $
 	Cursor = "\033[?25h$"
 )
-
-
 
 const (
 	usageHelp = "\n   Usage:\n         " +
@@ -26,7 +22,8 @@ const (
 		"rm [subjid]                  delete a anine-subject\n         " +
 		"ls                           show all anine-subjects\n         " +
 		"lsi [name]                   show anine resource list\n         " +
-		"lsg [name]                   show anine subtitleGroup list (rss type)\n"
+		"lsg [name]                   show anine subtitleGroup list (rss type)\n         " +
+		"sp [subjid]                  show download path of subject\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
 		"mikan add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +

@@ -29,7 +29,8 @@ const (
 	LsItems
 	LsGroup // reserved command
 	Help
-	SavePath 
+	SavePath
+	Info // TODO
 )
 
 func optionMode(o string) (Option, bool) {
@@ -44,6 +45,8 @@ func optionMode(o string) (Option, bool) {
 		return LsItems, true
 	case "lsg":
 		return LsGroup, true
+	case "sp":
+		return SavePath, true
 	case "h", "help", "":
 		return Help, true
 	default:
@@ -77,7 +80,7 @@ func Parse(cmds []string) (reply Command) {
 			reply.Err = errs.Custom("%w:%s", errs.ErrMissingCommandArgument, `Use "mikan help " for more information about a command.`)
 			return
 		}
-		if opt == Del || (opt == Add && len(cmds) == 3) {
+		if opt == Del || (opt == Add && len(cmds) == 3) || opt == SavePath {
 			reply.N = cmds[2]
 			return
 		}

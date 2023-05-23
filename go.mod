@@ -12,6 +12,7 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 
 )
 
@@ -26,6 +27,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/liushuochen/gotable v0.0.0-20221119160816-1113793e7092
 	github.com/olekukonko/tablewriter v0.0.5
@@ -35,5 +37,6 @@ require (
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v3 v3.0.1
 )

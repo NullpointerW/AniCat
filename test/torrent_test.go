@@ -29,7 +29,7 @@ func TestDLcompl(t *testing.T) {
 
 func TestGetViaPath(t *testing.T) {
 	util.DebugEnv()
-	ts, err := TORR.GetViaPath("D:\\mikan-subj\\3375@mikan")
+	ts, err := TORR.GetViaPath("D:\\mikan-subj\\381666@mikan")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

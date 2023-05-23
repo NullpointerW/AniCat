@@ -60,6 +60,19 @@ func route(c *cmd.Command) {
 		c.N = ls
 	case cmd.LsGroup:
 		c.Err = errs.WarnReservedCommand_lsg
+
+	case cmd.SavePath:
+		i, err := strconv.Atoi(c.N)
+		if err != nil {
+			c.Err = err
+			return
+		}
+		subj := subject.Manager.Get(i)
+		if subj == nil {
+			c.Err = errs.ErrSubjectNotFound
+			return
+		}
+		c.N = subj.Path
 	}
 }
 

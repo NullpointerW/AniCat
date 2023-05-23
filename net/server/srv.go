@@ -77,7 +77,7 @@ func process(c *N.Conn) {
 				c.Write(s)
 				continue
 			}
-			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup {
+			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup || rep.Opt == cmd.SavePath {
 				c.Write(rep.N)
 			} else {
 				c.Write("OK")
