@@ -49,6 +49,8 @@ type Subject struct {
 	// while init,if this flag is false then there is noneed to start a gorountine to run it
 	// exit actively flag should  be set to true
 	Terminate bool `json:"terminate"`
+	// a Set store all pushed torrents,avoid duplicate push.
+	Pushed map[string]struct{} `json:"pushed"`
 }
 
 type Extra struct {
@@ -195,7 +197,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	opt := RC.Option{}
 	if ext != nil {
 		opt.Group = ext.RssOption.SubtitleGroup
-		util.Debugln("SubtitleGroup",opt.Group)
+		util.Debugln("SubtitleGroup", opt.Group)
 		opt.Index = ext.TorrOption.Index
 	}
 	u, bgm, isrss, err := RC.Scrape(n, opt)

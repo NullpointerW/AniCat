@@ -1,9 +1,15 @@
 package pusher
 
-type Pusher interface{
-	Push()
+type Payload struct {
+	SubjectId    int    // $id$
+	SubjectName  string // $name$
+	DownLoadName string // $dlname$
+	Size         int    // $size$
 }
 
-func Push(){
-
+type Pusher interface {
+	Push(p Payload)
+	Template(t string)
 }
+
+var Mock Pusher

@@ -38,7 +38,7 @@ func TestScan(t *testing.T) {
 }
 
 func TestCreateSubj(t *testing.T) {
-	err := subject.CreateSubject("未闻花名",nil)
+	err := subject.CreateSubject("未闻花名", nil)
 	errs.NoError(t, err)
 }
 
@@ -47,4 +47,14 @@ func TestXxx(t *testing.T) {
 	fmt.Println("Type:", typ)
 	typ = reflect.TypeOf(subject.Extra{})
 	fmt.Println("Type:", typ)
+
+	s := subject.Subject{}
+	s.Pushed = make(map[string]struct{})
+	s.Pushed["v1"] = struct{}{}
+	b,_:=json.Marshal(s)
+	fmt.Println(string(b))
+	err:=json.Unmarshal(b,&s)
+	if err!=nil{
+		t.FailNow()
+	}
 }

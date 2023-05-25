@@ -42,7 +42,7 @@ func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
 func TestSendQQEmail(t *testing.T) {
 	message := `
     <p> Hello %s,</p>
-	
+	     $torr$
 		<p style="text-indent:2em">test test test test test test test test test test test test.</p> 
 		<p style="text-indent:2em">test test test test test test test test test test test test.</p>
  

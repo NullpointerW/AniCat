@@ -123,10 +123,10 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	}
 	tlen := len(arts)
 	if tlen == 0 {
-		log.Println("there is no arts matched , check the rss match rule!","sid:",s.SubjId)
+		log.Println("there is no arts matched , check the rss match rule!", "sid:", s.SubjId)
 		return true, nil
 	}
-	util.Debugln("rss total len is", tlen,"sid is",s.SubjId)
+	util.Debugln("rss total len is", tlen, "sid is", s.SubjId)
 	hs, err := TORR.GetViaPath(s.Path)
 	if err != nil {
 		return false, err
@@ -137,13 +137,18 @@ func (s *Subject) RssDLSynced() (bool, error) {
 			c++
 		}
 	}
-	util.Debugf("subj sid:%d total series:%d local series:%d,local cmpl series:%d ", s.SubjId, tlen, len(hs),c)
+	util.Debugf("subj sid:%d total series:%d local series:%d,local cmpl series:%d ", s.SubjId, tlen, len(hs), c)
 	return c >= tlen, nil
 }
 
 func (s *Subject) push(torr qbt.Torrent) error {
+	pusher.Mock.Push(pusher.Payload{
+		SubjectId:    s.SubjId,
+		SubjectName:  s.Name,
+		DownLoadName: torr.Name,
+		Size:         torr.Size,
+	})
 	if s.ResourceTyp == Torrent {
-		pusher.Push()
 		s.terminate()
 	}
 	return nil
