@@ -8,8 +8,17 @@ type Payload struct {
 }
 
 type Pusher interface {
-	Push(p Payload)
+	Push(p Payload) error
 	Template(t string)
 }
 
-var Mock Pusher
+type Mock struct{}
+
+func (m Mock) Push(p Payload) error {
+	return nil
+}
+func (m Mock) Template(t string) {
+
+}
+
+var Mock_ Pusher = Mock{}

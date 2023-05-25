@@ -142,7 +142,7 @@ func (s *Subject) RssDLSynced() (bool, error) {
 }
 
 func (s *Subject) push(torr qbt.Torrent) error {
-	pusher.Mock.Push(pusher.Payload{
+	pusher.Mock_.Push(pusher.Payload{
 		SubjectId:    s.SubjId,
 		SubjectName:  s.Name,
 		DownLoadName: torr.Name,

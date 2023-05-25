@@ -4,13 +4,10 @@ import (
 	// "crypto/tls"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"net/smtp"
 	"testing"
 
 	"gopkg.in/gomail.v2"
-
-
 )
 
 type loginAuth struct {
@@ -41,14 +38,22 @@ func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
 
 func TestSendQQEmail(t *testing.T) {
 	message := `
-    <p> Hello %s,</p>
-	     $torr$
-		<p style="text-indent:2em">test test test test test test test test test test test test.</p> 
-		<p style="text-indent:2em">test test test test test test test test test test test test.</p>
- 
-		<p style="text-indent:2em">test test test test test test test test test test test test.</P>
- 
-		<p style="text-indent:2em">Best Wishes!</p>
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>New Episode Available - TV Show Name</title>
+	</head>
+	<body>
+		<div style="background-color: #f2f2f2; padding: 20px;">
+			<h2 style="font-family: Arial, sans-serif; color: #333333; font-size: 24px;">New Episode Available - TV Show Name</h2>
+			<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">Dear Subscriber,</p>
+			<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">We are excited to announce that a new episode of <strong>TV Show Name</strong> is now available for download! The file size for this episode is <strong>[File Size]</strong>.</p>
+			<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">To access the latest episode, please log in to your account and navigate to the "Episodes" section. From there, you can select the newest episode and begin downloading.</p>
+			<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">Thank you for being a loyal subscriber, and we hope you enjoy the latest installment of <strong>TV Show Name</strong>.</p>
+			<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">Best regards,<br>[Your Company Name]</p>
+		</div>
+	</body>
+	</html>
 	`
 
 	// QQ 邮箱：
@@ -57,7 +62,7 @@ func TestSendQQEmail(t *testing.T) {
 	// SMTP 服务器地址：smtp.163.com（端口：25）
 	host := "smtp.qq.com"
 	port := 25
-	userName := "xxxx@qq.com"
+	userName := "xxx@qq.com"
 	password := "xxx"
 
 	m := gomail.NewMessage()
@@ -70,7 +75,7 @@ func TestSendQQEmail(t *testing.T) {
 
 	// text/html 的意思是将文件的 content-type 设置为 text/html 的形式，浏览器在获取到这种文件时会自动调用html的解析器对文件进行相应的处理。
 	// 可以通过 text/html 处理文本格式进行特殊处理，如换行、缩进、加粗等等
-	m.SetBody("text/html", fmt.Sprintf(message, "testUser"))
+	m.SetBody("text/html", message)
 
 	// text/plain的意思是将文件设置为纯文本的形式，浏览器在获取到这种文件时并不会对其进行处理
 	// m.SetBody("text/plain", "纯文本")
@@ -95,6 +100,3 @@ func TestSendQQEmail(t *testing.T) {
 	}
 
 }
-
-
-
