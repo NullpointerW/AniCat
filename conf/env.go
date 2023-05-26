@@ -20,6 +20,14 @@ type Environment struct {
 	} `yaml:"qbittorrent"`
 	Proxies  []string `yaml:"proxies"`
 	SubjPath string   `yaml:"path"`
+	Pusher   struct {
+		Email struct{
+			Host string `yaml:"host"`
+			Port int   `yaml:"port"`
+			Username string `yaml:"username"`
+			Password string  `yaml:"password"`
+		}`yaml:"email"`
+	} `yaml:"push"`
 }
 
 func init() {

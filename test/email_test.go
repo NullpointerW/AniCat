@@ -2,9 +2,15 @@ package test
 
 import (
 	// "crypto/tls"
+	
 	"crypto/tls"
+
 	"errors"
+	// "fmt"
+	// "io"
+	// "net/http"
 	"net/smtp"
+	// "net/url"
 	"testing"
 
 	"gopkg.in/gomail.v2"
@@ -100,3 +106,4 @@ func TestSendQQEmail(t *testing.T) {
 	}
 
 }
+

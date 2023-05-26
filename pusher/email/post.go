@@ -1,0 +1,5 @@
+package email
+
+func init (){
+	
+}
