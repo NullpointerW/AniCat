@@ -9,7 +9,6 @@ type Payload struct {
 
 type Pusher interface {
 	Push(p Payload) error
-	Template(t string)
 }
 
 type Mock struct{}
@@ -17,8 +16,6 @@ type Mock struct{}
 func (m Mock) Push(p Payload) error {
 	return nil
 }
-func (m Mock) Template(t string) {
 
-}
 
 var Mock_ Pusher = Mock{}

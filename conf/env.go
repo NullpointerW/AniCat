@@ -21,12 +21,14 @@ type Environment struct {
 	Proxies  []string `yaml:"proxies"`
 	SubjPath string   `yaml:"path"`
 	Pusher   struct {
-		Email struct{
-			Host string `yaml:"host"`
-			Port int   `yaml:"port"`
-			Username string `yaml:"username"`
-			Password string  `yaml:"password"`
-		}`yaml:"email"`
+		Email struct {
+			Host         string `yaml:"host"`
+			Port         int    `yaml:"port"`
+			Username     string `yaml:"username"`
+			Password     string `yaml:"password"`
+			TemplatePath string `yaml:"template"`
+			SkipSSL      bool   `yaml:"skipssl"`
+		} `yaml:"email"`
 	} `yaml:"push"`
 }
 
