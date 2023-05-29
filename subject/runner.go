@@ -10,7 +10,8 @@ import (
 	"github.com/NullpointerW/mikanani/download/rss"
 	TORR "github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/pusher"
+	P "github.com/NullpointerW/mikanani/pusher"
+	"github.com/NullpointerW/mikanani/pusher/email"
 	"github.com/NullpointerW/mikanani/util"
 )
 
@@ -38,8 +39,10 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 	for {
 		select {
 		case torr := <-s.PushChan:
-			err := s.push(torr)
-			log.Println(err)
+			err := s.push(torr, email.Sender{})
+			if err != nil {
+				log.Println(err)
+			}
 		case <-ctx.Done():
 			util.Debugf("subj exited sid:%d", s.SubjId)
 			exit(s)
@@ -141,17 +144,25 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	return c >= tlen, nil
 }
 
-func (s *Subject) push(torr qbt.Torrent) error {
-	pusher.Mock_.Push(pusher.Payload{
+func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
+	if _, e := s.Pushed[torr.Hash]; e {
+		return errs.ErrItemAlreadyPushed
+	}
+	mErr := errs.MultiErr{}
+	s.Pushed[torr.Hash] = struct{}{}
+	err := pusher.Push(P.Payload{
 		SubjectId:    s.SubjId,
 		SubjectName:  s.Name,
 		DownLoadName: torr.Name,
 		Size:         torr.Size,
 	})
+	mErr.Add(err)
 	if s.ResourceTyp == Torrent {
 		s.terminate()
+	} else {
+		mErr.Add(s.writeJson())
 	}
-	return nil
+	return mErr.Err()
 }
 
 func (s *Subject) terminate() {

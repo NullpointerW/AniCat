@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 
 	CFG "github.com/NullpointerW/mikanani/conf"
+	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/pusher"
 	"gopkg.in/gomail.v2"
 )
@@ -13,9 +14,9 @@ var (
 	from, to string
 )
 
-type e struct{}
+type Sender struct{}
 
-func (_ e) Push(p pusher.Payload) error {
+func (_ Sender) Push(p pusher.Payload) error {
 	m := gomail.NewMessage()
 	// Sender
 	m.SetHeader("From", from)
@@ -30,7 +31,7 @@ func (_ e) Push(p pusher.Payload) error {
 	m.SetBody("text/html", Parse(p))
 
 	if err := sender.DialAndSend(m); err != nil {
-		return err
+		return errs.Custom("send email error:%w", err)
 	}
 	return nil
 }

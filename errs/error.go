@@ -23,7 +23,31 @@ var (
 	ErrMissingCommandArgument   = errors.New("missing command argument")
 	ErrAddCommandMissingHelping = errors.New("")
 	WarnReservedCommand_lsg     = errors.New("the command 'lsg' is currently unavailable. use 'lsi' to  view the list of subtitle groups ")
+
+	ErrItemAlreadyPushed = errors.New("item was already pushed")
 )
+
+type MultiErr struct {
+	errs []error
+}
+
+func (me *MultiErr) Add(e error) {
+	if e != nil {
+		me.errs = append(me.errs, e)
+	}
+
+}
+
+func (me *MultiErr) Err() error {
+	if len(me.errs) == 0 {
+		return nil
+	}
+	var errstr string
+	for _, e := range me.errs {
+		errstr += e.Error() + "\n"
+	}
+	return errors.New(errstr)
+}
 
 func Custom(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
