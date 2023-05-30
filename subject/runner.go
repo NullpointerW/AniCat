@@ -26,6 +26,9 @@ func (s *Subject) runtimeInit(reload bool) {
 	s.exit = exit
 	s.PushChan = make(chan qbt.Torrent, 1024)
 	s.Exited = make(chan struct{})
+	if s.Pushed == nil {
+		s.Pushed = make(map[string]struct{})
+	}
 	Manager.Add(s)
 	go s.run(ctx, reload)
 }

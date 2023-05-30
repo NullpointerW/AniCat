@@ -2,6 +2,7 @@ package email
 
 import (
 	"crypto/tls"
+	"log"
 
 	CFG "github.com/NullpointerW/mikanani/conf"
 	"github.com/NullpointerW/mikanani/errs"
@@ -10,7 +11,7 @@ import (
 )
 
 var (
-	sender   gomail.Dialer
+	sender   *gomail.Dialer
 	from, to string
 )
 
@@ -37,7 +38,7 @@ func (_ Sender) Push(p pusher.Payload) error {
 }
 
 func init() {
-	sender := gomail.NewDialer(
+	sender = gomail.NewDialer(
 		CFG.Env.Pusher.Email.Host,
 		CFG.Env.Pusher.Email.Port,
 		CFG.Env.Pusher.Email.Username,
@@ -47,4 +48,6 @@ func init() {
 	if CFG.Env.Pusher.Email.SkipSSL {
 		sender.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
+	log.Println("email dialer init completed")
+	
 }

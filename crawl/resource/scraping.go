@@ -157,7 +157,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = e
+		err = errs.Custom("collyError:%w", e)
 	})
 
 	c.Visit(resourcesBaseUrl + endpoint)
@@ -219,7 +219,7 @@ func ListScrape(searchstr string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = e
+		err = errs.Custom("collyError:%w", e)
 	})
 
 	CR.SetProxy(c)
@@ -298,7 +298,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = e
+		err = errs.Custom("collyError:%w", e)
 	})
 
 	c.Visit(resourcesBaseUrl + endpoint)

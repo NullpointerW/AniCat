@@ -1,6 +1,7 @@
 package email
 
 import (
+	// "fmt"
 	"log"
 	"os"
 	"strconv"
@@ -10,27 +11,35 @@ import (
 	"github.com/NullpointerW/mikanani/pusher"
 )
 
+
 const Default = `
 <!DOCTYPE html>
 <html>
-<head>
-	<title>剧集更新 - $name$(SubjectId:$id$)</title>
-</head>
-<body>
-	<div style="background-color: #f2f2f2; padding: 20px;">
-		<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">Dear Subscriber,</p>
-		<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">新增内容<strong>$dlname$</strong> 已下载完成,文件大小<strong>$size$</strong>kb</p>
-		<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">To access the latest episode, please log in to your account and navigate to the "Episodes" section. From there, you can select the newest episode and begin downloading.</p>
-		<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">Thank you for being a loyal subscriber, and we hope you enjoy the latest installment of <strong>TV Show Name</strong>.</p>
-		<p style="font-family: Arial, sans-serif; color: #333333; font-size: 16px;">Best regards,<br>[Mikan]</p>
-	</div>
-</body>
-</html>
-`
+  <head>
+    <meta charset="utf-8">
+    <title>剧集更新通知</title>
+  </head>
+  <body>
+    <h1>剧集【$name$】更新通知</h1>
+    <p>亲爱的用户，</p>
+    <p></p>
+    <ul>
+      <li>Subject Id:$id$</li>
+      <li>文件名:【$dlname$】</li>
+      <li>大小:$size$ KB</li>
+    </ul>
+    <p>您可以通过以下链接直接访问我们网站，观看这一最新的剧集：</p>
+    <p><a href="【剧集链接】">【剧集链接】</a></p>
+    <p>希望您能够喜欢这一最新的剧集，您也可以在我们的网站上留下您的宝贵意见和建议。</p>
+    <p>谢谢！</p>
+    <p>祝好！</p>
+    <p>【发件人名称】</p>
+  </body>
+</html>`
 
 var template string
 
-func Init() {
+func init() {
 	template = Default
 	if p := CFG.Env.Pusher.Email.TemplatePath; p != "" {
 		b, err := os.ReadFile(p)
