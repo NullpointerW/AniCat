@@ -1,10 +1,10 @@
 package pusher
 
 type Payload struct {
-	SubjectId    int    // $id$
-	SubjectName  string // $name$
-	DownLoadName string // $dlname$
-	Size         int    // $size$
+	SubjectId    int    // ${id}
+	SubjectName  string // ${name}
+	DownLoadName string // ${dlname}
+	Size         int    // ${size}
 }
 
 type Pusher interface {
@@ -16,6 +16,5 @@ type Mock struct{}
 func (m Mock) Push(p Payload) error {
 	return nil
 }
-
 
 var Mock_ Pusher = Mock{}

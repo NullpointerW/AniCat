@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"io"
 	"log"
 	"os"
 
@@ -33,10 +34,23 @@ type Environment struct {
 }
 
 func init() {
-	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
-	flaginit()
+	flaginit() 
 	b, err := os.ReadFile(EnvPath)
 	errs.PanicErr(err)
 	errs.PanicErr(yaml.Unmarshal(b, &Env))
 	log.Printf("env:\n%#+v\n", Env)
+}
+
+func loginit(debug bool) {
+	flag:=log.Ldate | log.Lmicroseconds
+	if debug{
+		flag|=log.Lshortfile
+	}
+	log.SetFlags(flag)
+	f, err := os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.SetOutput(io.MultiWriter(os.Stderr, f))
+	}
 }

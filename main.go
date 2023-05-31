@@ -8,12 +8,7 @@ import (
 	"github.com/NullpointerW/mikanani/download/detection"
 	netsrv "github.com/NullpointerW/mikanani/net/server"
 	"github.com/NullpointerW/mikanani/subject"
-	"github.com/NullpointerW/mikanani/util"
 )
-
-func init() {
-	util.DebugEnv()
-}
 
 func main() {
 	subject.Scan()
