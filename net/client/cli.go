@@ -13,10 +13,10 @@ import (
 	"github.com/NullpointerW/mikanani/net/cmd"
 )
 
-var debugMode bool
+var port int
 
 func init() {
-	flag.BoolVar(&debugMode, "d", false, "debug mode")
+	flag.IntVar(&port, "p", 8080, "server dial port")
 	flag.Parse()
 }
 
@@ -25,32 +25,8 @@ func main() {
 	defer func() {
 		r.ReadString('\n')
 	}()
-	var port string
-	for {
-		if debugMode {
-			port = ":8080"
-			break
-		}
-		fmt.Println(cmd.GreenBg, "PORT:", cmd.Reset)
-		l, err := r.ReadString('\n')
-		if err != nil {
-			log.Println(cmd.Red, err, cmd.Reset)
-			exit(r)
-		}
-		p := string(N.DropCR([]byte(l[:len(l)-1])))
-		_, err = strconv.Atoi(p)
-		if err != nil {
-			fmt.Println(cmd.Red, err, cmd.Reset)
-			_, _ = r.ReadString('\n')
-			fmt.Print(cmd.Cls)
-			continue
-		}
-		port = ":" + p
-		fmt.Print(cmd.Cls)
-		break
-	}
-
-	c, err := net.Dial("tcp", port)
+	dialport := ":" + strconv.Itoa(port)
+	c, err := net.Dial("tcp", dialport)
 	if err != nil {
 		log.Println(cmd.Red, err, cmd.Reset)
 		exit(r)

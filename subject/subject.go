@@ -3,6 +3,7 @@ package subject
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -114,20 +115,23 @@ func CreateSubject(n string, ext *Extra) error {
 	}
 
 	cp := subject.Path + "/" + CoverFN
-	err = CC.DOUBANCoverScraper.Scrape(cp, n)
-
-	if err != nil {
-		retry := 0
-		for err == errs.ErrCoverDownLoadZeroSize {
-			retry++
-			if retry >= 3 {
+	err = CC.TouchbgmCoverImg(sid, cp)
+	if err!=nil{
+		log.Println(err)
+		err = CC.DOUBANCoverScraper.Scrape(cp, n)
+		if err != nil {
+			retry := 0
+			for err == errs.ErrCoverDownLoadZeroSize {
+				retry++
+				if retry >= 3 {
+					return err
+				}
+				time.Sleep(500 * time.Millisecond)
+				err = CC.DOUBANCoverScraper.Scrape(cp, n)
+			}
+			if err != nil {
 				return err
 			}
-			time.Sleep(500 * time.Millisecond)
-			err = CC.DOUBANCoverScraper.Scrape(cp, n)
-		}
-		if err != nil {
-			return err
 		}
 	}
 

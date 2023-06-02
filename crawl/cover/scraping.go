@@ -55,21 +55,10 @@ func TouchCoverImg(fpath, cover string) (err error) {
 			return
 		}
 
-		f, e := os.Create(fpath)
+		e = downloadfile(fpath, resp.Body)
 		if e != nil {
 			err = e
 			return
-		}
-		defer resp.Body.Close()
-		defer f.Close()
-		wn, e := io.Copy(f, resp.Body)
-		log.Printf("cover file downloaded size:%d", wn)
-		if e != nil {
-			err = e
-			return
-		}
-		if wn == 0 {
-			err = errs.ErrCoverDownLoadZeroSize
 		}
 	})
 
@@ -101,7 +90,6 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		log.Println("Something went wrong:", e)
 		err = e
 	})
 
@@ -113,4 +101,22 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	c.Visit(fmt.Sprintf(coverSearchUrl, parseParam))
 
 	return
+}
+
+func downloadfile(filepath string, remote io.ReadCloser) error {
+	f, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer remote.Close()
+	defer f.Close()
+	wn, err := io.Copy(f, remote)
+	log.Printf("cover file downloaded size:%d", wn)
+	if err != nil {
+		return err
+	}
+	if wn == 0 {
+		return errs.ErrCoverDownLoadZeroSize
+	}
+	return nil
 }
