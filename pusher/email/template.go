@@ -61,11 +61,11 @@ const def = `<!DOCTYPE html>
 </head>
 <body>
 	<h1>${name}</h1>
-	<h2>剧集更新通知</h2>
+	<h2>剧集已更新</h2>
 	<ul>
 		<li>SubjectId: ${id}</li>
 		<li>文件名: ${dlname}</li>
-		<li>文件大小: ${size} KB</li>
+		<li>文件大小: ${size} MB</li>
 		<li><a href="https://bgm.tv/subject/${id}">在bgm.tv上查看番剧信息</a></li>
 	</ul>
 	<img src="http://api.bgm.tv/v0/subjects/${id}/image?type=medium">

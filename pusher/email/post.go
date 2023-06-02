@@ -24,7 +24,7 @@ func (_ Sender) Push(p pusher.Payload) error {
 	// Recipient(s), can be multiple recipients, but must use the same SMTP connection.
 	m.SetHeader("To", to)
 
-	m.SetHeader("Subject", "[Mikan]剧集推送更新提醒")
+	m.SetHeader("Subject", "[Mikan] 剧集推送更新提醒")
 
 	// The meaning of text/html is to set the content-type of the file as text/html,
 	// and the browser will automatically call the HTML parser to process the file accordingly when it is obtained.
