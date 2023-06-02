@@ -20,7 +20,7 @@ func Scan() {
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
 			if f.IsDir() && strings.HasSuffix(f.Name(), FolderSuffix) {
-				log.Println("scan:found subj:" + home + `/` + f.Name() + `/` + jsonfileName)
+				log.Println("scan:found subj folder:" + home + `/` + f.Name())
 				if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + jsonfileName); err == nil {
 					var s Subject
 					err := json.Unmarshal(jsraw, &s)

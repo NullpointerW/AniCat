@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"io"
+	// "io"
 	"log"
 	"os"
 
@@ -51,6 +51,6 @@ func loginit(debug bool) {
 	if err != nil {
 		log.Println(err)
 	} else {
-		log.SetOutput(io.MultiWriter(os.Stderr, f))
+		log.SetOutput(f)
 	}
 }
