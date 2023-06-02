@@ -11,33 +11,7 @@ import (
 	"github.com/NullpointerW/mikanani/pusher"
 )
 
-const Default = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>剧集更新通知</title>
-  </head>
-  <body>
-     <h1>剧集【${name}】更新通知</h1>
-    <p>亲爱的用户，</p>
-    <p></p>
-    <ul>
-      <li>Subject Id:${id}</li>
-      <li>文件名:${dlname}</li>
-      <li>大小:${size} MB</li>
-    </ul>
-    <p>已下载完毕</p>
-    <p><a href="https://bgm.tv/subject/${id}">番剧信息</a></p>
-    <img src="【图片链接】" alt="【图片描述】">
-    <p>希望您能够喜欢这一最新的剧集，您也可以在我们的网站上留下您的宝贵意见和建议。</p>
-    <p>谢谢！</p>
-    <p>祝好！</p>
-    <p><a href="https://github.com/NullpointerW/mikanani">【Mikan】</p>
-  </body>
-</html>`
-
-var Def2 = `<!DOCTYPE html>
+const def = `<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -87,7 +61,7 @@ var Def2 = `<!DOCTYPE html>
 </head>
 <body>
 	<h1>${name}</h1>
-	<h2>新内容已下载</h2>
+	<h2>剧集更新通知</h2>
 	<ul>
 		<li>SubjectId: ${id}</li>
 		<li>文件名: ${dlname}</li>
@@ -95,6 +69,7 @@ var Def2 = `<!DOCTYPE html>
 		<li><a href="https://bgm.tv/subject/${id}">在bgm.tv上查看番剧信息</a></li>
 	</ul>
 	<img src="http://api.bgm.tv/v0/subjects/${id}/image?type=medium">
+	<p>已下载完成</p>
 	<p>Enjoy it,</p>
 	<p>Mikan</p>
 	<div class="inc">
@@ -106,7 +81,7 @@ var Def2 = `<!DOCTYPE html>
 var template string
 
 func init() {
-	template = Def2
+	template = def
 	if p := CFG.Env.Pusher.Email.TemplatePath; p != "" {
 		b, err := os.ReadFile(p)
 		if err != nil {
