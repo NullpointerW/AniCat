@@ -1,9 +1,11 @@
 package view
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
+	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/subject"
 	"github.com/liushuochen/gotable"
@@ -14,6 +16,7 @@ type Table interface {
 	RssGroup(rgs []CR.RssGroup) string
 	TorrList(its []CR.Item) string
 	Ls(ls []subject.Subject) string
+	Status(subj *subject.Subject, torrs []qbt.Torrent) string
 }
 
 var TableRender = mergTb{}
@@ -88,6 +91,48 @@ func (_ mergTb) Ls(ls []subject.Subject) string {
 	return "\n" + tableString.String()
 }
 
+func (_ mergTb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
+	var row [][]string
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter(tableString)
+	table.SetHeader([]string{"name", "type", "resource", "file", "process", "size", "finshed", "path", "totalSize(all compl)"})
+	table.SetAutoFormatHeaders(false)
+	var (
+		fin    string = "N"
+		typ    string = subject.RSS.String()
+		resTyp string = subject.RSS.String()
+	)
+	if subj.Finished {
+		fin = "Y"
+	}
+	if subj.Typ == subject.MOVIE {
+		typ = subject.MOVIE.String()
+	}
+	if subj.ResourceTyp == subject.Torrent {
+		resTyp = subject.Torrent.String()
+
+	}
+	var totalSize int
+	for _, t := range torrs {
+		fileProgress := fmt.Sprintf("%f", t.Progress*100) + "%"
+		totalSize += t.Size
+		fileSize := strconv.Itoa(t.Size/1024/1024) + "MB"
+		row = append(row, []string{subj.Name, typ, resTyp, t.Name, fileProgress, fileSize, fin, subj.Path})
+	}
+	ttsize := strconv.Itoa(totalSize/1024/1024) + "MB"
+	for i, r := range row {
+		row[i] = append(r, ttsize)
+	}
+	table.SetAutoMergeCells(true)
+	table.SetRowLine(true)
+	table.SetBorder(false)
+	table.AppendBulk(row)
+	table.SetAutoWrapText(false)
+	table.SetColWidth(60)
+	table.Render()
+	return "\n" + tableString.String()
+}
+
 type tb struct{}
 
 func (_ tb) RssGroup(rgs []CR.RssGroup) string {
@@ -132,4 +177,8 @@ func (_ tb) Ls(ls []subject.Subject) string {
 		tb.AddRow([]string{sid, s.Typ.String(), s.Name, epi, fin, compl})
 	}
 	return "\n" + tb.String()
+}
+
+func (_ tb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
+	return ""
 }

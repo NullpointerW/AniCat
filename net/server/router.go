@@ -7,6 +7,7 @@ import (
 	// "strings"
 
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
+	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/net/cmd/view"
@@ -61,18 +62,24 @@ func route(c *cmd.Command) {
 	case cmd.LsGroup:
 		c.Err = errs.WarnReservedCommand_lsg
 
-	case cmd.SavePath:
+	case cmd.Status:
 		i, err := strconv.Atoi(c.N)
 		if err != nil {
 			c.Err = err
 			return
 		}
 		subj := subject.Manager.Get(i)
+
 		if subj == nil {
 			c.Err = errs.ErrSubjectNotFound
 			return
 		}
-		c.N = subj.Path
+		hs, err := torrent.GetViaPath(subj.Path)
+		if err != nil {
+			c.Err = err
+			return
+		}
+		c.N = view.TableRender.Status(subj, hs)
 	}
 }
 
