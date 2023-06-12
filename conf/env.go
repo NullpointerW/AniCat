@@ -1,8 +1,9 @@
 package conf
 
 import (
-	// "io"
 	"io"
+	"runtime"
+
 	"log"
 	"os"
 
@@ -35,7 +36,7 @@ type Environment struct {
 }
 
 func init() {
-	flaginit() 
+	flaginit()
 	b, err := os.ReadFile(EnvPath)
 	errs.PanicErr(err)
 	errs.PanicErr(yaml.Unmarshal(b, &Env))
@@ -43,16 +44,22 @@ func init() {
 }
 
 func loginit(debug bool) {
-	flag:=log.Ldate | log.Lmicroseconds
-	if debug{
-		flag|=log.Lshortfile
+	flag := log.Ldate | log.Lmicroseconds
+	if debug {
+		flag |= log.Lshortfile
 	}
 	log.SetFlags(flag)
 	f, err := os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
 	if err != nil {
 		log.Println(err)
 	} else {
-		mio:=io.MultiWriter(os.Stderr,f)
-		log.SetOutput(mio)
+		if runtime.GOOS == "windows" {
+			log.Println("os:windows")
+			log.SetOutput(f)
+		} else {
+			mio := io.MultiWriter(os.Stderr, f)
+			log.SetOutput(mio)
+		}
+
 	}
 }

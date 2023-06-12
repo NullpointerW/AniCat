@@ -56,7 +56,7 @@ func process(c *N.Conn) {
 				if rep.Err == errs.ErrAddCommandMissingHelping {
 					s = rep.N
 				} else {
-					s = fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+					s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
 				}
 				c.Write(s)
 				continue
@@ -71,7 +71,7 @@ func process(c *N.Conn) {
 				if rep.Err == errs.WarnRssRuleNotMatched || rep.Err == errs.WarnReservedCommand_lsg {
 					s = fmt.Sprintln(cmd.YellowBg, rep.Err.Error(), cmd.Reset)
 				} else {
-					s = fmt.Sprintln(cmd.RedBg, rep.Err.Error(), cmd.Reset)
+					s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
 				}
 
 				c.Write(s)

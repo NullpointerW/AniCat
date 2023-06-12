@@ -47,7 +47,7 @@ type Subject struct {
 	// received and push to terminal
 	PushChan chan qbt.Torrent `json:"-"`
 	// The anime series of this project has already ended and all episodes have been downloaded.
-	// while init,if this flag is false then there is noneed to start a gorountine to run it
+	// while init,if this flag is true then there is noneed to start a gorountine to run it
 	// exit actively flag should  be set to true
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed torrents,avoid duplicate push.

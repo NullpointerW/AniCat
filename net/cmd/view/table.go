@@ -99,7 +99,7 @@ func (_ mergTb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
 	table.SetAutoFormatHeaders(false)
 	var (
 		fin    string = "N"
-		typ    string = subject.RSS.String()
+		typ    string = subject.TV.String()
 		resTyp string = subject.RSS.String()
 	)
 	if subj.Finished {
@@ -114,12 +114,12 @@ func (_ mergTb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
 	}
 	var totalSize int
 	for _, t := range torrs {
-		fileProgress := fmt.Sprintf("%f", t.Progress*100) + "%"
+		fileProgress := fmt.Sprintf("%.0f", t.Progress*100) + "%"
 		totalSize += t.Size
 		fileSize := strconv.Itoa(t.Size/1024/1024) + "MB"
 		row = append(row, []string{subj.Name, typ, resTyp, t.Name, fileProgress, fileSize, fin, subj.Path})
 	}
-	ttsize := strconv.Itoa(totalSize/1024/1024) + "MB"
+	ttsize := strconv.Itoa(totalSize/1024/1024/1024) + "GB"
 	for i, r := range row {
 		row[i] = append(r, ttsize)
 	}
