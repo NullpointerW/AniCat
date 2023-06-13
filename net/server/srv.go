@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"strconv"
 
 	CFG "github.com/NullpointerW/mikanani/conf"
@@ -77,8 +78,11 @@ func process(c *N.Conn) {
 				c.Write(s)
 				continue
 			}
-			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup || rep.Opt == cmd.Status {
+			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup || rep.Opt == cmd.Status || rep.Opt == cmd.Stop {
 				c.Write(rep.N)
+				if rep.Opt == cmd.Stop{
+					os.Exit(0)
+				}
 			} else {
 				c.Write("OK")
 			}

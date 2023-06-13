@@ -29,8 +29,9 @@ const (
 	LsItems
 	LsGroup // reserved command
 	Help
-	
+
 	Status // TODO
+	Stop
 )
 
 func optionMode(o string) (Option, bool) {
@@ -49,6 +50,8 @@ func optionMode(o string) (Option, bool) {
 		return Status, true
 	case "h", "help", "":
 		return Help, true
+	case "stop":
+		return Stop, true
 	default:
 		return -1, false
 	}
@@ -70,7 +73,7 @@ func Parse(cmds []string) (reply Command) {
 		return
 	}
 	reply.Opt = opt
-	if opt != Help && opt != Ls {
+	if opt != Help && opt != Ls && opt != Stop {
 		if len(cmds) < 3 {
 			if opt == Add {
 				reply.N = addCMDUsageHelp

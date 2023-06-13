@@ -33,12 +33,12 @@ type Subject struct {
 	EndTime     string      `json:"endTime"`
 	// used while `ResourceTyp` is `Torrent`
 	TorrentHash string `json:"torrentHash"`
-	// manager use ctxcancel func to exit gorountine running the current subject.
+	// manager use ctxcancel func to Exit gorountine running the current subject.
 	// when delete a subject manager,should run the cancelfunc and if a gorountine is runing
-	// for this subject it will exit.
+	// for this subject it will Exit.
 	// Context is hold by subject-running gorountine
-	// while subject-running gorountine exit actively func should be called
-	exit context.CancelFunc `json:"-"`
+	// while subject-running gorountine Exit actively func should be called
+	Exit context.CancelFunc `json:"-"`
 	// before detection-gorountine push to subject,Check if this channel is closed.
 	// before exit Exited channel should  be closed
 	Exited chan struct{} `json:"-"`
@@ -116,7 +116,7 @@ func CreateSubject(n string, ext *Extra) error {
 
 	cp := subject.Path + "/" + CoverFN
 	err = CC.TouchbgmCoverImg(sid, cp)
-	if err!=nil{
+	if err != nil {
 		log.Println(err)
 		err = CC.DOUBANCoverScraper.Scrape(cp, n)
 		if err != nil {

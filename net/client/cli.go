@@ -37,6 +37,9 @@ func main() {
 	s.Buffer(buf, 1024*1024)
 	for s.Scan() {
 		log.Println(s.Text())
+		if s.Text() == "exited." {
+			return
+		}
 		fmt.Print(cmd.Cyan, cmd.Cursor, cmd.Reset)
 		l, err := r.ReadString('\n')
 		l = string(N.DropCR([]byte(l[:len(l)-1])))

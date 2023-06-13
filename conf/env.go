@@ -54,12 +54,11 @@ func loginit(debug bool) {
 		log.Println(err)
 	} else {
 		if runtime.GOOS == "windows" {
-			log.Println("os:windows")
 			log.SetOutput(f)
 		} else {
 			mio := io.MultiWriter(os.Stderr, f)
 			log.SetOutput(mio)
 		}
-
+		log.Println("os:", runtime.GOOS)
 	}
 }

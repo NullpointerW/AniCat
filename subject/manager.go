@@ -70,10 +70,10 @@ func (m SubjectManager) Get(sid int) *Subject {
 }
 
 func (m *SubjectManager) List() (ls []Subject) {
+	m.mu.Lock()
 	if m.copy != nil {
 		return m.copy
 	}
-	m.mu.Lock()
 	defer m.mu.Unlock()
 	for _, ss := range m.sto {
 		ls = append(ls, *ss)
@@ -96,8 +96,8 @@ func StartManagement() {
 			i := p.arg.(int)
 			s := Manager.Get(i)
 			if s != nil {
-				if !s.Terminate{
-					s.exit()
+				if !s.Terminate {
+					s.Exit()
 				}
 				Manager.Remove(s)
 				s.RmRes()

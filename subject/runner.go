@@ -23,7 +23,7 @@ func (s *Subject) runtimeInit(reload bool) {
 	}
 	c := context.Background()
 	ctx, exit := context.WithCancel(c)
-	s.exit = exit
+	s.Exit = exit
 	s.PushChan = make(chan qbt.Torrent, 1024)
 	s.Exited = make(chan struct{})
 	if s.Pushed == nil {
@@ -76,6 +76,10 @@ func (s *Subject) update() error {
 }
 
 func exit(s *Subject) {
+	err := s.writeJson()
+	if err != nil {
+		log.Println(err)
+	}
 	close(s.Exited)
 	close(s.PushChan)
 }
@@ -172,5 +176,5 @@ func (s *Subject) terminate() {
 	util.Debugf("subj sid:%d terminate ", s.SubjId)
 	s.Terminate, s.Finished = true, true
 	s.writeJson()
-	s.exit()
+	s.Exit()
 }

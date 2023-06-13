@@ -1,18 +1,13 @@
 package server
 
 import (
-	// "fmt"
-	"strconv"
-
-	// "strings"
-
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/net/cmd/view"
 	"github.com/NullpointerW/mikanani/subject"
-	"github.com/liushuochen/gotable"
+	"strconv"
 )
 
 func route(c *cmd.Command) {
@@ -80,13 +75,13 @@ func route(c *cmd.Command) {
 			return
 		}
 		c.N = view.TableRender.Status(subj, hs)
-	}
-}
 
-func createItemLStb(its []CR.Item) string {
-	tb, _ := gotable.Create("name", "size", "updateTime")
-	for _, it := range its {
-		tb.AddRow([]string{it.Name, it.Size, it.UpdateTime})
+	case cmd.Stop:
+		for _, s := range subject.Manager.List() {
+			if !s.Terminate {
+				s.Exit()
+			}
+		}
+		c.N = "exited."
 	}
-	return "\n" + tb.String() + "\n"
 }
