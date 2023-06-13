@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"strconv"
 
 	N "github.com/NullpointerW/mikanani/net"
@@ -40,11 +41,23 @@ func main() {
 		if s.Text() == "exited." {
 			return
 		}
-		fmt.Print(cmd.Cyan, cmd.Cursor, cmd.Reset)
-		l, err := r.ReadString('\n')
-		l = string(N.DropCR([]byte(l[:len(l)-1])))
-		if err != nil {
-			panic(err)
+		var (
+			err error
+			l   string
+		)
+		for {
+			fmt.Print(cmd.Cyan, cmd.Cursor, cmd.Reset)
+			l, err = r.ReadString('\n')
+			if err != nil {
+				panic(err)
+			}
+			l = string(N.DropCR([]byte(l[:len(l)-1])))
+			if l != "cls" && l != "clear" {
+				break
+			}
+			cmd := exec.Command("cmd", "/c", "cls")
+			cmd.Stdout = os.Stdout
+			cmd.Run()
 		}
 		c.Write([]byte(l + N.CRLF))
 	}

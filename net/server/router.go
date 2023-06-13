@@ -1,13 +1,15 @@
 package server
 
 import (
+	"strconv"
+
 	CR "github.com/NullpointerW/mikanani/crawl/resource"
 	"github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
 	"github.com/NullpointerW/mikanani/net/cmd"
 	"github.com/NullpointerW/mikanani/net/cmd/view"
 	"github.com/NullpointerW/mikanani/subject"
-	"strconv"
+	"github.com/NullpointerW/mikanani/util"
 )
 
 func route(c *cmd.Command) {
@@ -35,8 +37,10 @@ func route(c *cmd.Command) {
 		subject.Delete <- p
 		c.Err = p.Error()
 	case cmd.Ls:
+		util.Debugln("at cmd.Ls")
 		ls := subject.Manager.List()
 		c.N = view.TableRender.Ls(ls)
+		util.Debugln("render table ::", c.N)
 	case cmd.LsItems:
 		l, err := CR.ListScrape(c.N, CR.Ls)
 		if err != nil {

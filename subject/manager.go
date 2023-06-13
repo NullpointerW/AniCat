@@ -71,10 +71,10 @@ func (m SubjectManager) Get(sid int) *Subject {
 
 func (m *SubjectManager) List() (ls []Subject) {
 	m.mu.Lock()
+	defer m.mu.Unlock()
 	if m.copy != nil {
 		return m.copy
 	}
-	defer m.mu.Unlock()
 	for _, ss := range m.sto {
 		ls = append(ls, *ss)
 	}
