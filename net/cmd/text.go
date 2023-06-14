@@ -23,7 +23,8 @@ const (
 		"ls                           show all anine-subjects\n         " +
 		"lsi [name]                   show anine resource list\n         " +
 		"lsg [name]                   show anine subtitleGroup list (rss type)\n         " +
-		"sp [subjid]                  show download path of subject\n"
+		"stat [subjid]                show detailed information of subject\n         "+
+		"stop                         terminate program\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
 		"mikan add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +

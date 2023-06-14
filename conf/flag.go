@@ -13,7 +13,7 @@ var (
 
 func flaginit() {
 	flag.StringVar(&EnvPath, "e", "./env.yaml", "env yaml filepath")
-	flag.BoolVar(&debug, "d", true, "debug mode")
+	flag.BoolVar(&debug, "d", false, "debug mode")
 	if debug {
 		util.DebugEnv()
 	}
