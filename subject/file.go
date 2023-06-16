@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
+	// "strconv"
 	"strings"
 )
 
@@ -46,7 +46,8 @@ func initFolder(subject *Subject) (err error) {
 	var folderPath string
 
 	folderPath = trimPath(HOME)
-	folderPath += "/" + strconv.Itoa(subject.SubjId) + FolderSuffix
+	
+	folderPath += "/" + subject.Name
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {

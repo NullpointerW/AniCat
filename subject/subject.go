@@ -81,7 +81,7 @@ func CreateSubject(n string, ext *Extra) error {
 	subject := new(Subject)
 
 	// for testing
-	fmt.Printf("%#+v", *subject)
+	util.Debugf("%#+v", *subject)
 
 	bgmurl, err := solveResource(n, subject, ext)
 	if err != nil {

@@ -9,9 +9,10 @@ import (
 var Asia_Shanghai, _ = time.LoadLocation("Asia/Shanghai")
 
 const (
-	YMDParseLayout = "2006年1月2日"
-	Day            = 24 * time.Hour // 24h0m0s
-	Week           = 7 * Day
+	YMDParseLayout  = "2006年1月2日"
+	ShortDateLayout = "2006-01"
+	Day             = 24 * time.Hour // 24h0m0s
+	Week            = 7 * Day
 )
 
 type Tuple[F, S any] struct {
@@ -35,7 +36,7 @@ func NewTuple[F, S any](a1 F, a2 S) Tuple[F, S] {
 }
 
 func ParseTime(strd string) (time.Time, error) {
-	t, err := time.ParseInLocation(YMDParseLayout, strd, time.Local)
+	t, err := time.ParseInLocation(YMDParseLayout, strd, time.Local) 
 	if err != nil {
 		return time.Time{}, err
 	}
