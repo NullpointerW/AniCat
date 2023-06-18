@@ -43,5 +43,5 @@ const (
 )
 
 const (
-	CoverFN = "cover.jpg"
+	CoverFN = "folder.jpg" // adapt infuse
 )
