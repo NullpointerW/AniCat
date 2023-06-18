@@ -35,8 +35,16 @@ func NewTuple[F, S any](a1 F, a2 S) Tuple[F, S] {
 	}
 }
 
+func ParseShortTime(strd string) (string, error) {
+	t, err := ParseTime(strd)
+	if err != nil {
+		return "", err
+	}
+	return t.Format(ShortDateLayout), nil
+}
+
 func ParseTime(strd string) (time.Time, error) {
-	t, err := time.ParseInLocation(YMDParseLayout, strd, time.Local) 
+	t, err := time.ParseInLocation(YMDParseLayout, strd, time.Local)
 	if err != nil {
 		return time.Time{}, err
 	}

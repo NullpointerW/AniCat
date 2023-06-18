@@ -20,6 +20,15 @@ func TestXxx(t *testing.T) {
 	fmt.Println(ti)
 }
 
+func TestParseShortTime(t *testing.T) {
+	sstr, err := ParseShortTime("2023年1月9日")
+	if err != nil {
+		t.Error(t)
+		t.FailNow()
+	}
+	fmt.Println(sstr)
+}
+
 func TestTuple(t *testing.T) {
 	tuple := NewTuple("a", 3)
 	// tuple2 := NewTuple(4, 3)
