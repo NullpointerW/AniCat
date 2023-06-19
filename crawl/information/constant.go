@@ -14,6 +14,7 @@ const (
 	SubjStartTime     = "放送开始"
 	SubjMoveStartTime = "上映年度"
 	SubjectEndTime    = "播放结束"
+	Alias             = "别名"
 )
 
 var InfoAPIs = map[string]string{

@@ -48,11 +48,6 @@ func Detect() {
 						goto viaSP
 					}
 				viaSP:
-					// sp := util.FileSeparatorConv(torr.SavePath)
-					// ss := strings.Split(sp, "/")
-					// s := ss[len(ss)-1]
-					// s = strings.ReplaceAll(s, subject.FolderSuffix, "")
-					// sid, err = strconv.Atoi(s)
 					sid = subject.Manager.GetSidViaSp(util.FileSeparatorConv(torr.SavePath))
 					if err != nil {
 						log.Println(err)
@@ -77,6 +72,8 @@ func send(sid int, torr qbt.Torrent) error {
 	s := subject.Manager.Get(sid)
 
 	if s == nil {
+
+
 		return errs.Custom("%w:sid:%d", errs.ErrSubjectNotFound, sid)
 	}
 	if s.Terminate {
@@ -85,7 +82,7 @@ func send(sid int, torr qbt.Torrent) error {
 
 	log.Printf("pushing--->torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
 
-	select {
+	select { 
 	case <-s.Exited:
 	default:
 		s.PushChan <- torr

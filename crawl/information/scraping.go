@@ -45,6 +45,10 @@ func DoScrape(url string) (tips map[string]string, err error) {
 				lt := htmlquery.InnerText(l)
 				lt = strings.Replace(lt, tt, "", 1)
 				tt = strings.TrimSuffix(tt, ": ")
+				pre, e := tips[tt]
+				if e {
+					lt += "|" + pre
+				}
 				tips[tt] = lt
 			}
 			s := strings.Split(url, `/`)

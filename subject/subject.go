@@ -31,6 +31,7 @@ type Subject struct {
 	Typ         BgmiTyp     `json:"typ"`
 	StartTime   string      `json:"startTime"`
 	EndTime     string      `json:"endTime"`
+	Alias       string      `json:"alias"`
 	// used while `ResourceTyp` is `Torrent`
 	TorrentHash string `json:"torrentHash"`
 	// manager use ctxcancel func to Exit gorountine running the current subject.
