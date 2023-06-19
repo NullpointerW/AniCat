@@ -3,13 +3,13 @@ package server
 import (
 	"strconv"
 
-	CR "github.com/NullpointerW/mikanani/crawl/resource"
-	"github.com/NullpointerW/mikanani/download/torrent"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/net/cmd"
-	"github.com/NullpointerW/mikanani/net/cmd/view"
-	"github.com/NullpointerW/mikanani/subject"
-	"github.com/NullpointerW/mikanani/util"
+	CR "github.com/NullpointerW/anicat/crawl/resource"
+	"github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/net/cmd"
+	"github.com/NullpointerW/anicat/net/cmd/view"
+	"github.com/NullpointerW/anicat/subject"
+	"github.com/NullpointerW/anicat/util"
 )
 
 func route(c *cmd.Command) {

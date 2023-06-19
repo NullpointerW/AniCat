@@ -7,12 +7,12 @@ import (
 
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 
-	"github.com/NullpointerW/mikanani/download/rss"
-	TORR "github.com/NullpointerW/mikanani/download/torrent"
-	"github.com/NullpointerW/mikanani/errs"
-	P "github.com/NullpointerW/mikanani/pusher"
-	"github.com/NullpointerW/mikanani/pusher/email"
-	"github.com/NullpointerW/mikanani/util"
+	"github.com/NullpointerW/anicat/download/rss"
+	TORR "github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/errs"
+	P "github.com/NullpointerW/anicat/pusher"
+	"github.com/NullpointerW/anicat/pusher/email"
+	"github.com/NullpointerW/anicat/util"
 )
 
 // before gorountie handle it init inner channels and ctxfunc
@@ -152,6 +152,9 @@ func (s *Subject) RssDLSynced() (bool, error) {
 }
 
 func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
+	if s.Pushed == nil {
+		s.Pushed = make(map[string]struct{})
+	}
 	if _, e := s.Pushed[torr.Hash]; e {
 		return errs.ErrItemAlreadyPushed
 	}

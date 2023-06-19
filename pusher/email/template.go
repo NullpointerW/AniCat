@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	CFG "github.com/NullpointerW/mikanani/conf"
-	"github.com/NullpointerW/mikanani/pusher"
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/pusher"
 )
 
 const def = `<!DOCTYPE html>
@@ -73,7 +73,7 @@ const def = `<!DOCTYPE html>
 	<p>Enjoy it,</p>
 	<p>Mikan</p>
 	<div class="inc">
-		<p><img src="https://github.githubassets.com/images/email/global/octocat-logo.png" width="32" style=" box-sizing: border-box; ; ; ; ; ; ; ; "><a href="https://github.com/NullpointerW/mikanani"> project page</a></p>
+		<p><img src="https://github.githubassets.com/images/email/global/octocat-logo.png" width="32" style=" box-sizing: border-box; ; ; ; ; ; ; ; "><a href="https://github.com/NullpointerW/anicat"> project page</a></p>
 	</div>
 </body>
 </html>`

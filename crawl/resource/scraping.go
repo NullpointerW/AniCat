@@ -6,9 +6,9 @@ import (
 
 	"strings"
 
-	CR "github.com/NullpointerW/mikanani/crawl"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/util"
+	CR "github.com/NullpointerW/anicat/crawl"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/util"
 	"golang.org/x/net/html"
 
 	"github.com/antchfx/htmlquery"

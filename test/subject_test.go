@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/subject"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/subject"
 )
 
 func TestOS(t *testing.T) {
@@ -51,10 +51,10 @@ func TestXxx(t *testing.T) {
 	s := subject.Subject{}
 	s.Pushed = make(map[string]struct{})
 	s.Pushed["v1"] = struct{}{}
-	b,_:=json.Marshal(s)
+	b, _ := json.Marshal(s)
 	fmt.Println(string(b))
-	err:=json.Unmarshal(b,&s)
-	if err!=nil{
+	err := json.Unmarshal(b, &s)
+	if err != nil {
 		t.FailNow()
 	}
 }

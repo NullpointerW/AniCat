@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	TORR "github.com/NullpointerW/mikanani/download/torrent"
-	"github.com/NullpointerW/mikanani/util"
+	TORR "github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/util"
 )
 
 func TestDL(t *testing.T) {

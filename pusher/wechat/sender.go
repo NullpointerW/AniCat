@@ -6,7 +6,8 @@ package wechat
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NullpointerW/mikanani/pusher"
+
+	"github.com/NullpointerW/anicat/pusher"
 	"github.com/wxpusher/wxpusher-sdk-go"
 	"github.com/wxpusher/wxpusher-sdk-go/model"
 )

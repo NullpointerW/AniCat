@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/NullpointerW/mikanani/download/rss"
-	"github.com/NullpointerW/mikanani/subject"
+	"github.com/NullpointerW/anicat/download/rss"
+	"github.com/NullpointerW/anicat/subject"
 )
 
 func TestRss(t *testing.T) {

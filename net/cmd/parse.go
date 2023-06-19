@@ -3,7 +3,7 @@ package cmd
 import (
 	"strings"
 
-	"github.com/NullpointerW/mikanani/errs"
+	"github.com/NullpointerW/anicat/errs"
 	"github.com/jessevdk/go-flags"
 )
 

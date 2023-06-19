@@ -4,9 +4,9 @@ import (
 	"crypto/tls"
 	"log"
 
-	CFG "github.com/NullpointerW/mikanani/conf"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/pusher"
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/pusher"
 	"gopkg.in/gomail.v2"
 )
 
@@ -49,5 +49,5 @@ func init() {
 		sender.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	log.Println("email dialer init completed")
-	
+
 }

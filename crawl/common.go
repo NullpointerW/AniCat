@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	CFG "github.com/NullpointerW/mikanani/conf"
+	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
 )
@@ -17,7 +17,7 @@ func NewCollector() *colly.Collector {
 }
 
 func SetProxy(c *colly.Collector) {
-	if len(CFG.Env.Proxies)!= 0 {
+	if len(CFG.Env.Proxies) != 0 {
 		if p, err := proxy.RoundRobinProxySwitcher(
 			CFG.Env.Proxies...,
 		); err == nil {

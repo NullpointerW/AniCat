@@ -1,8 +1,8 @@
 package rss
 
 import (
+	DL "github.com/NullpointerW/anicat/download"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	DL "github.com/NullpointerW/mikanani/download"
 )
 
 const RuleNamePrefix = "ADL-"

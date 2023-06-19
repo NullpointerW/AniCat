@@ -2,8 +2,9 @@ package conf
 
 import (
 	"flag"
-	"github.com/NullpointerW/mikanani/util"
 	"testing"
+
+	"github.com/NullpointerW/anicat/util"
 )
 
 var (

@@ -1,10 +1,10 @@
 package torrent
 
 import (
+	DL "github.com/NullpointerW/anicat/download"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/util"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	DL "github.com/NullpointerW/mikanani/download"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/util"
 )
 
 func Add(url, path, tag string) (string, error) {
@@ -40,7 +40,7 @@ func Get(h string) (torr qbt.Torrent, err error) {
 }
 
 func GetViaPath(path string) (hits []qbt.Torrent, err error) {
-	path=util.FileSeparatorConv(path)
+	path = util.FileSeparatorConv(path)
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
 		"filter": "all",
 	})
@@ -53,13 +53,13 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 
 	for _, t := range torrs {
 		p := util.FileSeparatorConv(t.SavePath)
-		util.Debugln("torr_save_path:",p)
+		util.Debugln("torr_save_path:", p)
 		if p == path {
 			hits = append(hits, t)
 		}
 	}
 	if len(hits) == 0 {
-		return hits, errs.Custom("%w,No torrs found on savepath:%s",errs.ErrTorrnetOnSavePathNotFound,path)
+		return hits, errs.Custom("%w,No torrs found on savepath:%s", errs.ErrTorrnetOnSavePathNotFound, path)
 	}
 	return
 }

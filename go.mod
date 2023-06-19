@@ -1,4 +1,4 @@
-module github.com/NullpointerW/mikanani
+module github.com/NullpointerW/anicat
 
 go 1.20
 

@@ -1,6 +1,7 @@
 package detection
 
 import (
+	// "fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -8,11 +9,11 @@ import (
 
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 
-	DL "github.com/NullpointerW/mikanani/download"
-	"github.com/NullpointerW/mikanani/download/torrent"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/subject"
-	"github.com/NullpointerW/mikanani/util"
+	DL "github.com/NullpointerW/anicat/download"
+	"github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/subject"
+	"github.com/NullpointerW/anicat/util"
 )
 
 func Detect() {
@@ -43,17 +44,16 @@ func Detect() {
 							log.Println(err)
 						}
 						continue
-					} else if strings.Contains(torr.SavePath, subject.FolderSuffix) {
-						goto viaSP
 					} else {
-						continue
+						goto viaSP
 					}
 				viaSP:
-					sp := util.FileSeparatorConv(torr.SavePath)
-					ss := strings.Split(sp, "/")
-					s := ss[len(ss)-1]
-					s = strings.ReplaceAll(s, subject.FolderSuffix, "")
-					sid, err = strconv.Atoi(s)
+					// sp := util.FileSeparatorConv(torr.SavePath)
+					// ss := strings.Split(sp, "/")
+					// s := ss[len(ss)-1]
+					// s = strings.ReplaceAll(s, subject.FolderSuffix, "")
+					// sid, err = strconv.Atoi(s)
+					sid = subject.Manager.GetSidViaSp(util.FileSeparatorConv(torr.SavePath))
 					if err != nil {
 						log.Println(err)
 						continue

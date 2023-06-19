@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	CR "github.com/NullpointerW/anicat/crawl/resource"
+	"github.com/NullpointerW/anicat/subject"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	CR "github.com/NullpointerW/mikanani/crawl/resource"
-	"github.com/NullpointerW/mikanani/subject"
 	"github.com/liushuochen/gotable"
 	"github.com/olekukonko/tablewriter"
 )

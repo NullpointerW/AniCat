@@ -7,11 +7,11 @@ import (
 	"os"
 	"strconv"
 
-	CFG "github.com/NullpointerW/mikanani/conf"
-	"github.com/NullpointerW/mikanani/errs"
-	N "github.com/NullpointerW/mikanani/net"
-	"github.com/NullpointerW/mikanani/net/cmd"
-	"github.com/NullpointerW/mikanani/util"
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/errs"
+	N "github.com/NullpointerW/anicat/net"
+	"github.com/NullpointerW/anicat/net/cmd"
+	"github.com/NullpointerW/anicat/util"
 )
 
 func Listen() {
@@ -66,7 +66,7 @@ func process(c *N.Conn) {
 				c.Write(rep.N)
 				continue
 			}
-			util.Debugln("ls::after parse cmd",rep)
+			util.Debugln("ls::after parse cmd", rep)
 			route(&rep)
 			util.Debugln("ls::after route(&rep)")
 			if rep.Err != nil {
@@ -85,7 +85,7 @@ func process(c *N.Conn) {
 				c.Write(rep.N)
 				util.Debugln("ls::rep.N")
 				util.Debugln(rep.N)
-				if rep.Opt == cmd.Stop{
+				if rep.Opt == cmd.Stop {
 					os.Exit(0)
 				}
 			} else {

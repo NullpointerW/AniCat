@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/NullpointerW/mikanani/errs"
+	"github.com/NullpointerW/anicat/errs"
 	"gopkg.in/yaml.v3"
 )
 

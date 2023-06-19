@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	CR "github.com/NullpointerW/mikanani/crawl"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/util"
+	CR "github.com/NullpointerW/anicat/crawl"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/util"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"github.com/tidwall/gjson"

@@ -10,8 +10,8 @@ import (
 	"os/exec"
 	"strconv"
 
-	N "github.com/NullpointerW/mikanani/net"
-	"github.com/NullpointerW/mikanani/net/cmd"
+	N "github.com/NullpointerW/anicat/net"
+	"github.com/NullpointerW/anicat/net/cmd"
 )
 
 var port int

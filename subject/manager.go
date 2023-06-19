@@ -38,21 +38,34 @@ func init() {
 }
 
 var Manager = SubjectManager{
-	mu:  new(sync.Mutex),
-	sto: make(map[int]*Subject),
+	mu:     new(sync.Mutex),
+	sto:    make(map[int]*Subject),
+	sp_sid: make(map[string]int),
 }
 
 type SubjectManager struct {
-	mu  *sync.Mutex
-	sto map[int]*Subject
+	mu     *sync.Mutex
+	sto    map[int]*Subject
+	sp_sid map[string]int
 	// a snapshot copy from the last list()-calling make caller fast get list
 	copy []Subject
+}
+
+func (m *SubjectManager) GetSidViaSp(sp string) int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	sid, e := m.sp_sid[sp]
+	if !e {
+		return -1
+	}
+	return sid
 }
 
 func (m *SubjectManager) Add(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.sto[s.SubjId] = s
+	m.sp_sid[s.Path] = s.SubjId
 	m.copy = nil
 }
 
@@ -60,6 +73,7 @@ func (m *SubjectManager) Remove(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	delete(m.sto, s.SubjId)
+	delete(m.sp_sid, s.Path)
 	m.copy = nil
 }
 

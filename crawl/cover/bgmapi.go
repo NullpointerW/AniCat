@@ -7,7 +7,7 @@ import (
 
 	"sync"
 
-	"github.com/NullpointerW/mikanani/errs"
+	"github.com/NullpointerW/anicat/errs"
 )
 
 var (
@@ -24,7 +24,7 @@ func Bgmimage(subjid int, typ, filepath string) (err error) {
 	if err != nil {
 		return
 	}
-	req.Header.Set("User-Agent", "github.com/NullpointerW/mikanani")
+	req.Header.Set("User-Agent", "github.com/NullpointerW/anicat")
 	resp, err := c.Do(req)
 	if err != nil {
 		return

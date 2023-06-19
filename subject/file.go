@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	CFG "github.com/NullpointerW/mikanani/conf"
-	"github.com/NullpointerW/mikanani/download/rss"
-	TORR "github.com/NullpointerW/mikanani/download/torrent"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/util"
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/download/rss"
+	TORR "github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/util"
 
 	// "strconv"
 	"strings"
@@ -61,7 +61,7 @@ func initFolder(subject *Subject) (err error) {
 	}
 
 	if ap, err := filepath.Abs(folderPath); err == nil {
-		subject.Path = ap
+		subject.Path = util.FileSeparatorConv(ap)
 	}
 
 	return

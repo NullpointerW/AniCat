@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	I "github.com/NullpointerW/mikanani/crawl/information"
+	I "github.com/NullpointerW/anicat/crawl/information"
 )
 
 func TestInfoSearch(t *testing.T) {

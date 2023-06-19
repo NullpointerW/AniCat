@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/NullpointerW/mikanani/download/detection"
-	netsrv "github.com/NullpointerW/mikanani/net/server"
-	"github.com/NullpointerW/mikanani/subject"
+	"github.com/NullpointerW/anicat/download/detection"
+	netsrv "github.com/NullpointerW/anicat/net/server"
+	"github.com/NullpointerW/anicat/subject"
 )
 
 func main() {

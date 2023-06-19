@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"time"
 
+	CC "github.com/NullpointerW/anicat/crawl/cover"
+	IC "github.com/NullpointerW/anicat/crawl/information"
+	RC "github.com/NullpointerW/anicat/crawl/resource"
+	"github.com/NullpointerW/anicat/download/rss"
+	"github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/util"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	CC "github.com/NullpointerW/mikanani/crawl/cover"
-	IC "github.com/NullpointerW/mikanani/crawl/information"
-	RC "github.com/NullpointerW/mikanani/crawl/resource"
-	"github.com/NullpointerW/mikanani/download/rss"
-	"github.com/NullpointerW/mikanani/download/torrent"
-	"github.com/NullpointerW/mikanani/errs"
-	"github.com/NullpointerW/mikanani/util"
 )
 
 // Subject as basic obj of each bgmi

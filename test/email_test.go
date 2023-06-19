@@ -15,12 +15,12 @@ import (
 	"fmt"
 	"testing"
 
-	CFG "github.com/NullpointerW/mikanani/conf"
-	"github.com/NullpointerW/mikanani/pusher"
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/pusher"
 
-	P "github.com/NullpointerW/mikanani/pusher"
-	"github.com/NullpointerW/mikanani/pusher/email"
-	"github.com/NullpointerW/mikanani/pusher/wechat"
+	P "github.com/NullpointerW/anicat/pusher"
+	"github.com/NullpointerW/anicat/pusher/email"
+	"github.com/NullpointerW/anicat/pusher/wechat"
 	// "gopkg.in/gomail.v2"
 )
 

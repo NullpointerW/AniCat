@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/NullpointerW/mikanani/net/cmd"
+	"github.com/NullpointerW/anicat/net/cmd"
 )
 
 func TestParseCmd(t *testing.T) {

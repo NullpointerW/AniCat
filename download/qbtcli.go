@@ -1,9 +1,9 @@
 package download
 
 import (
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/errs"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	CFG "github.com/NullpointerW/mikanani/conf"
-	"github.com/NullpointerW/mikanani/errs"
 )
 
 var Qbt *qbt.Client

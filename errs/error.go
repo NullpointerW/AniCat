@@ -15,7 +15,7 @@ var (
 	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
 	ErrSubjectAlreadyExisted     = errors.New("subject already existed")
 	ErrSubjectNotFound           = errors.New("subject not found")
-	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on mikanani")
+	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on anicat")
 	ErrUndefinedCrawlListType    = errors.New("undefined crawl list type")
 	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-download rule!")
 	// command error

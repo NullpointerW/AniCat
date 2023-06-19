@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	CR "github.com/NullpointerW/mikanani/crawl"
-	"github.com/NullpointerW/mikanani/errs"
+	CR "github.com/NullpointerW/anicat/crawl"
+	"github.com/NullpointerW/anicat/errs"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 )

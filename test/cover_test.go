@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	C "github.com/NullpointerW/mikanani/crawl/cover"
+	C "github.com/NullpointerW/anicat/crawl/cover"
 )
 
 func TestTouchCoverImg(t *testing.T) {
