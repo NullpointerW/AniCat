@@ -32,13 +32,13 @@ const (
 
 // file-related
 const (
-	FolderSuffix = "@mikan"
-	jsonfileName = "info.json"
+	FolderSuffix = "@anicat"
+	jsonfileName = "meta-data.json"
 )
 
 // qbt tag generation template
 const (
-	QbtTag_prefix = "mikan@subj-"
+	QbtTag_prefix = "anicat@subj-"
 	QbtTag        = QbtTag_prefix + "%d"
 )
 

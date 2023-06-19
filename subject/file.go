@@ -2,13 +2,16 @@ package subject
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+	"path/filepath"
+
 	CFG "github.com/NullpointerW/mikanani/conf"
 	"github.com/NullpointerW/mikanani/download/rss"
 	TORR "github.com/NullpointerW/mikanani/download/torrent"
 	"github.com/NullpointerW/mikanani/errs"
-	"log"
-	"os"
-	"path/filepath"
+	"github.com/NullpointerW/mikanani/util"
+
 	// "strconv"
 	"strings"
 )
@@ -19,8 +22,8 @@ func Scan() {
 	home := trimPath(HOME)
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
-			if f.IsDir() && strings.HasSuffix(f.Name(), FolderSuffix) {
-				log.Println("scan:found subj folder:" + home + `/` + f.Name())
+			if f.IsDir() {
+				log.Println("scan:found folder:" + home + string(os.PathSeparator) + f.Name())
 				if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + jsonfileName); err == nil {
 					var s Subject
 					err := json.Unmarshal(jsraw, &s)
@@ -46,8 +49,11 @@ func initFolder(subject *Subject) (err error) {
 	var folderPath string
 
 	folderPath = trimPath(HOME)
-	
-	folderPath += "/" + subject.Name
+	sd, err := util.ParseShortTime(subject.StartTime)
+	if err != nil {
+		return err
+	}
+	folderPath += "/" + "[" + sd + "]" + subject.Name
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {

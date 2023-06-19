@@ -16,7 +16,7 @@ var (
 
 const (
 	usageHelp = "\n   Usage:\n         " +
-		"mikan  <command> [argument(s)]\n   " +
+		"anicat  <command> [argument(s)]\n   " +
 		"The commands are:\n\n         " +
 		"add [name] [-g -i -mc ...]   add a anine-subject\n         " +
 		"rm [subjid]                  delete a anine-subject\n         " +
@@ -26,7 +26,7 @@ const (
 		"stat [subjid]                show detailed information of subject\n         "+
 		"stop                         terminate program\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
-		"mikan add [name] [arguments]\n   " +
+		"anicat add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +
 		"--mn                          the substring that the torrent name must not contain (rss auto download rule)\n         " +
 		"--mc                          the substring that the torrent name must contain (rss auto download rule)\n         " +
@@ -38,7 +38,7 @@ const (
 // just for test
 func TestingString() (text string) {
 	text = "\n   Usage:\n         " +
-		"mikan add [name] [arguments]\n   " +
+		"anicat add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +
 		"-mn                          the substring that the torrent name must not contain (rss auto download rule)\n         " +
 		"-mc                          the substring that the torrent name must contain (rss auto download rule)\n         " +

@@ -58,7 +58,7 @@ func optionMode(o string) (Option, bool) {
 }
 
 func Parse(cmds []string) (reply Command) {
-	sfxok := cmds[0] == "mikan"
+	sfxok := cmds[0] == "anicat"
 	if !sfxok {
 		reply.Err = errs.Custom("%w:%s", errs.ErrUnknownCommand, cmds[0])
 		return
@@ -80,7 +80,7 @@ func Parse(cmds []string) (reply Command) {
 				reply.Err = errs.ErrAddCommandMissingHelping
 				return
 			}
-			reply.Err = errs.Custom("%w:%s", errs.ErrMissingCommandArgument, `Use "mikan help " for more information about a command.`)
+			reply.Err = errs.Custom("%w:%s", errs.ErrMissingCommandArgument, `Use "anicat help " for more information about a command.`)
 			return
 		}
 		if opt == Del || (opt == Add && len(cmds) == 3) || opt == Status {
