@@ -180,6 +180,7 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 		subj.StartTime = tips[IC.SubjMoveStartTime]
 		subj.Finished = true
 	}
+	subj.Alias = tips[IC.Alias]
 	return nil
 }
 

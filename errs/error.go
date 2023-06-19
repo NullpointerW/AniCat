@@ -24,6 +24,8 @@ var (
 	ErrAddCommandMissingHelping = errors.New("")
 	WarnReservedCommand_lsg     = errors.New("the command 'lsg' is currently unavailable. use 'lsi' to  view the list of subtitle groups ")
 
+	ErrCannotCaptureEpisNum = errors.New("can not capture episode num from text")
+
 	ErrItemAlreadyPushed = errors.New("item was already pushed")
 )
 
