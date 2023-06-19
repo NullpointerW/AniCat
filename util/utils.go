@@ -1,9 +1,13 @@
 package util
 
 import (
+	
+	"log"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 var Asia_Shanghai, _ = time.LoadLocation("Asia/Shanghai")
@@ -14,6 +18,18 @@ const (
 	Day             = 24 * time.Hour // 24h0m0s
 	Week            = 7 * Day
 )
+
+var zh_cn_numb = map[rune]byte{
+	'一': '1',
+	'二': '2',
+	'三': '3',
+	'四': '4',
+	'五': '5',
+	'六': '6',
+	'七': '7',
+	'八': '8',
+	'九': '9',
+	}
 
 type Tuple[F, S any] struct {
 	slot1 F
@@ -62,4 +78,45 @@ func FileSeparatorConv(path string) string {
 func IsRegexp(str string) bool {
 	_, err := regexp.Compile(str)
 	return err == nil
+}
+
+func IsNumber(s string) bool {
+	for _, r := range s {
+		if !unicode.IsNumber(r) {
+			return false
+		}
+	}
+	return true
+}
+
+func ConvertZhCnNumbToa(cnn string) string {
+	runes := []rune(cnn)
+	nl := len(runes)
+	if nl == 1 {
+		return string(zh_cn_numb[runes[0]])
+	} else if nl == 2 {
+		i, err := strconv.Atoi(string(zh_cn_numb[runes[1]]))
+		if err != nil {
+			log.Println(err)
+			return "0"
+		}
+		return strconv.Itoa(10 + i)
+	} else if nl == 3 {
+		i, err := strconv.Atoi(string(zh_cn_numb[runes[0]]))
+		if err != nil {
+			log.Println(err)
+			return "0"
+		}
+		i *= 10
+		e, err := strconv.Atoi(string(zh_cn_numb[runes[2]]))
+		if err != nil {
+			log.Println(err)
+			return "0"
+		}
+		i += e
+		return strconv.Itoa(i)
+	} else {
+		log.Println("convert fail:cannot convert zh-cn numbers with more than 3 digits")
+		return "0"
+	}
 }

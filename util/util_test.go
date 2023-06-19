@@ -49,3 +49,11 @@ func TestTuple(t *testing.T) {
 		fmt.Printf("%p", blank)
 	}
 }
+
+func TestIsNumber(t *testing.T){
+	t.Log(IsNumber("十二")) 
+}
+
+func TestConvertZHCN(t *testing.T){
+	t.Log(ConvertZhCnNumbToa("三十五")) 
+}
