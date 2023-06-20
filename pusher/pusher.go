@@ -4,6 +4,7 @@ type Payload struct {
 	SubjectId    int    // ${id}
 	SubjectName  string // ${name}
 	DownLoadName string // ${dlname}
+	Episode      string // ${epi}
 	Size         int    // ${size}
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	
 	"testing"
 
 	"github.com/NullpointerW/anicat/errs"
@@ -61,6 +62,7 @@ func TestXxx(t *testing.T) {
 
 func TestGetSeason(t *testing.T) {
 	var s subject.Subject
-	s.Name = "小林家的龙女仆 s2"
-	t.Log(s.GetSeason())
+	s.Name = "小林家的龙女仆 第二季"
+	subject.GetSeason(&s)
+	t.Log(s.Season)
 }

@@ -7,6 +7,7 @@ import (
 
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 
+	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/download/rss"
 	TORR "github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -155,16 +156,25 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]struct{})
 	}
-	if _, e := s.Pushed[torr.Hash]; e {
-		return errs.ErrItemAlreadyPushed
+	rename, err := Rename(s, torr)
+	if err != nil {
+		return err
+	}
+	if _, e := s.Pushed[rename]; e {
+		return errs.Custom("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
+	}
+	err = DL.Qbt.RenameFile(torr.Hash, torr.Name, rename)
+	if err != nil {
+		return err
 	}
 	mErr := errs.MultiErr{}
-	s.Pushed[torr.Hash] = struct{}{}
-	err := pusher.Push(P.Payload{
+	s.Pushed[rename] = struct{}{}
+	err = pusher.Push(P.Payload{
 		SubjectId:    s.SubjId,
 		SubjectName:  s.Name,
 		DownLoadName: torr.Name,
 		Size:         torr.Size,
+		Episode:      util.TrimExtensionAndGetEpi(rename),
 	})
 	mErr.Add(err)
 	if s.ResourceTyp == Torrent {

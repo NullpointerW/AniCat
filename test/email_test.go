@@ -32,7 +32,8 @@ func TestEmailPush(t *testing.T) {
 		8964,
 		"凉宫春日的忧郁",
 		"[ANi] 江戶前精靈 - 04 [1080P][Baha][WEB-DL][AAC AVC][CHT].mp4",
-		70891200017,
+		"S01E02",
+		222,
 	})
 	if err != nil {
 		t.Error(err)

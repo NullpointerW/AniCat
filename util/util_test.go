@@ -62,3 +62,8 @@ func TestConvertZHCN(t *testing.T){
 func TestCheckZH(t *testing.T){
 	t.Log(CheckZhCn("av2")) 
 }
+
+
+func TestTrimGetEpi(t *testing.T){
+	t.Log(TrimExtensionAndGetEpi("天国大魔镜 S01E02.mp4")) 
+}

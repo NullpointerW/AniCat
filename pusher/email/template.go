@@ -62,8 +62,9 @@ const def = `<!DOCTYPE html>
 <body>
 	<h1>${name}</h1>
 	<h2>剧集已更新</h2>
+	<h3>${epi}<h3>
 	<ul>
-		<li>SubjectId: ${id}</li>
+		<li>AniCat id: ${id}</li>
 		<li>文件名: ${dlname}</li>
 		<li>文件大小: ${size} MB</li>
 		<li><a href="https://bgm.tv/subject/${id}">在bgm.tv上查看番剧信息</a></li>
@@ -98,5 +99,6 @@ func Parse(p pusher.Payload) string {
 	tmp = strings.ReplaceAll(tmp, `${name}`, p.SubjectName)
 	tmp = strings.ReplaceAll(tmp, `${dlname}`, p.DownLoadName)
 	tmp = strings.ReplaceAll(tmp, `${size}`, strconv.Itoa(p.Size/1024/1024))
+	tmp = strings.ReplaceAll(tmp, `${epi}`, p.Episode)
 	return tmp
 }

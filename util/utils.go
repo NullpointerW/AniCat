@@ -124,3 +124,11 @@ func CheckZhCn(s string) bool {
 	ok, _ := regexp.MatchString("[\u4e00-\u9fa5]", s)
 	return ok
 }
+
+func TrimExtensionAndGetEpi(fn string) string {
+	sep := "."
+	sp := strings.Split(fn, sep)
+	o := sep + sp[len(sp)-1]
+	trimed := strings.ReplaceAll(fn, o, "")
+	return trimed[len(trimed)-6:]
+}

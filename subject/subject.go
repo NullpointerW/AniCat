@@ -34,6 +34,7 @@ type Subject struct {
 	StartTime   string      `json:"startTime"`
 	EndTime     string      `json:"endTime"`
 	Alias       string      `json:"alias"`
+	Season      string      `json:"season"`
 	// used while `ResourceTyp` is `Torrent`
 	TorrentHash string `json:"torrentHash"`
 	// manager use ctxcancel func to Exit gorountine running the current subject.
@@ -53,7 +54,8 @@ type Subject struct {
 	// while init,if this flag is true then there is noneed to start a gorountine to run it
 	// exit actively flag should  be set to true
 	Terminate bool `json:"terminate"`
-	// a Set store all pushed torrents,avoid duplicate push.
+	// a Set store all pushed renamed episodes,avoid duplicate push.
+	// content will like be `S01E01,S01E05...`
 	Pushed map[string]struct{} `json:"pushed"`
 }
 
@@ -111,7 +113,7 @@ func CreateSubject(n string, ext *Extra) error {
 	if err != nil {
 		return err
 	}
-
+	GetSeason(subject)
 	err = initFolder(subject)
 	if err != nil {
 		return err
@@ -247,7 +249,7 @@ func download(subj *Subject, ext *Extra) error {
 	return nil
 }
 
-func (s *Subject) GetSeason() string {
+func GetSeason(s *Subject) {
 	var ns []string
 	ns = append(ns, s.Name)
 	as := strings.Split(s.Alias, "|")
@@ -258,18 +260,20 @@ func (s *Subject) GetSeason() string {
 		if len(match) > 1 {
 			m := match[1]
 			if iszh := util.CheckZhCn(m); iszh {
-				return util.ConvertZhCnNumbToa(m)
+				m = util.ConvertZhCnNumbToa(m)
 			}
-			return m
+			s.Season = fmt.Sprintf("%2s", m)
+			return
 		}
 		for _, rg := range sregs {
 			regexper := regexp.MustCompile(rg)
 			match := regexper.FindStringSubmatch(n)
 			if len(match) > 1 {
-				return match[1]
+				s.Season = fmt.Sprintf("%2s", match[1])
+				return
 			}
 		}
 	}
-
-	return "1"
+	s.Season = "01"
+	return
 }
