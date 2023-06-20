@@ -21,9 +21,10 @@ type Environment struct {
 		Password     string `yaml:"password"`
 		LocalConnect bool   `yaml:"localed"`
 	} `yaml:"qbittorrent"`
-	Proxies  []string `yaml:"proxies"`
-	SubjPath string   `yaml:"path"`
-	Pusher   struct {
+	Proxies          []string `yaml:"proxies"`
+	SubjPath         string   `yaml:"path"`
+	DropOnDumplicate bool     `yaml:"dropDumplicate"`
+	Pusher           struct {
 		Email struct {
 			Host         string `yaml:"host"`
 			Port         int    `yaml:"port"`
