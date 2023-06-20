@@ -60,5 +60,8 @@ func loginit(debug bool) {
 			log.SetOutput(mio)
 		}
 		log.Println("os:", runtime.GOOS)
+		if debug {
+			log.Println("debug mode")
+		}
 	}
 }

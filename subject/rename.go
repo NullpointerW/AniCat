@@ -27,13 +27,15 @@ func CaptureEpisNum(text string) (string, error) {
 }
 
 func Rename(s *Subject, torr qbt.Torrent) (string, error) {
-	sp := strings.Split(torr.Name, ".")
+	sep:="."
+	sp := strings.Split(torr.Name, sep)
 	extension := sp[len(sp)-1]
+	extension=sep+extension
 	basename := s.Name
 	season := "S"
 	episode := "E"
 
-	epin, err := CaptureEpisNum(reg0)
+	epin, err := CaptureEpisNum(torr.Name)
 	if err != nil {
 		return "", err
 	}
