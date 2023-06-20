@@ -62,7 +62,7 @@ const def = `<!DOCTYPE html>
 <body>
 	<h1>${name}</h1>
 	<h2>剧集已更新</h2>
-	<h3>${epi}<h3>
+	<h2>${epi}<h2>
 	<ul>
 		<li>AniCat id: ${id}</li>
 		<li>文件名: ${dlname}</li>
@@ -72,7 +72,7 @@ const def = `<!DOCTYPE html>
 	<img src="http://api.bgm.tv/v0/subjects/${id}/image?type=medium">
 	<p>已下载完成</p>
 	<p>Enjoy it,</p>
-	<p>Mikan</p>
+	<p>AniCat</p>
 	<div class="inc">
 		<p><img src="https://github.githubassets.com/images/email/global/octocat-logo.png" width="32" style=" box-sizing: border-box; ; ; ; ; ; ; ; "><a href="https://github.com/NullpointerW/anicat"> project page</a></p>
 	</div>

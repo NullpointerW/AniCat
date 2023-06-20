@@ -13,7 +13,7 @@ var Asia_Shanghai, _ = time.LoadLocation("Asia/Shanghai")
 
 const (
 	YMDParseLayout  = "2006年1月2日"
-	ShortDateLayout = "2006-01"
+	ShortDateLayout = "200601"
 	Day             = 24 * time.Hour // 24h0m0s
 	Week            = 7 * Day
 )

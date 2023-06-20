@@ -53,7 +53,7 @@ func initFolder(subject *Subject) (err error) {
 	if err != nil {
 		return err
 	}
-	folderPath += "/" + "[" + sd + "] " + subject.Name
+	folderPath += "/" + subject.Name + " (" + sd + ")"
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
