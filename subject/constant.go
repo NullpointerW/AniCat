@@ -57,7 +57,7 @@ var sregs = []string{reg0, reg1}
 const (
 	reg0v_epi = `]\[(\d{2})[vV]` // [02v1]
 	reg1_epi  = `\[(\d+)\]`      // [02]
-	reg2_epi  = `\b-\s*(\d+)`    // - 02
+	reg2_epi  = `- ?(\d+)`    // - 02
 )
 
 var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi}

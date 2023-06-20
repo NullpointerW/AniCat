@@ -8,7 +8,7 @@ import (
 )
 
 func TestCaptureEpisNum(t *testing.T) {
-	n, err := subject.CaptureEpisNum("[星空字幕组][小林家的龙女仆S / Kobayashi-san Chi no Maid Dragon S][09v2][简体内嵌][1080P][WebRip][MP4] [复制磁连]	")
+	n, err := subject.CaptureEpisNum("[ANi] 我內心的糟糕念頭 - 09 [1080P][Baha][WEB-DL][AAC AVC][CHT].mp4	")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
