@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	CC "github.com/NullpointerW/anicat/crawl/cover"
@@ -245,13 +247,29 @@ func download(subj *Subject, ext *Extra) error {
 	return nil
 }
 
-// TODO use in v2
-func buildRssDLR(subj *Subject, ext Extra) (DLR qbt.AutoDLRule) {
-	DLR.Enabled = true
-	DLR.AffectedFeeds = []string{subj.ResourceUrl}
-	DLR.SavePath = subj.Path
-	DLR.UseRegex = ext.RssOption.UseRegex
-	DLR.MustContain = ext.RssOption.MustContain
-	DLR.MustNotContain = ext.RssOption.MustNotContain
-	return
+func (s *Subject) GetSeason() string {
+	var ns []string
+	ns = append(ns, s.Name)
+	as := strings.Split(s.Alias, "|")
+	ns = append(ns, as...)
+	for _, n := range ns {
+		regexper := regexp.MustCompile(zhreg)
+		match := regexper.FindStringSubmatch(n)
+		if len(match) > 1 {
+			m := match[1]
+			if iszh := util.CheckZhCn(m); iszh {
+				return util.ConvertZhCnNumbToa(m)
+			}
+			return m
+		}
+		for _, rg := range sregs {
+			regexper := regexp.MustCompile(rg)
+			match := regexper.FindStringSubmatch(n)
+			if len(match) > 1 {
+				return match[1]
+			}
+		}
+	}
+
+	return "1"
 }

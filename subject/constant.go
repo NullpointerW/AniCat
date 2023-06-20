@@ -45,3 +45,11 @@ const (
 const (
 	CoverFN = "folder.jpg" // adapt infuse
 )
+
+const (
+	reg0 = `[sS](\d+)`
+	reg1 = `(?i)season(\d+)`
+	zhreg = `第(.+?)季`
+)
+
+var sregs = []string{reg0, reg1}

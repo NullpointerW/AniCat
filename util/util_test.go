@@ -57,3 +57,8 @@ func TestIsNumber(t *testing.T){
 func TestConvertZHCN(t *testing.T){
 	t.Log(ConvertZhCnNumbToa("三十五")) 
 }
+
+
+func TestCheckZH(t *testing.T){
+	t.Log(CheckZhCn("av2")) 
+}

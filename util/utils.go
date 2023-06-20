@@ -1,7 +1,6 @@
 package util
 
 import (
-	
 	"log"
 	"regexp"
 	"strconv"
@@ -29,7 +28,7 @@ var zh_cn_numb = map[rune]byte{
 	'七': '7',
 	'八': '8',
 	'九': '9',
-	}
+}
 
 type Tuple[F, S any] struct {
 	slot1 F
@@ -98,25 +97,30 @@ func ConvertZhCnNumbToa(cnn string) string {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[1]]))
 		if err != nil {
 			log.Println(err)
-			return "0"
+			return "1"
 		}
 		return strconv.Itoa(10 + i)
 	} else if nl == 3 {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[0]]))
 		if err != nil {
 			log.Println(err)
-			return "0"
+			return "1"
 		}
 		i *= 10
 		e, err := strconv.Atoi(string(zh_cn_numb[runes[2]]))
 		if err != nil {
 			log.Println(err)
-			return "0"
+			return "1"
 		}
 		i += e
 		return strconv.Itoa(i)
 	} else {
 		log.Println("convert fail:cannot convert zh-cn numbers with more than 3 digits")
-		return "0"
+		return "1"
 	}
+}
+
+func CheckZhCn(s string) bool {
+	ok, _ := regexp.MatchString("[\u4e00-\u9fa5]", s)
+	return ok
 }

@@ -58,3 +58,9 @@ func TestXxx(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestGetSeason(t *testing.T) {
+	var s subject.Subject
+	s.Name = "小林家的龙女仆 s2"
+	t.Log(s.GetSeason())
+}

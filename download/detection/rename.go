@@ -1,7 +1,7 @@
 package detection
 
 import (
-	"fmt"
+
 	"regexp"
 
 	"github.com/NullpointerW/anicat/errs"
@@ -20,7 +20,7 @@ var regs = []string{reg0, reg1, reg2}
 
 func CaptureEpisNum(text string) (string, error) {
 	for _, reg := range regs {
-		fmt.Println(reg)
+		// fmt.Println(reg)
 		regexper := regexp.MustCompile(reg)
 		match := regexper.FindStringSubmatch(text)
 		if len(match) > 1 {
