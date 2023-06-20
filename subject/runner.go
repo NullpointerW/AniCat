@@ -29,7 +29,7 @@ func (s *Subject) runtimeInit(reload bool) {
 	s.PushChan = make(chan qbt.Torrent, 1024)
 	s.Exited = make(chan struct{})
 	if s.Pushed == nil {
-		s.Pushed = make(map[string]struct{})
+		s.Pushed = make(map[string]string)
 	}
 	Manager.Add(s)
 	go s.run(ctx, reload)
@@ -155,17 +155,18 @@ func (s *Subject) RssDLSynced() (bool, error) {
 
 func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	if s.Pushed == nil {
-		s.Pushed = make(map[string]struct{})
+		s.Pushed = make(map[string]string)
 	}
 	rename, err := Rename(s, torr)
 	if err != nil {
 		return err
 	}
-	if _, e := s.Pushed[rename]; e {
+	if th, e := s.Pushed[rename]; e {
 		merr := errs.MultiErr{}
 		dumpliErr := errs.Custom("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
 		merr.Add(dumpliErr)
-		if CFG.Env.DropOnDumplicate {
+		if CFG.Env.DropOnDumplicate && th != torr.Hash {
+			log.Println("delete ", torr.Name)
 			merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
 		}
 		return merr.Err()
@@ -175,7 +176,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		return err
 	}
 	mErr := errs.MultiErr{}
-	s.Pushed[rename] = struct{}{}
+	s.Pushed[rename] = torr.Hash
 	err = pusher.Push(P.Payload{
 		SubjectId:    s.SubjId,
 		SubjectName:  s.Name,

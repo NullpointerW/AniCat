@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	
+
 	"testing"
 
 	"github.com/NullpointerW/anicat/errs"
@@ -50,8 +50,8 @@ func TestXxx(t *testing.T) {
 	fmt.Println("Type:", typ)
 
 	s := subject.Subject{}
-	s.Pushed = make(map[string]struct{})
-	s.Pushed["v1"] = struct{}{}
+	s.Pushed = make(map[string]string)
+	s.Pushed["v1"] = "struct{}{}"
 	b, _ := json.Marshal(s)
 	fmt.Println(string(b))
 	err := json.Unmarshal(b, &s)
