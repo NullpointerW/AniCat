@@ -5,23 +5,13 @@ import (
 	"regexp"
 	"strings"
 
-	
 	"github.com/NullpointerW/anicat/errs"
 
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 
-const (
-	reg0v_e = `]\[(\d{2})[vV]` // [02v1]
-	reg1_e = `\[(\d+)\]`      // [02]
-	reg2_e = `\b-\s*(\d+)`    // - 02
-
-)
-
-var regs = []string{reg0v_e, reg1_e, reg2_e}
-
 func CaptureEpisNum(text string) (string, error) {
-	for _, reg := range regs {
+	for _, reg := range epi_regs {
 		// fmt.Println(reg)
 		regexper := regexp.MustCompile(reg)
 		match := regexper.FindStringSubmatch(text)
@@ -56,6 +46,6 @@ func Rename(s *Subject, torr qbt.Torrent) (string, error) {
 	episode += epin
 	rename := basename + " " + season + episode + extension
 	log.Println("rename file", `"`, torr.Name, `"`, "to", `"`, rename, `"`)
-	return rename,nil
+	return rename, nil
 
 }
