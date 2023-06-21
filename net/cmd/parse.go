@@ -35,6 +35,7 @@ const (
 )
 
 func optionMode(o string) (Option, bool) {
+	o = strings.ToLower(o)
 	switch o {
 	case "add":
 		return Add, true
@@ -58,7 +59,7 @@ func optionMode(o string) (Option, bool) {
 }
 
 func Parse(cmds []string) (reply Command) {
-	sfxok := cmds[0] == "anicat"
+	sfxok := strings.ToLower(cmds[0]) == "anicat"
 	if !sfxok {
 		reply.Err = errs.Custom("%w:%s", errs.ErrUnknownCommand, cmds[0])
 		return
@@ -119,7 +120,7 @@ func Parse(cmds []string) (reply Command) {
 }
 
 func ParseArgs(s string) []string {
-	s = strings.ToLower(s)
+	// s = strings.ToLower(s)
 	return strings.Fields(s)
 }
 

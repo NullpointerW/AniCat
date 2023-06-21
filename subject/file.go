@@ -54,7 +54,9 @@ func initFolder(subject *Subject) (err error) {
 	if err != nil {
 		return err
 	}
-	folderPath += "/" + subject.Name + " (" + sd + ")"
+
+	floderN := strings.ReplaceAll(util.FileSeparatorConv(subject.Name), "/", " ")
+	folderPath += "/" + floderN + " (" + sd + ")"
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
@@ -86,7 +88,7 @@ func (s *Subject) RmRes() error {
 			categ := s.QbtTag()
 			return DL.Qbt.RmCategoies(categ)
 		})
-		
+
 		wrap.Handle(func() error {
 			return rss.RmRss(s.RssPath())
 		})

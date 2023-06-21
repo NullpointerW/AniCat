@@ -157,40 +157,44 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
 	}
-	rename, err := Rename(s, torr)
-	if err != nil {
-		return err
-	}
-	if th, e := s.Pushed[rename]; e {
-		merr := errs.MultiErr{}
-		dumpliErr := errs.Custom("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
-		merr.Add(dumpliErr)
-		if CFG.Env.DropOnDumplicate && th != torr.Hash {
-			log.Println("delete ", torr.Name)
-			merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
+	if s.ResourceTyp == RSS && s.Typ == TV {
+		rename, err := Rename(s, torr)
+		if err != nil {
+			return err
 		}
-		return merr.Err()
+		if th, e := s.Pushed[rename]; e {
+			merr := errs.MultiErr{}
+			dumpliErr := errs.Custom("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
+			merr.Add(dumpliErr)
+			if CFG.Env.DropOnDumplicate && th != torr.Hash {
+				log.Println("delete ", torr.Name)
+				merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
+			}
+			return merr.Err()
+		}
+		err = DL.Qbt.RenameFile(torr.Hash, torr.Name, rename)
+		if err != nil {
+			return err
+		}
+		mErr := errs.MultiErr{}
+		s.Pushed[rename] = torr.Hash
+		err = pusher.Push(P.Payload{
+			SubjectId:    s.SubjId,
+			SubjectName:  s.Name,
+			DownLoadName: torr.Name,
+			Size:         torr.Size,
+			Episode:      util.TrimExtensionAndGetEpi(rename),
+		})
+		mErr.Add(err)
+		if s.ResourceTyp == Torrent {
+			s.terminate()
+		} else {
+			mErr.Add(s.writeJson())
+		}
+		return mErr.Err()
 	}
-	err = DL.Qbt.RenameFile(torr.Hash, torr.Name, rename)
-	if err != nil {
-		return err
-	}
-	mErr := errs.MultiErr{}
-	s.Pushed[rename] = torr.Hash
-	err = pusher.Push(P.Payload{
-		SubjectId:    s.SubjId,
-		SubjectName:  s.Name,
-		DownLoadName: torr.Name,
-		Size:         torr.Size,
-		Episode:      util.TrimExtensionAndGetEpi(rename),
-	})
-	mErr.Add(err)
-	if s.ResourceTyp == Torrent {
-		s.terminate()
-	} else {
-		mErr.Add(s.writeJson())
-	}
-	return mErr.Err()
+	return nil
+
 }
 
 func (s *Subject) terminate() {
