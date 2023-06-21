@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	CFG "github.com/NullpointerW/anicat/conf"
+	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/download/rss"
 	TORR "github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -81,6 +82,11 @@ func (s *Subject) writeJson() (err error) {
 func (s *Subject) RmRes() error {
 	wrap := errs.ErrWrapper{}
 	if s.ResourceTyp == RSS {
+		wrap.Handle(func() error {
+			categ := s.QbtTag()
+			return DL.Qbt.RmCategoies(categ)
+		})
+		
 		wrap.Handle(func() error {
 			return rss.RmRss(s.RssPath())
 		})

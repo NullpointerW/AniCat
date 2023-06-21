@@ -88,3 +88,8 @@ func DelTorrs(p string) error {
 func DelTag(t string) error {
 	return DL.Qbt.DelTags(t)
 }
+
+// shorthand for DL.Qbt.AddCategory(categ, "")
+func AddCategroy(categ string) error {
+	return DL.Qbt.AddCategory(categ, "")
+}
