@@ -8,6 +8,7 @@ var (
 	Red      = string([]byte{27, 91, 57, 49, 109})
 	Cyan     = string([]byte{27, 91, 51, 54, 109})
 	YellowBg = string([]byte{27, 91, 57, 48, 59, 52, 51, 109})
+	Yellow   = string([]byte{27, 91, 51, 51, 109})
 	Cls      = "\033[2J\033[H"
 	Reset    = string([]byte{27, 91, 48, 109})
 	// $
@@ -23,7 +24,7 @@ const (
 		"ls                           show all anine-subjects\n         " +
 		"lsi [name]                   show anine resource list\n         " +
 		"lsg [name]                   show anine subtitleGroup list (rss type)\n         " +
-		"stat [subjid]                show detailed information of subject\n         "+
+		"stat [subjid]                show detailed information of subject\n         " +
 		"stop                         terminate program\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
 		"anicat add [name] [arguments]\n   " +

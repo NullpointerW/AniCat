@@ -73,7 +73,7 @@ func process(c *N.Conn) {
 				util.Debugln("ls::in err{}")
 				var s string
 				if rep.Err == errs.WarnRssRuleNotMatched || rep.Err == errs.WarnReservedCommand_lsg {
-					s = fmt.Sprintln(cmd.YellowBg, rep.Err.Error(), cmd.Reset)
+					s = fmt.Sprintln(cmd.Yellow, rep.Err.Error(), cmd.Reset)
 				} else {
 					s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
 				}
