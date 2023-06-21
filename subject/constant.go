@@ -39,7 +39,7 @@ const (
 // qbt tag generation template
 const (
 	QbtTag_prefix = "anicat@subj-"
-	QbtTag        = QbtTag_prefix + "%d"
+	QbtTag        = QbtTag_prefix + "%d"  // identity for each resource
 )
 
 const (

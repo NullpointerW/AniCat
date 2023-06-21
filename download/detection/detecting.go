@@ -31,33 +31,26 @@ func Detect() {
 						log.Println(err)
 						continue
 					}
-					util.Debugf("detcting---->torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
-					if strings.Contains(torr.Tags, subject.QbtTag_prefix) {
-						s := strings.ReplaceAll(torr.Tags, subject.QbtTag_prefix, "")
+					util.Debugf("detcting---->torrfn:%s,savepath:%s,tag:%s,categ:%s \n", torr.Name, torr.SavePath, 
+					torr.Tags, torr.Category)
+					if istorr, isrss := strings.Contains(torr.Tags, subject.QbtTag_prefix),
+						strings.Contains(torr.Category, subject.QbtTag_prefix); istorr || isrss {
+						var s string
+						if istorr {
+							s = strings.ReplaceAll(torr.Tags, subject.QbtTag_prefix, "")
+						} else {
+							s = strings.ReplaceAll(torr.Category, subject.QbtTag_prefix, "")
+						}
 						sid, err = strconv.Atoi(s)
 						if err != nil {
 							log.Println(err)
-							goto viaSP
+							continue
 						}
 						err = send(sid, torr)
 						if err != nil {
 							log.Println(err)
 						}
-						continue
-					} else {
-						goto viaSP
 					}
-				viaSP:
-					sid = subject.Manager.GetSidViaSp(util.FileSeparatorConv(torr.SavePath))
-					if err != nil {
-						log.Println(err)
-						continue
-					}
-					err = send(sid, torr)
-					if err != nil {
-						log.Println(err)
-					}
-					continue
 				}
 			}
 		} else {
@@ -65,7 +58,6 @@ func Detect() {
 		}
 		time.Sleep(20 * time.Second)
 	}
-
 }
 
 func send(sid int, torr qbt.Torrent) error {
@@ -79,7 +71,7 @@ func send(sid int, torr qbt.Torrent) error {
 	}
 
 	log.Printf("pushing--->torrfn:%s,savepath:%s,tag:%s \n", torr.Name, torr.SavePath, torr.Tags)
-	
+
 	select {
 	case <-s.Exited:
 	default:

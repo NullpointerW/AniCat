@@ -232,9 +232,10 @@ func download(subj *Subject, ext *Extra) error {
 		subj.TorrentHash = h
 	} else {
 		r := qbt.AutoDLRule{
-			Enabled:       true,
-			AffectedFeeds: []string{subj.ResourceUrl},
-			SavePath:      subj.Path,
+			Enabled:          true,
+			AffectedFeeds:    []string{subj.ResourceUrl},
+			SavePath:         subj.Path,
+			AssignedCategory: subj.QbtTag(),
 		}
 		if ext != nil {
 			r.UseRegex = ext.RssOption.UseRegex
@@ -275,5 +276,4 @@ func GetSeason(s *Subject) {
 		}
 	}
 	s.Season = "01"
-	return
 }
