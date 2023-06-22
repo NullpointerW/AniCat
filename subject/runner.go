@@ -139,25 +139,44 @@ func (s *Subject) RssDLSynced() (bool, error) {
 		return true, nil
 	}
 	util.Debugln("rss total len is", tlen, "sid is", s.SubjId)
-	hs, err := TORR.GetViaPath(s.Path)
-	if err != nil {
-		return false, err
-	}
-	c := 0
-	for _, h := range hs {
-		if h.Progress == 1 {
-			c++
-		}
-	}
-	util.Debugf("subj sid:%d total series:%d local series:%d,local cmpl series:%d ", s.SubjId, tlen, len(hs), c)
+	// hs, err := TORR.GetViaPath(s.Path)
+	// if err != nil {
+	// 	return false, err
+	// }
+	// c := 0
+	// for _, h := range hs {
+	// 	if h.Progress == 1 {
+	// 		c++
+	// 	}
+	// }
+	c := len(s.RssTorrents)
+	util.Debugf("subj sid:%d total series:%d local series:%d,local cmpl series:%d ", s.SubjId, tlen, c, c)
 	return c >= tlen, nil
 }
 
 func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
+	if s.ResourceTyp == Torrent {
+		if torr.Hash == s.TorrentHash {
+			err := pusher.Push(P.Payload{
+				SubjectId:    s.SubjId,
+				SubjectName:  s.Name,
+				DownLoadName: torr.Name,
+				Size:         torr.Size,
+			})
+			s.terminate()
+			return err
+		}
+		return nil
+	}
+	// RSS
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
 	}
-	if s.ResourceTyp == RSS && s.Typ == TV {
+	if s.RssTorrents == nil {
+		s.RssTorrents = map[string]struct{}{}
+	}
+	s.RssTorrents[torr.Hash] = struct{}{}
+	if s.Typ == TV {
 		rename, err := Rename(s, torr)
 		if err != nil {
 			return err
@@ -186,11 +205,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			Episode:      util.TrimExtensionAndGetEpi(rename),
 		})
 		mErr.Add(err)
-		if s.ResourceTyp == Torrent {
-			s.terminate()
-		} else {
-			mErr.Add(s.writeJson())
-		}
+		mErr.Add(s.writeJson())
 		return mErr.Err()
 	}
 	return nil

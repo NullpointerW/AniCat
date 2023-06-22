@@ -56,7 +56,8 @@ type Subject struct {
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed renamed episodes,avoid duplicate push.
 	// content will like be `S01E01,S01E05...`
-	Pushed map[string]string `json:"pushed"`
+	Pushed      map[string]string   `json:"pushed"`
+	RssTorrents map[string]struct{} `json:"rssTorrents"`
 }
 
 type Extra struct {
