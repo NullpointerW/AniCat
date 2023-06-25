@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
@@ -82,7 +83,6 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 			fn = sep[len(sep)-1]
 			rn, err := renameTV(s, fn)
 			if err != nil {
-				merr := errs.MultiErr{}
 				merr.Add(err)
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn)) // mabye drop
 				continue
@@ -91,12 +91,14 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 			if _, e := epis[se]; !e {
 				epis[se] = struct{}{}
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, rn))
+				continue
 			}
 			if !CFG.Env.DropOnDumplicate {
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
 			}
 		}
 	}
+	time.Sleep(1000 * time.Millisecond) // wati for qbt moving files
 	merr.Add(os.RemoveAll(torr.ContentPath))
 	return merr.Err()
 }

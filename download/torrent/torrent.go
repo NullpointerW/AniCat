@@ -1,6 +1,8 @@
 package torrent
 
 import (
+	"time"
+
 	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/util"
@@ -12,7 +14,7 @@ func Add(url, path, tag string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	time.Sleep(100 * time.Millisecond) // wait for qbt
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
 		"filter": "all",
 		"tag":    tag,
