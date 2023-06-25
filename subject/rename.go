@@ -2,11 +2,15 @@ package subject
 
 import (
 	"log"
+	"os"
 	"regexp"
 	"strings"
 
+	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/util"
 
+	DL "github.com/NullpointerW/anicat/download"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 
@@ -26,16 +30,20 @@ func CaptureEpisNum(text string) (string, error) {
 	return "", errs.Custom("%w:%s", errs.ErrCannotCaptureEpisNum, text)
 }
 
-func Rename(s *Subject, torr qbt.Torrent) (string, error) {
-	sep:="."
-	sp := strings.Split(torr.Name, sep)
+func RenameTV(s *Subject, torr qbt.Torrent) (string, error) {
+	return renameTV(s, torr.Name)
+}
+
+func renameTV(s *Subject, fn string) (string, error) {
+	sep := "."
+	sp := strings.Split(fn, sep)
 	extension := sp[len(sp)-1]
-	extension=sep+extension
+	extension = sep + extension
 	basename := s.Name
 	season := "S"
 	episode := "E"
 
-	epin, err := CaptureEpisNum(torr.Name)
+	epin, err := CaptureEpisNum(fn)
 	if err != nil {
 		return "", err
 	}
@@ -47,7 +55,48 @@ func Rename(s *Subject, torr qbt.Torrent) (string, error) {
 	season += sean
 	episode += epin
 	rename := basename + " " + season + episode + extension
-	log.Println("rename file", `"`, torr.Name, `"`, "to", `"`, rename, `"`)
+	log.Println("rename file", `"`, fn, `"`, "to", `"`, rename, `"`)
 	return rename, nil
+}
 
+// func RenameMovie(s *Subject, torr qbt.Torrent) string {
+// 	sep := "."
+// 	sp := strings.Split(torr.Name, sep)
+// 	extension := sp[len(sp)-1]
+// 	extension = sep + extension
+// 	basename := s.Name
+// 	return basename + " " + extension
+// }
+
+func renameTorr(s *Subject, torr qbt.Torrent) error {
+	epis := make(map[string]struct{})
+	fs, err := DL.Qbt.Files(torr.Hash)
+	if err != nil {
+		return err
+	}
+	merr := errs.MultiErr{}
+	for _, f := range fs {
+		if fn := f.Name; util.IsVideofile(fn) {
+			fn = util.FileSeparatorConv(fn)
+			sep := strings.Split(fn, "/")
+			fn = sep[len(sep)-1]
+			rn, err := renameTV(s, fn)
+			if err != nil {
+				merr := errs.MultiErr{}
+				merr.Add(err)
+				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn)) // mabye drop
+				continue
+			}
+			se := util.TrimExtensionAndGetEpi(rn)
+			if _, e := epis[se]; !e {
+				epis[se] = struct{}{}
+				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, rn))
+			}
+			if !CFG.Env.DropOnDumplicate {
+				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
+			}
+		}
+	}
+	merr.Add(os.RemoveAll(torr.ContentPath))
+	return merr.Err()
 }

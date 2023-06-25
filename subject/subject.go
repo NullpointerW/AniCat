@@ -115,6 +115,7 @@ func CreateSubject(n string, ext *Extra) error {
 		return err
 	}
 	GetSeason(subject)
+	subject.trimName()
 	err = initFolder(subject)
 	if err != nil {
 		return err
@@ -269,17 +270,21 @@ func GetSeason(s *Subject) {
 			if iszh := util.CheckZhCn(m); iszh {
 				m = util.ConvertZhCnNumbToa(m)
 			}
-			s.Season = fmt.Sprintf("%2s", m)
+			s.Season = fmt.Sprintf("%02s", m)
 			return
 		}
 		for _, rg := range sregs {
 			regexper := regexp.MustCompile(rg)
 			match := regexper.FindStringSubmatch(n)
 			if len(match) > 1 {
-				s.Season = fmt.Sprintf("%2s", match[1])
+				s.Season = fmt.Sprintf("%02s", match[1])
 				return
 			}
 		}
 	}
 	s.Season = "01"
+}
+
+func (s *Subject) trimName() {
+	s.Name = strings.ReplaceAll(util.FileSeparatorConv(s.Name), "/", " ")
 }

@@ -55,8 +55,7 @@ func initFolder(subject *Subject) (err error) {
 		return err
 	}
 
-	floderN := strings.ReplaceAll(util.FileSeparatorConv(subject.Name), "/", " ")
-	folderPath += "/" + floderN + " (" + sd + ")"
+	folderPath += "/" + subject.Name + " (" + sd + ")"
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {

@@ -2,6 +2,7 @@ package subject
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -157,11 +158,17 @@ func (s *Subject) RssDLSynced() (bool, error) {
 func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	if s.ResourceTyp == Torrent {
 		if torr.Hash == s.TorrentHash {
-			err := pusher.Push(P.Payload{
+			err := renameTorr(s, torr)
+			if err != nil {
+				log.Println(err)
+			}
+			epi := "S" + s.Season + "E01-" + fmt.Sprintf("%02d", s.Episode)
+			err = pusher.Push(P.Payload{
 				SubjectId:    s.SubjId,
 				SubjectName:  s.Name,
 				DownLoadName: torr.Name,
 				Size:         torr.Size,
+				Episode:      epi,
 			})
 			s.terminate()
 			return err
@@ -177,11 +184,12 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	}
 	s.RssTorrents[torr.Hash] = struct{}{}
 	if s.Typ == TV {
-		rename, err := Rename(s, torr)
+		rename, err := RenameTV(s, torr)
 		if err != nil {
 			return err
 		}
-		if th, e := s.Pushed[rename]; e {
+		se := util.TrimExtensionAndGetEpi(rename)
+		if th, e := s.Pushed[se]; e {
 			merr := errs.MultiErr{}
 			dumpliErr := errs.Custom("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
 			merr.Add(dumpliErr)
@@ -196,20 +204,34 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			return err
 		}
 		mErr := errs.MultiErr{}
-		s.Pushed[rename] = torr.Hash
+		s.Pushed[se] = torr.Hash
 		err = pusher.Push(P.Payload{
 			SubjectId:    s.SubjId,
 			SubjectName:  s.Name,
 			DownLoadName: torr.Name,
 			Size:         torr.Size,
-			Episode:      util.TrimExtensionAndGetEpi(rename),
+			Episode:      se,
+		})
+		mErr.Add(err)
+		mErr.Add(s.writeJson())
+		return mErr.Err()
+	} else { //Movie
+		if _, e := s.Pushed[torr.Hash]; e {
+			return errs.Custom("%w:name:%s", errs.ErrItemAlreadyPushed, torr.Name)
+		}
+		mErr := errs.MultiErr{}
+		s.Pushed[torr.Hash] = ""
+		err := pusher.Push(P.Payload{
+			SubjectId:    s.SubjId,
+			SubjectName:  s.Name,
+			DownLoadName: torr.Name,
+			Size:         torr.Size,
+			Episode:      "Movie",
 		})
 		mErr.Add(err)
 		mErr.Add(s.writeJson())
 		return mErr.Err()
 	}
-	return nil
-
 }
 
 func (s *Subject) terminate() {

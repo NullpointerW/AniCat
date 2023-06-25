@@ -50,20 +50,23 @@ func TestTuple(t *testing.T) {
 	}
 }
 
-func TestIsNumber(t *testing.T){
-	t.Log(IsNumber("十二")) 
+func TestIsNumber(t *testing.T) {
+	t.Log(IsNumber("十二"))
 }
 
-func TestConvertZHCN(t *testing.T){
-	t.Log(ConvertZhCnNumbToa("三十五")) 
+func TestConvertZHCN(t *testing.T) {
+	t.Log(ConvertZhCnNumbToa("三十五"))
 }
 
-
-func TestCheckZH(t *testing.T){
-	t.Log(CheckZhCn("av2")) 
+func TestCheckZH(t *testing.T) {
+	t.Log(CheckZhCn("av2"))
 }
 
+func TestTrimGetEpi(t *testing.T) {
+	t.Log(TrimExtensionAndGetEpi("天国大魔镜 S01E02.mp4"))
+}
 
-func TestTrimGetEpi(t *testing.T){
-	t.Log(TrimExtensionAndGetEpi("天国大魔镜 S01E02.mp4")) 
+func TestTrimGetEpi2(t *testing.T) {
+	// fmt.Printf("%02d", 1)
+	fmt.Printf("%02s", "02")
 }

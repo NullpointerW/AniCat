@@ -30,6 +30,17 @@ var zh_cn_numb = map[rune]byte{
 	'九': '9',
 }
 
+var videoExt = []string{".mp4", ".rmvb", ".avi", ".flv", ".m2v", ".mkv", ".wmv", ".mp3", ".wav", ".mov"}
+
+func IsVideofile(fn string) bool {
+	for _, ext := range videoExt {
+		if strings.HasSuffix(fn, ext) {
+			return true
+		}
+	}
+	return false
+}
+
 type Tuple[F, S any] struct {
 	slot1 F
 	slot2 S
