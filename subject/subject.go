@@ -72,6 +72,11 @@ type Extra struct {
 	}
 }
 
+func (ex *Extra) NoArgs() bool {
+	opt := ex.RssOption
+	return opt.SubtitleGroup == "" && opt.MustContain == "" && opt.MustNotContain == ""
+}
+
 // The tag used when adding a torrent with qbt
 // can be used to monitor the download status of resources
 // related to this subject file.
@@ -232,28 +237,32 @@ func download(subj *Subject, ext *Extra) error {
 			return err
 		}
 		subj.TorrentHash = h
-	} else {
-		categ := subj.QbtTag()
-		err := torrent.AddCategroy(categ)
-		if err != nil {
-			return err
-		}
-		r := qbt.AutoDLRule{
-			Enabled:          true,
-			AffectedFeeds:    []string{subj.ResourceUrl},
-			SavePath:         subj.Path,
-			AssignedCategory: categ,
-		}
-		if ext != nil {
-			r.UseRegex = ext.RssOption.UseRegex
-			r.MustContain = ext.RssOption.MustContain
-			r.MustNotContain = ext.RssOption.MustNotContain
-		}
-		err = rss.Download(r, subj.RssPath())
-		if err != nil {
-			return err
-		}
+		return nil
+	} else if ext == nil || ext.NoArgs() {
+		rss.GetItems(subj.RssPath())
+         
 	}
+	categ := subj.QbtTag()
+	err := torrent.AddCategroy(categ)
+	if err != nil {
+		return err
+	}
+	r := qbt.AutoDLRule{
+		Enabled:          true,
+		AffectedFeeds:    []string{subj.ResourceUrl},
+		SavePath:         subj.Path,
+		AssignedCategory: categ,
+	}
+	if ext != nil {
+		r.UseRegex = ext.RssOption.UseRegex
+		r.MustContain = ext.RssOption.MustContain
+		r.MustNotContain = ext.RssOption.MustNotContain
+	}
+	err = rss.Download(r, subj.RssPath())
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

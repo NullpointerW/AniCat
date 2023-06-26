@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
+	"strings"
 
 	"testing"
 
@@ -65,4 +67,22 @@ func TestGetSeason(t *testing.T) {
 	s.Name = "小林家的龙女仆 第二季"
 	subject.GetSeason(&s)
 	t.Log(s.Season)
+}
+
+
+func TestExtra(t *testing.T){
+	re, err := regexp.Compile(`\[[^\]]*\d+(\.\d+)\s*[Gg][Bb][^\]]*\]`)
+	if err != nil {
+		fmt.Println("正则表达式编译失败：", err)
+		return
+	}
+
+	tests := []string{"【恶魔岛字幕组】★4月新番【吹响！上低音号_Hibike! Euphonium】[01-13][GB_BIG5][720P][MKV][全][4.7GB]", "3.5gb", "3.5 GB", "3.5gb ", "3.5GB", "3.5gB", "3gb ", "3.0 GB", "3.0gb"}
+	for _, test := range tests {
+		if re.MatchString(strings.TrimSpace(test)) {
+			fmt.Println(test, "符合要求")
+		} else {
+			fmt.Println(test, "不符合要求")
+		}
+	}
 }

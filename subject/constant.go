@@ -39,7 +39,7 @@ const (
 // qbt tag generation template
 const (
 	QbtTag_prefix = "anicat@subj-"
-	QbtTag        = QbtTag_prefix + "%d"  // identity for each resource
+	QbtTag        = QbtTag_prefix + "%d" // identity for each resource
 )
 
 const (
@@ -59,5 +59,12 @@ const (
 	reg1_epi  = `\[(\d+)\]`     // [02]
 	reg2_epi  = `- ?(\d+)`      // - 02
 )
+
+const (
+	reg0_coll = `\[[^\]]*\d+(\.\d+)\s*[Gg][Bb][^\]]*\]`
+	reg1_coll = `\d+-\d+`
+)
+
+var coll_regs = []string{reg0_coll, reg1_coll}
 
 var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi}

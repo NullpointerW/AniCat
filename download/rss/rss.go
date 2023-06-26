@@ -27,6 +27,19 @@ func GetMatchedArts(rssPath string) (arts []string, err error) {
 	return arts, nil
 }
 
+func GetItems(rssPath string) (*qbt.Item, error) {
+	its, err := DL.Qbt.GetAllItems(true)
+	if err != nil {
+		return nil, err
+	}
+	if it, e := its[rssPath]; !e {
+		return nil, nil
+	} else {
+		return &it, nil
+	}
+
+}
+
 func RmRss(rssPath string) error {
 	err := DL.Qbt.RemoveItem(rssPath)
 	if err != nil {
