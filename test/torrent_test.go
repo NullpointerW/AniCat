@@ -44,3 +44,12 @@ func TestStr(t *testing.T) {
 		fmt.Println(s)
 	}
 }
+
+func TestAdd(t *testing.T) {
+	hash, err := TORR.Add("https://mikanani.me/Download/20221231/3938fb98aa5bbc2d3e0631852accd234feef932e.torrent", "E:\vrhouse", "test123")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	t.Log(hash)
+}

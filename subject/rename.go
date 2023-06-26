@@ -32,6 +32,9 @@ func CaptureEpisNum(text string) (string, error) {
 }
 
 func RenameTV(s *Subject, torr qbt.Torrent) (string, error) {
+	if !util.IsVideofile(torr.Name) {
+		return "", errs.Custom("%s is not a video file", torr.Name)
+	}
 	return renameTV(s, torr.Name)
 }
 

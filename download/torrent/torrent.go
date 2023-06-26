@@ -14,8 +14,8 @@ func Add(url, path, tag string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	time.Sleep(100 * time.Millisecond) // wait for qbt
-	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
+	time.Sleep(200 * time.Millisecond) // wait for qbt
+	torrs, err := DL.Qbt.TorrentList(qbt.Optional{ 
 		"filter": "all",
 		"tag":    tag,
 	})
