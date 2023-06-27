@@ -62,7 +62,7 @@ const def = `<!DOCTYPE html>
 <body>
 	<h1>${name}</h1>
 	<h2>剧集已更新</h2>
-	<h2>${epi}<h2>
+	<h2>${epi}</h2>
 	<ul>
 		<li>AniCat id: ${id}</li>
 		<li>文件名: ${dlname}</li>

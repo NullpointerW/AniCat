@@ -158,18 +158,30 @@ func (s *Subject) RssDLSynced() (bool, error) {
 func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	if s.ResourceTyp == Torrent {
 		if torr.Hash == s.TorrentHash {
-			err := renameTorr(s, torr)
-			if err != nil {
-				log.Println(err)
+			var err error
+			if s.Typ == TV {
+				err = renameTorr(s, torr)
+				if err != nil {
+					goto term
+				}
+				epi := "S" + s.Season + "E01-" + fmt.Sprintf("%02d", s.Episode)
+				err = pusher.Push(P.Payload{
+					SubjectId:    s.SubjId,
+					SubjectName:  s.Name,
+					DownLoadName: torr.Name,
+					Size:         torr.Size,
+					Episode:      epi,
+				})
+			} else {
+				err = pusher.Push(P.Payload{
+					SubjectId:    s.SubjId,
+					SubjectName:  s.Name,
+					DownLoadName: torr.Name,
+					Size:         torr.Size,
+					Episode:      "MOVIE",
+				})
 			}
-			epi := "S" + s.Season + "E01-" + fmt.Sprintf("%02d", s.Episode)
-			err = pusher.Push(P.Payload{
-				SubjectId:    s.SubjId,
-				SubjectName:  s.Name,
-				DownLoadName: torr.Name,
-				Size:         torr.Size,
-				Episode:      epi,
-			})
+		term:
 			s.terminate()
 			return err
 		}
