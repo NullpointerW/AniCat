@@ -237,10 +237,12 @@ func download(subj *Subject, ext *Extra) error {
 		return err
 	} else if (ext == nil || ext.NoArgs()) && subj.Finished {
 		it, err := rss.AddAndGetItems(subj.ResourceUrl, subj.RssPath())
+		util.Debugln("rss path ", subj.RssPath())
 		if err != nil {
 			return err
 		}
 		for _, a := range it.Articles {
+			log.Println(a.Description)
 			desc := a.Description
 			for _, reg := range coll_regs {
 				re, err := regexp.Compile(reg)

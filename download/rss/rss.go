@@ -35,7 +35,7 @@ func AddAndGetItems(url, path string) (*qbt.Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(1500 * time.Millisecond)
 	it, err := GetItems(path)
 	return it, err
 }

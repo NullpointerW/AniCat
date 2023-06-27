@@ -18,3 +18,10 @@ func TestRss(t *testing.T) {
 	}
 	fmt.Println("macthed lens", len(as))
 }
+
+func TestRssItem(t *testing.T) {
+	it,_:=rss.GetItems("anicat@subj-115908")
+	fmt.Println(*it)
+}
+
+
