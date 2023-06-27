@@ -233,37 +233,61 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 func download(subj *Subject, ext *Extra) error {
 	if subj.ResourceTyp == Torrent {
 		h, err := torrent.Add(subj.ResourceUrl, subj.Path, subj.QbtTag())
+		subj.TorrentHash = h
+		return err
+	} else if (ext == nil || ext.NoArgs()) && subj.Finished {
+		it, err := rss.AddAndGetItems(subj.ResourceUrl, subj.RssPath())
 		if err != nil {
 			return err
 		}
-		subj.TorrentHash = h
-		return nil
-	} else if ext == nil || ext.NoArgs() {
-		rss.GetItems(subj.RssPath())
-         
-	}
-	categ := subj.QbtTag()
-	err := torrent.AddCategroy(categ)
-	if err != nil {
+		for _, a := range it.Articles {
+			desc := a.Description
+			for _, reg := range coll_regs {
+				re, err := regexp.Compile(reg)
+				if err != nil {
+					return err
+				}
+				if re.MatchString(desc) {
+					log.Printf("%d:%s  matched collection %s \n", subj.SubjId, subj.Name, desc)
+					err = rss.RmRss(subj.RssPath())
+					if err != nil {
+						return err
+					}
+					subj.ResourceTyp = Torrent
+					h, err := torrent.Add(a.TorrentURL, subj.Path, subj.QbtTag())
+					subj.TorrentHash = h
+					return err
+				}
+			}
+		}
+		log.Printf("%d:%s not matched any collection \n", subj.SubjId, subj.Name)
+		categ := subj.QbtTag()
+		err = torrent.AddCategroy(categ)
+		if err != nil {
+			return err
+		}
+		err = rss.SetAutoDLRule(subj.ResourceUrl, categ, subj.Path, subj.RssPath())
+		return err
+	} else {
+		categ := subj.QbtTag()
+		err := torrent.AddCategroy(categ)
+		if err != nil {
+			return err
+		}
+		r := qbt.AutoDLRule{
+			Enabled:          true,
+			AffectedFeeds:    []string{subj.ResourceUrl},
+			SavePath:         subj.Path,
+			AssignedCategory: categ,
+		}
+		if ext != nil {
+			r.UseRegex = ext.RssOption.UseRegex
+			r.MustContain = ext.RssOption.MustContain
+			r.MustNotContain = ext.RssOption.MustNotContain
+		}
+		err = rss.Download(r, subj.RssPath())
 		return err
 	}
-	r := qbt.AutoDLRule{
-		Enabled:          true,
-		AffectedFeeds:    []string{subj.ResourceUrl},
-		SavePath:         subj.Path,
-		AssignedCategory: categ,
-	}
-	if ext != nil {
-		r.UseRegex = ext.RssOption.UseRegex
-		r.MustContain = ext.RssOption.MustContain
-		r.MustNotContain = ext.RssOption.MustNotContain
-	}
-	err = rss.Download(r, subj.RssPath())
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func GetSeason(s *Subject) {
