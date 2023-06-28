@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"time"
 
 	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/net/cmd"
@@ -67,4 +68,57 @@ func main() {
 func exit(r *bufio.Reader) {
 	r.ReadString('\n')
 	os.Exit(1)
+}
+
+func waitProgress(c chan struct{}) {
+	fmt.Print("\033[K\r")
+	fmt.Print("\033[?25h")
+Wait:
+	<-c
+	for {
+		fmt.Print("\033[?25l")
+		fmt.Printf("\\\r")
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+		fmt.Printf("|\r")
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+		fmt.Printf("-\r")
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+		fmt.Printf("/\r")
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-c:
+			goto Wait
+		default:
+		}
+	}
 }
