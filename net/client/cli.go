@@ -128,3 +128,28 @@ Wait:
 		}
 	}
 }
+
+// st := time.Now()
+// 	var elapsed time.Duration
+// 	fmt.Print("\033[?25h") //display
+// 	for {
+// 		fmt.Print("\033[?25l")
+// 		elapsed = time.Since(st)
+// 		fmt.Printf("\\ (%0.2f s)\r", elapsed.Seconds())
+
+// 		time.Sleep(100 * time.Millisecond)
+
+// 		elapsed = time.Since(st)
+// 		fmt.Printf("| (%0.2f s)\r", elapsed.Seconds())
+
+// 		time.Sleep(100 * time.Millisecond)
+
+// 		elapsed = time.Since(st)
+// 		fmt.Printf("- (%0.2f s)\r", elapsed.Seconds())
+
+// 		time.Sleep(100 * time.Millisecond)
+
+// 		elapsed = time.Since(st)
+// 		fmt.Printf("/ (%0.2f s)\r", elapsed.Seconds())
+// 		time.Sleep(100 * time.Millisecond)
+// 	}
