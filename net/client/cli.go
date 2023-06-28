@@ -76,8 +76,11 @@ func waitProgress(c chan struct{}) {
 Wait:
 	<-c
 	for {
+		st := time.Now()
+		var elapsed time.Duration
 		fmt.Print("\033[?25l")
-		fmt.Printf("\\\r")
+		elapsed=time.Since(st)
+		fmt.Printf("\\\r (%0.2f)",elapsed.Seconds())
 		select {
 		case <-c:
 			goto Wait
@@ -89,7 +92,8 @@ Wait:
 			goto Wait
 		default:
 		}
-		fmt.Printf("|\r")
+		elapsed=time.Since(st)
+		fmt.Printf("|\r (%0.2f)",elapsed.Seconds())
 		select {
 		case <-c:
 			goto Wait
@@ -101,7 +105,8 @@ Wait:
 			goto Wait
 		default:
 		}
-		fmt.Printf("-\r")
+		elapsed=time.Since(st)
+		fmt.Printf("-\r (%0.2f)",elapsed.Seconds())
 		select {
 		case <-c:
 			goto Wait
@@ -113,7 +118,8 @@ Wait:
 			goto Wait
 		default:
 		}
-		fmt.Printf("/\r")
+		elapsed=time.Since(st)
+		fmt.Printf("/\r (%0.2f)",elapsed.Seconds())
 		time.Sleep(100 * time.Millisecond)
 		select {
 		case <-c:
