@@ -15,20 +15,27 @@ import (
 	"github.com/NullpointerW/anicat/net/cmd"
 )
 
-var port int
+var (
+	host string
+	port int
+)
 
 func init() {
+	flag.StringVar(&host, "h", "localhost", "server dial host")
 	flag.IntVar(&port, "p", 8080, "server dial port")
 	flag.Parse()
 }
 
 func main() {
+	signal := make(chan struct{})
+	go waitProgress(signal)
+
 	r := bufio.NewReader(os.Stdin)
 	defer func() {
 		r.ReadString('\n')
 	}()
-	dialport := ":" + strconv.Itoa(port)
-	c, err := net.Dial("tcp", dialport)
+	dialadress := host + ":" + strconv.Itoa(port)
+	c, err := net.Dial("tcp", dialadress)
 	if err != nil {
 		log.Println(cmd.Red, err, cmd.Reset)
 		exit(r)
@@ -37,7 +44,12 @@ func main() {
 	s.Split(N.ScanCRLF)
 	buf := make([]byte, 0, 64*1024)
 	s.Buffer(buf, 1024*1024)
+	var f bool
 	for s.Scan() {
+		if f {
+			signal <- struct{}{}
+		}
+		f = true
 		log.Println(s.Text())
 		if s.Text() == "exited." {
 			return
@@ -61,6 +73,7 @@ func main() {
 			cmd.Run()
 		}
 		c.Write([]byte(l + N.CRLF))
+		signal <- struct{}{}
 	}
 	log.Println(cmd.Red, s.Err(), cmd.Reset)
 }
@@ -71,16 +84,16 @@ func exit(r *bufio.Reader) {
 }
 
 func waitProgress(c chan struct{}) {
+Wait:
 	fmt.Print("\033[K\r")
 	fmt.Print("\033[?25h")
-Wait:
 	<-c
+	st := time.Now()
 	for {
-		st := time.Now()
 		var elapsed time.Duration
 		fmt.Print("\033[?25l")
-		elapsed=time.Since(st)
-		fmt.Printf("\\\r (%0.2f)",elapsed.Seconds())
+		elapsed = time.Since(st)
+		fmt.Printf("\\ (%0.2f s)\r", elapsed.Seconds())
 		select {
 		case <-c:
 			goto Wait
@@ -92,8 +105,8 @@ Wait:
 			goto Wait
 		default:
 		}
-		elapsed=time.Since(st)
-		fmt.Printf("|\r (%0.2f)",elapsed.Seconds())
+		elapsed = time.Since(st)
+		fmt.Printf("| (%0.2f s)\r", elapsed.Seconds())
 		select {
 		case <-c:
 			goto Wait
@@ -105,8 +118,8 @@ Wait:
 			goto Wait
 		default:
 		}
-		elapsed=time.Since(st)
-		fmt.Printf("-\r (%0.2f)",elapsed.Seconds())
+		elapsed = time.Since(st)
+		fmt.Printf("- (%0.2f s)\r", elapsed.Seconds())
 		select {
 		case <-c:
 			goto Wait
@@ -118,8 +131,8 @@ Wait:
 			goto Wait
 		default:
 		}
-		elapsed=time.Since(st)
-		fmt.Printf("/\r (%0.2f)",elapsed.Seconds())
+		elapsed = time.Since(st)
+		fmt.Printf("/ (%0.2f s)\r", elapsed.Seconds())
 		time.Sleep(100 * time.Millisecond)
 		select {
 		case <-c:
@@ -128,28 +141,3 @@ Wait:
 		}
 	}
 }
-
-// st := time.Now()
-// 	var elapsed time.Duration
-// 	fmt.Print("\033[?25h") //display
-// 	for {
-// 		fmt.Print("\033[?25l")
-// 		elapsed = time.Since(st)
-// 		fmt.Printf("\\ (%0.2f s)\r", elapsed.Seconds())
-
-// 		time.Sleep(100 * time.Millisecond)
-
-// 		elapsed = time.Since(st)
-// 		fmt.Printf("| (%0.2f s)\r", elapsed.Seconds())
-
-// 		time.Sleep(100 * time.Millisecond)
-
-// 		elapsed = time.Since(st)
-// 		fmt.Printf("- (%0.2f s)\r", elapsed.Seconds())
-
-// 		time.Sleep(100 * time.Millisecond)
-
-// 		elapsed = time.Since(st)
-// 		fmt.Printf("/ (%0.2f s)\r", elapsed.Seconds())
-// 		time.Sleep(100 * time.Millisecond)
-// 	}
