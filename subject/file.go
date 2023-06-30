@@ -11,7 +11,7 @@ import (
 	"github.com/NullpointerW/anicat/download/rss"
 	TORR "github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 
 	// "strconv"
 	"strings"

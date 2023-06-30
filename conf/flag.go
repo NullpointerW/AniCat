@@ -4,7 +4,7 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 var (

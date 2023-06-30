@@ -1,4 +1,4 @@
-package infomation
+package information
 
 import (
 	"fmt"

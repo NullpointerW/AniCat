@@ -11,7 +11,7 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/net/cmd"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 func Listen() {

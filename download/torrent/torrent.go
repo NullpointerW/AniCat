@@ -3,7 +3,7 @@ package torrent
 import (
 	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 

@@ -1,4 +1,4 @@
-package infomation
+package information
 
 const (
 	infoBaseUrl      = `https://bgm.tv`

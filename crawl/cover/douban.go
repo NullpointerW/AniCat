@@ -12,7 +12,7 @@ import (
 
 	CR "github.com/NullpointerW/anicat/crawl"
 	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"github.com/tidwall/gjson"
@@ -37,7 +37,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		util.Debugf("%#+v", r.Headers)
 	})
 	c.OnResponse(func(r *colly.Response) {
-		exp := coverXpathExp
+		exp := DouBancoverXpathExp
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
 			err = e
@@ -98,7 +98,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	parseParam := CR.ConstructSearch(coverName)
-	c.Visit(fmt.Sprintf(coverSearchUrl, parseParam))
+	c.Visit(fmt.Sprintf(DouBancoverSearchUrl, parseParam))
 
 	return
 }

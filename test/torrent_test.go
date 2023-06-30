@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	TORR "github.com/NullpointerW/anicat/download/torrent"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 func TestDL(t *testing.T) {

@@ -6,10 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 
 	DL "github.com/NullpointerW/anicat/download"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"

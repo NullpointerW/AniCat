@@ -13,7 +13,7 @@ import (
 	"github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/subject"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 func Detect() {
@@ -31,8 +31,8 @@ func Detect() {
 						log.Println(err)
 						continue
 					}
-					util.Debugf("detcting---->torrfn:%s,savepath:%s,tag:%s,categ:%s \n", torr.Name, torr.SavePath, 
-					torr.Tags, torr.Category)
+					util.Debugf("detcting---->torrfn:%s,savepath:%s,tag:%s,categ:%s \n", torr.Name, torr.SavePath,
+						torr.Tags, torr.Category)
 					if istorr, isrss := strings.Contains(torr.Tags, subject.QbtTag_prefix),
 						strings.Contains(torr.Category, subject.QbtTag_prefix); istorr || isrss {
 						var s string
@@ -70,8 +70,8 @@ func send(sid int, torr qbt.Torrent) error {
 		return nil
 	}
 
-	log.Printf("pushing---->torrfn:%s,savepath:%s,tag:%s,categ:%s \n", torr.Name, torr.SavePath, 
-	torr.Tags, torr.Category)
+	log.Printf("pushing---->torrfn:%s,savepath:%s,tag:%s,categ:%s \n", torr.Name, torr.SavePath,
+		torr.Tags, torr.Category)
 
 	select {
 	case <-s.Exited:

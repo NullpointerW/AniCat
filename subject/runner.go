@@ -15,7 +15,7 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	P "github.com/NullpointerW/anicat/pusher"
 	"github.com/NullpointerW/anicat/pusher/email"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 // before gorountie handle it init inner channels and ctxfunc

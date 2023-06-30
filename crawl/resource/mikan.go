@@ -8,7 +8,7 @@ import (
 
 	CR "github.com/NullpointerW/anicat/crawl"
 	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/util"
+	util "github.com/NullpointerW/anicat/utils"
 	"golang.org/x/net/html"
 
 	"github.com/antchfx/htmlquery"
