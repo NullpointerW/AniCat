@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"log"
+	// "log"
 	"net"
 	"os"
 	"os/exec"
@@ -37,7 +37,7 @@ func main() {
 	dialadress := host + ":" + strconv.Itoa(port)
 	c, err := net.Dial("tcp", dialadress)
 	if err != nil {
-		log.Println(cmd.Red, err, cmd.Reset)
+		fmt.Println(cmd.Red, err, cmd.Reset)
 		exit(r)
 	}
 	s := bufio.NewScanner(c)
@@ -50,7 +50,7 @@ func main() {
 			signal <- struct{}{}
 		}
 		f = true
-		log.Println(s.Text())
+		fmt.Println(s.Text())
 		if s.Text() == "exited." {
 			return
 		}
@@ -75,7 +75,7 @@ func main() {
 		c.Write([]byte(l + N.CRLF))
 		signal <- struct{}{}
 	}
-	log.Println(cmd.Red, s.Err(), cmd.Reset)
+	fmt.Println(cmd.Red, s.Err(), cmd.Reset)
 }
 
 func exit(r *bufio.Reader) {

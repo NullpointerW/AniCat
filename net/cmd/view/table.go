@@ -87,6 +87,7 @@ func (_ mergTb) Ls(ls []subject.Subject) string {
 	table.SetRowLine(true)
 	table.SetAutoWrapText(false)
 	table.SetColWidth(60)
+	table.SetBorder(false)
 	table.Render()
 	return "\n" + tableString.String()
 }

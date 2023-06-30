@@ -7,6 +7,8 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+var cmdprfx = "anicat"
+
 type Command struct {
 	N    string
 	Opt  Option
@@ -59,7 +61,7 @@ func optionMode(o string) (Option, bool) {
 }
 
 func Parse(cmds []string) (reply Command) {
-	sfxok := strings.ToLower(cmds[0]) == "anicat"
+	sfxok := hasPrfx(cmds)
 	if !sfxok {
 		reply.Err = errs.Custom("%w:%s", errs.ErrUnknownCommand, cmds[0])
 		return
@@ -121,7 +123,17 @@ func Parse(cmds []string) (reply Command) {
 
 func ParseArgs(s string) []string {
 	// s = strings.ToLower(s)
-	return strings.Fields(s)
+	args := strings.Fields(s)
+	if len(args) == 0 {
+		return args
+	}
+	if hasPrfx(args) {
+		return args
+	} else {
+		prfx := []string{cmdprfx}
+		prfx = append(prfx, args...)
+		return prfx
+	}
 }
 
 func ParseFlagArgs(flag []string) (f []string) {
@@ -144,4 +156,8 @@ func ParseFlagArgs(flag []string) (f []string) {
 		}
 	}
 	return
+}
+
+func hasPrfx(c []string) bool {
+	return strings.ToLower(c[0]) == cmdprfx
 }
