@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
+
 
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
@@ -101,7 +101,7 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 			}
 		}
 	}
-	time.Sleep(1000 * time.Millisecond) // wati for qbt moving files
+	DL.Wait(1000) // wati for qbt moving files
 	merr.Add(os.RemoveAll(torr.ContentPath))
 	return merr.Err()
 }

@@ -1,8 +1,7 @@
 package rss
 
 import (
-	"time"
-
+	
 	DL "github.com/NullpointerW/anicat/download"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
@@ -35,7 +34,7 @@ func AddAndGetItems(url, path string) (*qbt.Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	time.Sleep(1000 * time.Millisecond)
+	DL.Wait(1000)
 	it, err := GetItems(path)
 	return it, err
 }

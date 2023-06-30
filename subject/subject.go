@@ -12,6 +12,7 @@ import (
 	CC "github.com/NullpointerW/anicat/crawl/cover"
 	IC "github.com/NullpointerW/anicat/crawl/information"
 	RC "github.com/NullpointerW/anicat/crawl/resource"
+	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/download/rss"
 	"github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -158,7 +159,7 @@ func CreateSubject(n string, ext *Extra) error {
 	subject.runtimeInit(false)
 
 	if subject.ResourceTyp == RSS {
-		time.Sleep(1500 * time.Millisecond) // wait for qbt
+		DL.Wait(1500) // wait for qbt
 		a, err := rss.GetMatchedArts(subject.RssPath())
 		if err == nil && len(a) == 0 {
 			return errs.WarnRssRuleNotMatched

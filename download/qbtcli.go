@@ -1,6 +1,8 @@
 package download
 
 import (
+	"time"
+
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
@@ -20,4 +22,8 @@ func init() {
 	}
 	errs.PanicErr(err)
 	Qbt = cli
+}
+
+func Wait(ms int) {
+	time.Sleep(time.Duration(ms) * time.Millisecond)
 }
