@@ -30,6 +30,7 @@ func Scan() {
 					err := json.Unmarshal(jsraw, &s)
 					if err != nil {
 						log.Println(err)
+						continue
 					}
 					s.runtimeInit(true)
 				} else {

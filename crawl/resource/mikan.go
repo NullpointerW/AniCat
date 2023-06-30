@@ -39,9 +39,9 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			err = e
 			return
 		}
-		a := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/ul[@class='list-inline an-ul']/li/a//@href`)
-		if a != nil {
-			ep, bgmurl, e := scrapeRssEndPoint(htmlquery.InnerText(a), opt)
+		a := htmlquery.Find(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/ul[@class='list-inline an-ul']/li`)
+		if len(a) != 0 {
+			ep, bgmurl, e := scrapeRssEndPoint(selectRss(a, searchstr), opt)
 			if e != nil {
 				err = e
 				return
@@ -81,6 +81,17 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
 
 	return
+}
+
+func selectRss(nodes []*html.Node, cmp string) string {
+	var targer *html.Node
+	for i, n := range nodes {
+		div:=htmlquery.FindOne(n,`/a/div/div/div`)
+		if name := htmlquery.InnerText(div); name == cmp || i == 0 {
+			targer = htmlquery.FindOne(n, `/a/@href`)
+		}
+	}
+	return htmlquery.InnerText(targer)
 }
 
 func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err error) {
