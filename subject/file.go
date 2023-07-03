@@ -25,16 +25,25 @@ func Scan() {
 		for _, f := range fs {
 			if f.IsDir() {
 				log.Println("scan:found folder:" + home + string(os.PathSeparator) + f.Name())
-				if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + jsonfileName); err == nil {
-					var s Subject
-					err := json.Unmarshal(jsraw, &s)
-					if err != nil {
-						log.Println(err)
-						continue
-					}
-					s.runtimeInit(true)
-				} else {
+				fs, err := os.ReadDir(home + `/` + f.Name())
+				if err != nil {
 					log.Println(err)
+					continue
+				}
+				for _, ff := range fs {
+					if util.IsJsonFile(ff.Name()) && strings.Contains(ff.Name(), "meta-data") {
+						if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + ff.Name()); err == nil {
+							var s Subject
+							err := json.Unmarshal(jsraw, &s)
+							if err != nil {
+								log.Println(err)
+								continue
+							}
+							s.runtimeInit(true)
+						} else {
+							log.Println(err)
+						}
+					}
 				}
 			}
 		}

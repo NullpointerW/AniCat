@@ -16,6 +16,14 @@ func IsVideofile(fn string) bool {
 	return false
 }
 
+func IsJsonFile(fn string) bool {
+	sep := strings.Split(fn, ".")
+	if len(sep) < 2 {
+		return false
+	}
+	return strings.ToLower(sep[1]) == "json"
+}
+
 func FileSeparatorConv(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
 }
