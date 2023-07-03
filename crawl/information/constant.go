@@ -1,5 +1,7 @@
 package information
 
+
+
 const (
 	infoBaseUrl      = `https://bgm.tv`
 	infoPageXpathExp = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='main'][2]/div[@class='columns clearit']/div[@id='columnSearchB']/ul[@id='browserItemList']/li[1]/div[@class='inner']/h3/a[@class='l']/@href`
@@ -21,3 +23,15 @@ var InfoAPIs = map[string]string{
 	"search":  "/subject_search/%s?cat=2",
 	"subject": "/subject/%d",
 }
+
+var TMDBAPIs = map[string]string{
+	"search": "/search/%s?query=%s",
+}
+
+const (
+	TMDB_HOST      = "https://www.themoviedb.org"
+	TMDB_TYP_TV    = "tv"
+	TMDB_TYP_MOVIE = "movie"
+)
+
+

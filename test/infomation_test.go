@@ -33,3 +33,12 @@ func TestBgmTVInfoScrape(t *testing.T) {
 		fmt.Println(v)
 	}
 }
+
+func TestTMDB(t *testing.T){
+ n,d,e:= I.FloderSearch(I.TMDB_TYP_TV,"凉宫春日的忧郁")
+ if e!=nil{
+	t.Error(e)
+	t.FailNow()
+ }
+ t.Log(n,d)
+}

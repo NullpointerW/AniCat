@@ -100,6 +100,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
 			err = e
+			return
 		}
 		defXpathExp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text'][1]/a[@class='mikan-rss']/@href`
 		if opt.Group == "" {

@@ -34,7 +34,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
 			err = e
-			log.Fatal(err)
+			return
 		}
 		ls := htmlquery.Find(doc, infoXpathExp)
 
@@ -81,14 +81,14 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
 		if e != nil {
 			err = e
-			log.Fatal(err)
+			return
 		}
 		a := htmlquery.FindOne(doc, infoPageXpathExp)
 		if a != nil {
 			p = htmlquery.InnerText(a)
 			fmt.Println(htmlquery.InnerText(a))
 		} else {
-			fmt.Println("NOT FOUND")
+			// fmt.Println("NOT FOUND")
 			err = errs.ErrCrawlNotFound
 			return
 		}
