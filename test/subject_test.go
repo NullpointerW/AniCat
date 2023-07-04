@@ -8,6 +8,8 @@ import (
 	"regexp"
 	// "strings"
 
+	// "strings"
+
 	"testing"
 
 	"github.com/NullpointerW/anicat/errs"
@@ -95,4 +97,15 @@ func TestFoundLastS(t *testing.T) {
 		t.FailNow()
 	}
 	t.Log(l)
+}
+func TestReg(t *testing.T){
+	str := "这是第一季的节目"
+	re := regexp.MustCompile(`第(.)季`)
+	match := re.FindStringSubmatch(str)
+	if len(match) > 1 {
+		season := match[1]
+		fmt.Printf("匹配到的季节为：%s\n", season)
+	} else {
+		fmt.Println("未匹配到季节")
+	}
 }

@@ -221,16 +221,27 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 			for _, n := range strings.Split(subj.Alias, "|") {
 				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				if err == nil {
-					log.Printf("%#+v",subj)
+					log.Printf("%#+v", subj)
 					return nil
 				} else if err != errs.ErrCrawlNotFound {
 					return err
 				}
 			}
+			re := regexp.MustCompile(`第(.)季`)
+			match := re.FindStringSubmatch(subj.Name)
+			if len(match) > 1 {
+				season := match[1]
+				n := strings.ReplaceAll(subj.Name, fmt.Sprintf("第%s季", season), "")
+				n = strings.TrimRight(n, " ")
+				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
+				return err
+			}
+		} else {
+			return err
 		}
 		return err
 	}
-	
+
 	return nil
 }
 
