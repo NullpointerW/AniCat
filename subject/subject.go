@@ -217,8 +217,20 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 	var err error
 	subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.Name)
 	if err != nil {
+		if err == errs.ErrCrawlNotFound {
+			for _, n := range strings.Split(subj.Alias, "|") {
+				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
+				if err == nil {
+					log.Printf("%#+v",subj)
+					return nil
+				} else if err != errs.ErrCrawlNotFound {
+					return err
+				}
+			}
+		}
 		return err
 	}
+	
 	return nil
 }
 
@@ -254,6 +266,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	} else {
 		subj.ResourceTyp = Torrent
 	}
+	log.Println(u, bgm, isrss)
 	return bgm, nil
 }
 
@@ -290,7 +303,7 @@ func download(subj *Subject, ext *Extra) error {
 			}
 		}
 		log.Printf("%d:%s not matched any collection \n", subj.SubjId, subj.Name)
-	
+
 		err = torrent.AddCategroy(subj.QbtCateg())
 		if err != nil {
 			return err
@@ -298,7 +311,7 @@ func download(subj *Subject, ext *Extra) error {
 		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath())
 		return err
 	} else {
-		
+
 		err := torrent.AddCategroy(subj.QbtCateg())
 		if err != nil {
 			return err

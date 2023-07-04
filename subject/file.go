@@ -120,17 +120,20 @@ func (s *Subject) RmRes() error {
 			categ := s.QbtTag()
 			return DL.Qbt.RmCategoies(categ)
 		})
-
 		wrap.Handle(func() error {
 			return rss.RmRss(s.RssPath())
 		})
+		wrap.Handle(func() error {
+			return TORR.DelViaCateg(s.QbtCateg())
+		})
+	} else {
+		wrap.Handle(func() error {
+			return TORR.Del(s.TorrentHash)
+		})
+		wrap.Handle(func() error {
+			return TORR.DelTag(s.QbtTag())
+		})
 	}
-	wrap.Handle(func() error {
-		return TORR.DelTorrs(s.Path)
-	})
-	wrap.Handle(func() error {
-		return TORR.DelTag(s.QbtTag())
-	})
 	return wrap.Error()
 }
 

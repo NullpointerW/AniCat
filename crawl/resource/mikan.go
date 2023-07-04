@@ -95,6 +95,7 @@ func selectRss(nodes []*html.Node, cmp string) string {
 }
 
 func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err error) {
+	log.Println("innnnnnn")
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
@@ -106,6 +107,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 		if opt.Group == "" {
 			a := htmlquery.FindOne(doc, defXpathExp)
 			if a == nil {
+				log.Println("flag----not found")
 				err = errs.ErrCrawlNotFound
 				return
 			} else {
@@ -147,6 +149,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 			} else {
 				a := htmlquery.FindOne(doc, defXpathExp)
 				if a == nil {
+					log.Println("flag----not found")
 					err = errs.ErrCrawlNotFound
 					return
 				} else {
@@ -291,6 +294,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 			rgs = append(rgs, rg)
 		}
 		if len(rgs) == 0 {
+			log.Println("flag---not found")
 			err = errs.ErrCrawlNotFound
 			return
 		}

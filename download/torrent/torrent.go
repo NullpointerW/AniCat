@@ -86,6 +86,24 @@ func DLcompl(h string) (bool, error) {
 	return torr.Progress == 1, nil
 }
 
+
+func DelViaCateg(categ string) error {
+	// util.Debugln("abs_path:", p)
+	torrs, err := GetViaCateg(categ)
+	if err != nil {
+		return err
+	}
+	var hs []string
+	for _, torr := range torrs {
+		hs = append(hs, torr.Hash)
+	}
+	return DL.Qbt.DelTorrentsFs(hs...)
+}
+
+func Del(hash string) error {
+	return DL.Qbt.DelTorrentsFs(hash)
+}
+
 func DelTorrs(p string) error {
 	// util.Debugln("abs_path:", p)
 	torrs, err := GetViaPath(p)
