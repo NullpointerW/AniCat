@@ -102,7 +102,7 @@ func (s *Subject) checkDL() (err error) {
 		util.Debugln("subj:", s.SubjId, "is rss typ,start check DL")
 		if s.Typ == TV && s.EndTime != "" {
 			util.Debugln("subj:", s.SubjId, "is TV and epi fin ")
-			e, err := util.ParseTime(s.EndTime)
+			e, err := util.ParseTime(s.EndTime,util.YMDParseLayout)
 			util.Debugln("subj:", s.SubjId, "epi endtime is ", util.ParseTimeStr(e))
 			if err != nil {
 				return err

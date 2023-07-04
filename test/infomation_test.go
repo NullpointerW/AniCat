@@ -2,9 +2,11 @@ package test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	I "github.com/NullpointerW/anicat/crawl/information"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 func TestInfoSearch(t *testing.T) {
@@ -34,11 +36,12 @@ func TestBgmTVInfoScrape(t *testing.T) {
 	}
 }
 
-func TestTMDB(t *testing.T){
- n,d,e:= I.FloderSearch(I.TMDB_TYP_TV,"凉宫春日的忧郁")
- if e!=nil{
-	t.Error(e)
-	t.FailNow()
- }
- t.Log(n,d)
+func TestTMDB(t *testing.T) {
+	_, d, e := I.FloderSearch(I.TMDB_TYP_TV, "凉宫春日的忧郁")
+	if e != nil {
+		t.Error(e)
+		t.FailNow()
+	}
+	pd,_:=util.ParseShort02Time(strings.ReplaceAll(d, " ", ""))
+	fmt.Println(pd)
 }

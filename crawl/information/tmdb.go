@@ -17,9 +17,9 @@ var (
 	dateXpathExp = root + `/span[@class='release_date']`
 )
 
-func FloderSearch(t, searchstr string) (n, d string, err error) {
+func FloderSearch(typ, searchstr string) (name, date string, err error) {
 	url := TMDB_HOST + fmt.Sprintf(TMDBAPIs["search"], TMDB_TYP_TV, "")
-	if t == TMDB_TYP_MOVIE {
+	if typ == TMDB_TYP_MOVIE {
 		url = TMDB_HOST + fmt.Sprintf(TMDBAPIs["search"], TMDB_TYP_MOVIE, "")
 	}
 	fmt.Println(url)
@@ -32,14 +32,14 @@ func FloderSearch(t, searchstr string) (n, d string, err error) {
 		}
 		nameH2 := htmlquery.FindOne(doc, nameXpathExp)
 		if nameH2 != nil {
-			n = htmlquery.InnerText(nameH2)
+			name = htmlquery.InnerText(nameH2)
 		} else {
 			err = errs.ErrCrawlNotFound
 			return
 		}
 		dateSpan := htmlquery.FindOne(doc, dateXpathExp)
 		if dateSpan != nil {
-			d = htmlquery.InnerText(dateSpan)
+			date = htmlquery.InnerText(dateSpan)
 		} else {
 			err = errs.ErrCrawlNotFound
 			return
@@ -60,5 +60,5 @@ func FloderSearch(t, searchstr string) (n, d string, err error) {
 	})
 
 	c.Visit(url + CR.ConstructSearch(searchstr))
-	return n, d, err
+	return name, date, err
 }

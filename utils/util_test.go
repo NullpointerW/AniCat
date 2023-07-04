@@ -12,7 +12,7 @@ func (t tests) Print() {
 }
 
 func TestXxx(t *testing.T) {
-	ti, err := ParseTime("2009年4月12日")
+	ti, err := ParseTime("2009年4月12日",YMDParseLayout)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

@@ -2,6 +2,7 @@ package subject
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -60,12 +61,12 @@ func initFolder(subject *Subject) (err error) {
 	var folderPath string
 
 	folderPath = trimPath(HOME)
-	sd, err := util.ParseShortTime(subject.StartTime)
+	sd, err := util.ParseShort02Time(strings.ReplaceAll(subject.FolderTime, " ", ""))
 	if err != nil {
 		return err
 	}
 
-	folderPath += "/" + subject.Name + " (" + sd + ")"
+	folderPath += "/" + subject.FolderName + " (" + sd + ")"
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
@@ -86,7 +87,8 @@ func rmFolder(s *Subject) error {
 func (s *Subject) writeJson() (err error) {
 	b, _ := json.Marshal(*s)
 	fldrp := s.Path
-	err = os.WriteFile(fldrp+"/"+jsonfileName, b, os.ModePerm)
+	jsfn := fmt.Sprintf(jsonfileName, s.Season)
+	err = os.WriteFile(fldrp+"/"+jsfn, b, os.ModePerm)
 	return err
 }
 

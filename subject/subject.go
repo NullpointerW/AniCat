@@ -25,6 +25,7 @@ import (
 // while some of fileds have updating it will be refresh to OS file
 type Subject struct {
 	SubjId      int         `json:"subjId"`
+	FolderName  string      `json:"folderName"` // source from tmdb
 	Name        string      `json:"name"`
 	Path        string      `json:"path"`
 	Finished    bool        `json:"finished"`
@@ -32,6 +33,7 @@ type Subject struct {
 	ResourceTyp ResourceTyp `json:"resourceTyp"`
 	ResourceUrl string      `json:"resourceUrl"`
 	Typ         BgmiTyp     `json:"typ"`
+	FolderTime  string      `json:"folderTime"` // source from tmdb
 	StartTime   string      `json:"startTime"`
 	EndTime     string      `json:"endTime"`
 	Alias       string      `json:"alias"`
@@ -181,7 +183,7 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 		subj.StartTime = tips[IC.SubjStartTime]
 		if et, e := tips[IC.SubjectEndTime]; e {
 			n := time.Now()
-			eti, err := util.ParseTime(et)
+			eti, err := util.ParseTime(et, util.YMDParseLayout)
 			if err != nil {
 				return err
 			}
@@ -193,6 +195,16 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 		subj.Finished = true
 	}
 	subj.Alias = tips[IC.Alias]
+	// source from tmdb
+	var tmdbTyp = IC.TMDB_TYP_TV
+	if subj.Typ == MOVIE {
+		tmdbTyp = IC.TMDB_TYP_MOVIE
+	}
+	var err error
+	subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.Name)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

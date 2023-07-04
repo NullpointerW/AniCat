@@ -33,7 +33,7 @@ const (
 // file-related
 const (
 	FolderSuffix = "@anicat"
-	jsonfileName = "meta-data.json"
+	jsonfileName = "meta-data#%s.json"
 )
 
 // qbt tag generation template
