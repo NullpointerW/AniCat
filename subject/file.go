@@ -82,6 +82,25 @@ func initFolder(subject *Subject) (err error) {
 	return
 }
 
+func RmFolder(s *Subject) error {
+	fs, err := os.ReadDir(s.Path)
+	if err != nil {
+		return err
+	}
+	var c int
+	for _, f := range fs {
+		isf := !f.IsDir()
+		if isf && util.IsJsonFile(f.Name()) && strings.Contains(f.Name(), "meta-data#") {
+			c++
+		}
+	}
+	if c > 1 {
+		return os.Remove(s.Path + "/" + fmt.Sprintf("meta-data#%s.json", s.Season))
+	} else {
+		return rmFolder(s)
+	}
+}
+
 func rmFolder(s *Subject) error {
 	return os.RemoveAll(s.Path)
 }

@@ -38,14 +38,14 @@ func init() {
 }
 
 var Manager = SubjectManager{
-	mu:     new(sync.Mutex),
-	sto:    make(map[int]*Subject),
+	mu:  new(sync.Mutex),
+	sto: make(map[int]*Subject),
 	// sp_sid: make(map[string]int),
 }
 
 type SubjectManager struct {
-	mu     *sync.Mutex
-	sto    map[int]*Subject
+	mu  *sync.Mutex
+	sto map[int]*Subject
 	// sp_sid map[string]int
 	// a snapshot copy from the last list()-calling make caller fast get list
 	copy []Subject
@@ -115,7 +115,7 @@ func StartManagement() {
 				}
 				Manager.Remove(s)
 				s.RmRes()
-				err := rmFolder(s)
+				err := RmFolder(s)
 				if err != nil {
 					p.err = err
 				}
