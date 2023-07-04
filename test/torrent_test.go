@@ -53,3 +53,11 @@ func TestAdd(t *testing.T) {
 	}
 	t.Log(hash)
 }
+
+func TestCateg(t *testing.T){
+	hs,err:=TORR.GetViaCateg("anicat@subj-274234")
+	if err!=nil{
+		t.Error(err)
+	}
+	t.Log(hs)
+}

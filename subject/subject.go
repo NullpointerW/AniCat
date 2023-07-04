@@ -87,6 +87,10 @@ func (s *Subject) QbtTag() string {
 	return fmt.Sprintf(QbtTag, s.SubjId)
 }
 
+func (s *Subject) QbtCateg() string {
+	return s.QbtTag()
+}
+
 func (s *Subject) RssPath() string {
 	return s.QbtTag()
 }
@@ -286,16 +290,16 @@ func download(subj *Subject, ext *Extra) error {
 			}
 		}
 		log.Printf("%d:%s not matched any collection \n", subj.SubjId, subj.Name)
-		categ := subj.QbtTag()
-		err = torrent.AddCategroy(categ)
+	
+		err = torrent.AddCategroy(subj.QbtCateg())
 		if err != nil {
 			return err
 		}
-		err = rss.SetAutoDLRule(subj.ResourceUrl, categ, subj.Path, subj.RssPath())
+		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath())
 		return err
 	} else {
-		categ := subj.QbtTag()
-		err := torrent.AddCategroy(categ)
+		
+		err := torrent.AddCategroy(subj.QbtCateg())
 		if err != nil {
 			return err
 		}
@@ -303,7 +307,7 @@ func download(subj *Subject, ext *Extra) error {
 			Enabled:          true,
 			AffectedFeeds:    []string{subj.ResourceUrl},
 			SavePath:         subj.Path,
-			AssignedCategory: categ,
+			AssignedCategory: subj.QbtCateg(),
 		}
 		if ext != nil {
 			r.UseRegex = ext.RssOption.UseRegex

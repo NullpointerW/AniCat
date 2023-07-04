@@ -39,6 +39,20 @@ func Get(h string) (torr qbt.Torrent, err error) {
 	return
 }
 
+func GetViaCateg(category string) (hits []qbt.Torrent, err error) {
+	hits, err = DL.Qbt.TorrentList(qbt.Optional{
+		"filter":   "all",
+		"category": category,
+	})
+	if err != nil {
+		return hits, err
+	}
+	if len(hits) == 0 {
+		return hits, errs.ErrTorrnetNotFound
+	}
+	return
+}
+
 func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 	path = util.FileSeparatorConv(path)
 	torrs, err := DL.Qbt.TorrentList(qbt.Optional{

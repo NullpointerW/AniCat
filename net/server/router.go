@@ -73,12 +73,22 @@ func route(c *cmd.Command) {
 			c.Err = errs.ErrSubjectNotFound
 			return
 		}
-		hs, err := torrent.GetViaPath(subj.Path)
-		if err != nil {
-			c.Err = err
-			return
+
+		if subj.ResourceTyp == subject.Torrent {
+			h, err := torrent.Get(subj.TorrentHash)
+			if err != nil {
+				c.Err = err
+				return
+			}
+			c.N = view.TableRender.Status(subj, h)
+		} else {
+			hs, err := torrent.GetViaCateg(subj.QbtCateg())
+			if err != nil {
+				c.Err = err
+				return
+			}
+			c.N = view.TableRender.Status(subj, hs...)
 		}
-		c.N = view.TableRender.Status(subj, hs)
 
 	case cmd.Stop:
 		for _, s := range subject.Manager.List() {

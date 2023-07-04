@@ -92,7 +92,7 @@ func (_ mergTb) Ls(ls []subject.Subject) string {
 	return "\n" + tableString.String()
 }
 
-func (_ mergTb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
+func (_ mergTb) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
 	var row [][]string
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
