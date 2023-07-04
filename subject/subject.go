@@ -236,6 +236,7 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				return err
 			}
+}
 		return err
 	}
 
