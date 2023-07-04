@@ -86,3 +86,13 @@ func TestExtra(t *testing.T){
 		}
 	}
 }
+
+
+func TestFoundLastS(t *testing.T) {
+	l,err:=subject.FindLastSeason(`D:\anicat\吹响！悠风号 (201504)`)
+	if err!=nil{
+		t.Error(l)
+		t.FailNow()
+	}
+	t.Log(l)
+}

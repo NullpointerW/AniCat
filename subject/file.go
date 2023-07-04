@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/download"
@@ -32,7 +33,8 @@ func Scan() {
 					continue
 				}
 				for _, ff := range fs {
-					if util.IsJsonFile(ff.Name()) && strings.Contains(ff.Name(), "meta-data") {
+					isf := !ff.IsDir()
+					if isf && util.IsJsonFile(ff.Name()) && strings.Contains(ff.Name(), "meta-data#") {
 						if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + ff.Name()); err == nil {
 							var s Subject
 							err := json.Unmarshal(jsraw, &s)
@@ -115,4 +117,27 @@ func (s *Subject) RmRes() error {
 
 func trimPath(n string) string {
 	return strings.TrimSuffix(strings.TrimSuffix(CFG.Env.SubjPath, "\\"), "/")
+}
+
+func FindLastSeason(p string) (int, error) {
+	fs, err := os.ReadDir(p)
+	if err != nil {
+		return -1, err
+	}
+	var max int
+	for _, f := range fs {
+		isf := !f.IsDir()
+		if isf && util.IsJsonFile(f.Name()) && strings.Contains(f.Name(), "meta-data#") {
+			s := strings.Split(f.Name(), ".")[0]
+			s = strings.ReplaceAll(s, "meta-data#", "")
+			cmp, err := strconv.Atoi(s)
+			if err != nil {
+				return -1, err
+			}
+			if cmp > max {
+				max = cmp
+			}
+		}
+	}
+	return max, nil
 }

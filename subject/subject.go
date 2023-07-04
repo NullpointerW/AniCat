@@ -128,24 +128,34 @@ func CreateSubject(n string, ext *Extra) error {
 	if err != nil {
 		return err
 	}
-
-	cp := subject.Path + "/" + CoverFN
-	err = CC.TouchbgmCoverImg(sid, cp)
+	lastS, err := FindLastSeason(subject.Path)
 	if err != nil {
-		log.Println(err)
-		err = CC.DOUBANCoverScraper.Scrape(cp, n)
+		return err
+	}
+	curr, err := strconv.Atoi(subject.Season)
+	if err != nil {
+		return err
+	}
+
+	if curr > lastS {
+		cp := subject.Path + "/" + CoverFN
+		err = CC.TouchbgmCoverImg(sid, cp)
 		if err != nil {
-			retry := 0
-			for err == errs.ErrCoverDownLoadZeroSize {
-				retry++
-				if retry >= 3 {
+			log.Println(err)
+			err = CC.DOUBANCoverScraper.Scrape(cp, n)
+			if err != nil {
+				retry := 0
+				for err == errs.ErrCoverDownLoadZeroSize {
+					retry++
+					if retry >= 3 {
+						return err
+					}
+					time.Sleep(500 * time.Millisecond)
+					err = CC.DOUBANCoverScraper.Scrape(cp, n)
+				}
+				if err != nil {
 					return err
 				}
-				time.Sleep(500 * time.Millisecond)
-				err = CC.DOUBANCoverScraper.Scrape(cp, n)
-			}
-			if err != nil {
-				return err
 			}
 		}
 	}
