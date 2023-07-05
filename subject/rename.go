@@ -42,7 +42,7 @@ func renameTV(s *Subject, fn string) (string, error) {
 	sp := strings.Split(fn, sep)
 	extension := sp[len(sp)-1]
 	extension = sep + extension
-	basename := s.Name
+	basename := s.FolderName
 	season := "S"
 	episode := "E"
 
