@@ -39,7 +39,10 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			err = e
 			return
 		}
-		a := htmlquery.Find(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/ul[@class='list-inline an-ul']/li`)
+		a := htmlquery.Find(doc, `/html/body[@class='main']/
+		div[@id='sk-container']/
+		div[@class='central-container']/
+		ul[@class='list-inline an-ul']/li`)
 		if len(a) != 0 {
 			ep, bgmurl, e := scrapeRssEndPoint(selectRss(a, searchstr), opt)
 			if e != nil {
@@ -54,7 +57,13 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			if opt.Index <= 0 {
 				opt.Index = 1
 			}
-			mglinkTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[1]/a[2]/@data-clipboard-text`
+			mglinkTemp := `/html/body[@class='main']/
+			div[@id='sk-container']/
+			div[@class='central-container']/
+			table[@class='table table-striped tbl-border fadeIn']/
+			tbody/
+			tr[@class='js-search-results-row'][%d]
+			/td[1]/a[2]/@data-clipboard-text`
 			mglink := htmlquery.FindOne(doc, fmt.Sprintf(mglinkTemp, opt.Index))
 
 			if mglink != nil {
@@ -86,7 +95,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 func selectRss(nodes []*html.Node, cmp string) string {
 	var targer *html.Node
 	for i, n := range nodes {
-		div:=htmlquery.FindOne(n,`/a/div/div/div`)
+		div := htmlquery.FindOne(n, `/a/div/div/div`)
 		if name := htmlquery.InnerText(div); name == cmp || i == 0 {
 			targer = htmlquery.FindOne(n, `/a/@href`)
 		}
@@ -95,7 +104,6 @@ func selectRss(nodes []*html.Node, cmp string) string {
 }
 
 func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err error) {
-	log.Println("innnnnnn")
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
@@ -103,11 +111,13 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 			err = e
 			return
 		}
-		defXpathExp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text'][1]/a[@class='mikan-rss']/@href`
+		defXpathExp := `/html/body[@class='main']/div[@id='sk-container']/
+		div[@class='central-container']/
+		div[@class='subgroup-text'][1]/
+		a[@class='mikan-rss']/@href`
 		if opt.Group == "" {
 			a := htmlquery.FindOne(doc, defXpathExp)
 			if a == nil {
-				log.Println("flag----not found")
 				err = errs.ErrCrawlNotFound
 				return
 			} else {
@@ -149,7 +159,6 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 			} else {
 				a := htmlquery.FindOne(doc, defXpathExp)
 				if a == nil {
-					log.Println("flag----not found")
 					err = errs.ErrCrawlNotFound
 					return
 				} else {
@@ -157,7 +166,10 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 				}
 			}
 		}
-		bgmXpathExp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='pull-left leftbar-container']/p[@class='bangumi-info'][last()]/a/@href`
+		bgmXpathExp := `/html/body[@class='main']/div[@id='sk-container']/
+		div[@class='pull-left leftbar-container']/
+		p[@class='bangumi-info'][last()]/
+		a/@href`
 		a := htmlquery.FindOne(doc, bgmXpathExp)
 		if a == nil {
 			err = errs.ErrBgmUrlNotFoundOnMikan
@@ -188,7 +200,10 @@ func ListScrape(searchstr string, t LsTyp) (res any, err error) {
 			err = e
 			return
 		}
-		a := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/ul[@class='list-inline an-ul']/li/a//@href`)
+		a := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/
+		div[@class='central-container']/
+		ul[@class='list-inline an-ul']/
+		li/a//@href`)
 		if a != nil {
 			res, e = scrapeRssList(htmlquery.InnerText(a), t)
 			if e != nil {
@@ -199,11 +214,36 @@ func ListScrape(searchstr string, t LsTyp) (res any, err error) {
 			log.Println(searchstr, "resource ls: torr typ")
 			switch t {
 			case Ls:
-				fnTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[1]/a[@class='magnet-link-wrap']`
-				szTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[2]`
-				uptTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[3]`
-				// torrTemp := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[4]/a/@href`)
-				nodes := htmlquery.Find(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row']`)
+				fnTemp := `/html/body[@class='main']/div[@id='sk-container']/
+				div[@class='central-container']/
+				table[@class='table table-striped tbl-border fadeIn']/
+				tbody/
+				tr[@class='js-search-results-row'][%d]/
+				td[1]/
+				a[@class='magnet-link-wrap']`
+				szTemp := `/html/body[@class='main']/div[@id='sk-container']/
+				div[@class='central-container']/
+				table[@class='table table-striped tbl-border fadeIn']/
+				tbody/
+				tr[@class='js-search-results-row'][%d]/
+				td[2]`
+				uptTemp := `/html/body[@class='main']/div[@id='sk-container']/
+				div[@class='central-container']/
+				table[@class='table table-striped tbl-border fadeIn']/
+				tbody/
+				tr[@class='js-search-results-row'][%d]/
+				td[3]`
+				/*
+				 torrTemp := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/
+				 div[@class='central-container']/
+				 table[@class='table table-striped tbl-border fadeIn']/
+				 tbody/
+				 tr[@class='js-search-results-row'][%d]/
+				 td[4]/a/@href`)
+				*/
+				nodes := htmlquery.Find(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/
+				table[@class='table table-striped tbl-border fadeIn']/
+				tbody/tr[@class='js-search-results-row']`)
 				var items []Item
 				for i, _ := range nodes {
 					fn := htmlquery.FindOne(doc, fmt.Sprintf(fnTemp, i+1))
@@ -256,7 +296,9 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 			err = errs.ErrUnknownResCrawlLsType
 			return
 		}
-		trsTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/table[@class='table table-striped tbl-border fadeIn'][%d]/tbody/tr`
+		trsTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/
+		table[@class='table table-striped tbl-border fadeIn'][%d]/
+		tbody/tr`
 		itnExp := `/td[1]/a[@class='magnet-link-wrap']`
 		szExp := `/td[2]`
 		uptExp := `/td[3]`

@@ -104,7 +104,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 }
 
 func downloadfile(filepath string, remote io.ReadCloser) error {
-	f, err := os.Create(filepath)
+	f, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return err
 	}

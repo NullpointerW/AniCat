@@ -221,7 +221,6 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 			for _, n := range strings.Split(subj.Alias, "|") {
 				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				if err == nil {
-					log.Printf("%#+v", subj)
 					return nil
 				} else if err != errs.ErrCrawlNotFound {
 					return err
@@ -291,7 +290,7 @@ func download(subj *Subject, ext *Extra) error {
 			return err
 		}
 		for _, a := range it.Articles {
-			log.Println(a.Description)
+			util.Debugln(a.Description)
 			desc := a.Description
 			for _, reg := range coll_regs {
 				re, err := regexp.Compile(reg)

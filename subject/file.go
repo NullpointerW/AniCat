@@ -70,7 +70,7 @@ func initFolder(subject *Subject) (err error) {
 
 	folderPath += "/" + subject.FolderName + " (" + sd + ")"
 
-	err = os.MkdirAll(folderPath, os.ModePerm)
+	err = os.MkdirAll(folderPath, 0777)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (s *Subject) writeJson() (err error) {
 	b, _ := json.Marshal(*s)
 	fldrp := s.Path
 	jsfn := fmt.Sprintf(jsonfileName, s.Season)
-	err = os.WriteFile(fldrp+"/"+jsfn, b, os.ModePerm)
+	err = os.WriteFile(fldrp+"/"+jsfn, b, 0777)
 	return err
 }
 

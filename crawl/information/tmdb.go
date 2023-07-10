@@ -41,7 +41,7 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 		if dateSpan != nil {
 			date = htmlquery.InnerText(dateSpan)
 		} else {
-			err = errs.ErrCrawlNotFound
+			err = errs.Custom("%w:TMDB info not found", errs.ErrCrawlNotFound)
 			return
 		}
 	})

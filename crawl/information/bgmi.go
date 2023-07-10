@@ -55,8 +55,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			sid := s[len(s)-1]
 			tips["sid"] = sid
 		} else {
-			log.Println("nofound bgmi cover")
-			err = errs.ErrCrawlNotFound
+			err = errs.Custom("%w:bgmi info not found", errs.ErrCrawlNotFound)
 			return
 		}
 	})
@@ -66,7 +65,6 @@ func DoScrape(url string) (tips map[string]string, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		log.Println("Something went wrong:", e)
 		err = e
 	})
 
