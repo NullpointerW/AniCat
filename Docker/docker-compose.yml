@@ -2,12 +2,13 @@ version: "3.9"
 services:
 
   anicat:
-    image: wmoon/anicat:latest
-    container_name: ab
+    image: wmooon/anicat:latest
+    container_name: anicat
     ports:
       - 9996:8080
     depends_on:
       - qb
+    user: "1000:1000"
     volumes:
       - ./cfg/env.yaml:/opt/env.yaml
       - ./bangumi:/bangumi
