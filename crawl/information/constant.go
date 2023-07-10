@@ -5,7 +5,7 @@ package information
 const (
 	infoBaseUrl      = `https://bgm.tv`
 	infoPageXpathExp = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='main'][2]/div[@class='columns clearit']/div[@id='columnSearchB']/ul[@id='browserItemList']/li[1]/div[@class='inner']/h3/a[@class='l']/@href`
-	infoXpathExp     = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@class='mainWrapper']/div[@class='columns clearit']/div[@id='columnSubjectHomeA']/div[@id='bangumiInfo']/div[@class='infobox']/ul[@id='infobox']/li`
+	infoXpathExp     = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@class='mainWrapper']/div[@class='columns clearit']/div[@id='columnSubjectHomeA']/div[@id='bangumiInfo']/div[@class='infobox']/div[@class='infobox_container']/ul[@id='infobox']/li`
 )
 
 // keys for info map Scrape from bgm.tv
