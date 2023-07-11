@@ -117,14 +117,14 @@ func (s *Subject) RmRes() error {
 	wrap := errs.ErrWrapper{}
 	if s.ResourceTyp == RSS {
 		wrap.Handle(func() error {
+			return TORR.DelViaCateg(s.QbtCateg())
+		})
+		wrap.Handle(func() error {
 			categ := s.QbtTag()
 			return DL.Qbt.RmCategoies(categ)
 		})
 		wrap.Handle(func() error {
 			return rss.RmRss(s.RssPath())
-		})
-		wrap.Handle(func() error {
-			return TORR.DelViaCateg(s.QbtCateg())
 		})
 	} else {
 		wrap.Handle(func() error {
