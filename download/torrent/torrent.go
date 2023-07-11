@@ -12,13 +12,22 @@ func Add(url, path, tag string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	DL.Wait(1000) // wait for qbt
-	torrs, err := DL.Qbt.TorrentList(qbt.Optional{
-		"filter": "all",
-		"tag":    tag,
-	})
+	var torrs []qbt.Torrent
+	ok, err := DL.DoFetch(func() (recvd bool, err error) {
+		torrs, err = DL.Qbt.TorrentList(qbt.Optional{
+			"filter": "all",
+			"tag":    tag,
+		})
+		if err != nil {
+			return false, err
+		}
+		return len(torrs) > 0, nil
+	}, 3000)
 	if err != nil {
 		return "", err
+	}
+	if !ok {
+		return "", errs.ErrQbtDataNotFound
 	}
 
 	return torrs[0].Hash, nil
@@ -85,7 +94,6 @@ func DLcompl(h string) (bool, error) {
 	}
 	return torr.Progress == 1, nil
 }
-
 
 func DelViaCateg(categ string) error {
 	// util.Debugln("abs_path:", p)

@@ -1,8 +1,8 @@
 package rss
 
 import (
-	
 	DL "github.com/NullpointerW/anicat/download"
+	"github.com/NullpointerW/anicat/errs"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 
@@ -29,14 +29,27 @@ func SetAutoDLRule(rssurl, categ, dlpath, rsspath string) error {
 
 }
 
+// called only for finshed items with rss type for now
 func AddAndGetItems(url, path string) (*qbt.Item, error) {
 	err := DL.Qbt.AddFeed(url, path)
 	if err != nil {
 		return nil, err
 	}
-	DL.Wait(1000)
-	it, err := GetItems(path)
-	return it, err
+	var it *qbt.Item
+	ok, err := DL.DoFetch(func() (bool, error) {
+		it, err = GetItems(path)
+		if err != nil {
+			return false, err
+		}
+		return len(it.Articles) > 0, nil
+	}, 3000)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, errs.ErrQbtDataNotFound
+	}
+	return it, nil
 }
 
 func GetMatchedArts(rssPath string) (arts []string, err error) {

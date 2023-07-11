@@ -175,9 +175,19 @@ func CreateSubject(n string, ext *Extra) error {
 	subject.runtimeInit(false)
 
 	if subject.ResourceTyp == RSS {
-		DL.Wait(1500) // wait for qbt
-		a, err := rss.GetMatchedArts(subject.RssPath())
-		if err == nil && len(a) == 0 {
+		// DL.Wait(1500) // wait for qbt
+		m, err := DL.DoFetch(func() (recvd bool, err error) {
+			a, err := rss.GetMatchedArts(subject.RssPath())
+			if err != nil {
+				return false, err
+			}
+			return len(a) > 0, nil
+		}, 3000)
+		if err != nil {
+			log.Println(errs.Custom("check rss matched item error:%w subjid:%d", err, subject.SubjId))
+			return nil
+		}
+		if !m {
 			return errs.WarnRssRuleNotMatched
 		}
 	}

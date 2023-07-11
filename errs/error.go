@@ -13,6 +13,7 @@ var (
 
 	ErrTorrnetNotFound           = errors.New("there are no torrent files on qbt")
 	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
+	ErrQbtDataNotFound           = errors.New("no data found from the api request (should be found)")
 	ErrSubjectAlreadyExisted     = errors.New("subject already existed")
 	ErrSubjectNotFound           = errors.New("subject not found")
 	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on anicat")
