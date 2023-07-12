@@ -22,7 +22,7 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 	if typ == TMDB_TYP_MOVIE {
 		url = TMDB_HOST + fmt.Sprintf(TMDBAPIs["search"], TMDB_TYP_MOVIE, "")
 	}
-	fmt.Println(url)
+	
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))

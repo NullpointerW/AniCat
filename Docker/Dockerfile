@@ -4,8 +4,10 @@ ADD .  /opt
 
 ENV  GOPROXY=https://goproxy.cn,direct 
 
+ENV  DEBUG false
+
 RUN go build -o anicat 
 
 EXPOSE 8080
 
-CMD ["/opt/anicat"]
+CMD ["/bin/sh", "-c", "/opt/anicat -d $DEBUG"]

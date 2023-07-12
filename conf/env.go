@@ -1,13 +1,14 @@
 package conf
 
 import (
-	"io"
+	// "io"
 	"runtime"
 
 	"log"
 	"os"
 
 	"github.com/NullpointerW/anicat/errs"
+	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,19 +51,18 @@ func loginit(debug bool) {
 		flag |= log.Lshortfile
 	}
 	log.SetFlags(flag)
-	f, err := os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
-	if err != nil {
-		log.Println(err)
-	} else {
-		if runtime.GOOS == "windows" {
-			log.SetOutput(f)
-		} else {
-			mio := io.MultiWriter(os.Stderr, f)
-			log.SetOutput(mio)
+
+	if runtime.GOOS == "windows" {
+		f, err := os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
+		if err != nil {
+			log.Println(err)
+			return
 		}
-		log.Println("os:", runtime.GOOS)
-		if debug {
-			log.Println("debug mode")
-		}
+		log.SetOutput(f)
 	}
+	// else {
+	// 	mio := io.MultiWriter(os.Stderr, f)
+	// 	log.SetOutput(mio)
+	// }
+	util.Debugln("os:", runtime.GOOS,"debug mode")
 }
