@@ -32,6 +32,9 @@ func ConvertZhCnNumbToa(cnn string) string {
 	runes := []rune(cnn)
 	nl := len(runes)
 	if nl == 1 {
+		if cnn == "十" {
+			return "10"
+		}
 		return string(zh_cn_numb[runes[0]])
 	} else if nl == 2 {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[1]]))
