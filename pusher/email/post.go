@@ -7,6 +7,7 @@ import (
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/pusher"
+	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/gomail.v2"
 )
 
@@ -17,7 +18,12 @@ var (
 
 type Sender struct{}
 
+
 func (_ Sender) Push(p pusher.Payload) error {
+	if sender == nil {
+		util.Debugln("email push disable")
+		return nil
+	}
 	m := gomail.NewMessage()
 	// Sender
 	m.SetHeader("From", from)
@@ -38,6 +44,10 @@ func (_ Sender) Push(p pusher.Payload) error {
 }
 
 func init() {
+	if CFG.Env.Pusher.Email.Host == "" {
+		log.Println("email push disable")
+		return
+	}
 	sender = gomail.NewDialer(
 		CFG.Env.Pusher.Email.Host,
 		CFG.Env.Pusher.Email.Port,
