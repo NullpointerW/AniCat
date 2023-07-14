@@ -21,6 +21,7 @@ type Environment struct {
 		Username     string `yaml:"username"`
 		Password     string `yaml:"password"`
 		LocalConnect bool   `yaml:"localed"`
+		Timeout      int    `yaml:"timeout"`
 	} `yaml:"qbittorrent"`
 	Proxies          []string `yaml:"proxies"`
 	SubjPath         string   `yaml:"path"`
@@ -42,6 +43,9 @@ func init() {
 	b, err := os.ReadFile(EnvPath)
 	errs.PanicErr(err)
 	errs.PanicErr(yaml.Unmarshal(b, &Env))
+	if Env.Qbt.Timeout <= 0 {
+		Env.Qbt.Timeout = 3000
+	}
 	log.Printf("env:\n%#+v\n", Env)
 }
 
@@ -64,5 +68,5 @@ func loginit(debug bool) {
 	// 	mio := io.MultiWriter(os.Stderr, f)
 	// 	log.SetOutput(mio)
 	// }
-	util.Debugln("os:", runtime.GOOS,"debug mode")
+	util.Debugln("os:", runtime.GOOS, "debug mode")
 }

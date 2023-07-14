@@ -5,6 +5,7 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	CFG "github.com/NullpointerW/anicat/conf"
 )
 
 func Add(url, path, tag string) (string, error) {
@@ -22,12 +23,12 @@ func Add(url, path, tag string) (string, error) {
 			return false, err
 		}
 		return len(torrs) > 0, nil
-	}, 3000)
+	}, CFG.Env.Qbt.Timeout)
 	if err != nil {
 		return "", err
 	}
 	if !ok {
-		return "", errs.ErrQbtDataNotFound
+		return "", errs.Custom("%w:get added torr hash fail,torr tag:%s", errs.ErrQbtDataNotFound, tag)
 	}
 
 	return torrs[0].Hash, nil
