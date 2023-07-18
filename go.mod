@@ -34,7 +34,7 @@ require (
 )
 
 require (
-	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.11
+	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.12
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/antchfx/htmlquery v1.3.0

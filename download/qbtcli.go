@@ -22,6 +22,21 @@ func init() {
 	}
 	errs.PanicErr(err)
 	Qbt = cli
+	err = qbtRssEnable()
+	errs.PanicErr(err)
+}
+
+func qbtRssEnable() error {
+	cfg, err := Qbt.GetPreferences()
+	if err != nil {
+		return err
+	}
+	cfg.RSSAutoDownloadingEnabled = true
+	cfg.RSSProcessingEnabled = true
+	cfg.RSSMaxArticlesPerFeed = 50
+	cfg.RSSRefreshInterval = 25
+	err = Qbt.SetPreferences(cfg)
+	return err
 }
 
 func Wait(ms int) {

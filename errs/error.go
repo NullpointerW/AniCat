@@ -3,6 +3,8 @@ package errs
 import (
 	"errors"
 	"fmt"
+	"log"
+	"runtime"
 )
 
 var (
@@ -58,6 +60,9 @@ func Custom(format string, a ...any) error {
 
 func PanicErr(err error) {
 	if err != nil {
+		if runtime.GOOS == "windows" {
+			log.Println("PANIC:", err)
+		}
 		panic(err)
 	}
 }
