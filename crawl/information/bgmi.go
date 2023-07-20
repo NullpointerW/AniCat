@@ -61,7 +61,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
@@ -85,7 +85,6 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		a := htmlquery.FindOne(doc, infoPageXpathExp)
 		if a != nil {
 			p = htmlquery.InnerText(a)
-			fmt.Println(htmlquery.InnerText(a))
 		} else {
 			// fmt.Println("NOT FOUND")
 			err = errs.ErrCrawlNotFound
@@ -94,7 +93,7 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {

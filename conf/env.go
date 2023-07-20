@@ -56,7 +56,7 @@ func loginit(debug bool) {
 	}
 	log.SetFlags(flag)
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows"&&!IDEdebugging {
 		f, err := os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
 		if err != nil {
 			log.Println(err)

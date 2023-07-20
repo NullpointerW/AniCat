@@ -66,9 +66,9 @@ func process(c *N.Conn) {
 				c.Write(rep.N)
 				continue
 			}
-			util.Debugln("ls::after parse cmd", rep)
+			
 			route(&rep)
-			util.Debugln("ls::after route(&rep)")
+
 			if rep.Err != nil {
 				util.Debugln("ls::in err{}")
 				var s string
@@ -84,7 +84,7 @@ func process(c *N.Conn) {
 			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup || rep.Opt == cmd.Status || rep.Opt == cmd.Stop {
 				c.Write(rep.N)
 				util.Debugln("ls::rep.N")
-				util.Debugln(rep.N)
+				// util.Debugln(rep.N)
 				if rep.Opt == cmd.Stop {
 					os.Exit(0)
 				}

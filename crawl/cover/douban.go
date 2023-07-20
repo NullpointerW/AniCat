@@ -46,7 +46,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		a := htmlquery.FindOne(doc, exp)
 		m := htmlquery.InnerText(a)
 		dl := strings.ReplaceAll(m, `/m/`, `/l/`)
-		fmt.Println("cover file url:", dl)
+		log.Println("douban cover: file url:", dl)
 		//download
 
 		resp, e := http.Get(dl)
@@ -63,7 +63,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
@@ -86,7 +86,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
@@ -94,7 +94,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		fmt.Printf("coverScrapUrl=%s \n", cUrl)
+		log.Printf("coverScrapUrl=%s \n", cUrl)
 	})
 
 	parseParam := CR.ConstructSearch(coverName)

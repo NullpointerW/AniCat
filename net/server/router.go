@@ -40,7 +40,7 @@ func route(c *cmd.Command) {
 		util.Debugln("at cmd.Ls")
 		ls := subject.Manager.List()
 		c.N = view.TableRender.Ls(ls)
-		util.Debugln("render table ::", c.N)
+		// util.Debugln("render table ::", c.N)
 	case cmd.LsItems:
 		l, err := CR.ListScrape(c.N, CR.Ls)
 		if err != nil {
