@@ -41,3 +41,15 @@ func ParseTime(strd, layout string) (time.Time, error) {
 func ParseTimeStr(t time.Time) string {
 	return t.Format(YMDParseLayout)
 }
+
+type Timer struct {
+	t time.Time
+}
+
+func (tr *Timer) Start() {
+	tr.t = time.Now()
+}
+
+func (tr *Timer) End() time.Duration {
+	return time.Since(tr.t)
+}
