@@ -28,7 +28,7 @@ const (
 		"stat [subjid]                show downloading status with the subject\n         "+
 		"stop                         terminate program\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
-		"anicat add [name] [arguments]\n   " +
+		"(anicat) add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +
 		"--mn                          the substring that the torrent name must not contain (rss auto download rule)\n         " +
 		"--mc                          the substring that the torrent name must contain (rss auto download rule)\n         " +
@@ -40,7 +40,7 @@ const (
 // just for test
 func TestingString() (text string) {
 	text = "\n   Usage:\n         " +
-		"anicat add [name] [arguments]\n   " +
+		"(anicat) add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +
 		"-mn                          the substring that the torrent name must not contain (rss download rule)\n         " +
 		"-mc                          the substring that the torrent name must contain (rss download rule)\n         " +

@@ -12,8 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	ver    = "0.0.1b"
+var (
+	Ver    = "x.x.x"
 	projlk = "https://github.com/NullpointerW/AniCat"
 )
 
@@ -72,7 +72,7 @@ func init() {
 	if Env.Qbt.Timeout <= 0 {
 		Env.Qbt.Timeout = 3000
 	}
-	log.Println("AniCat", "Ver."+ver, "github:"+projlk)
+	log.Println("AniCat", "Ver."+Ver, "github:"+projlk)
 	// log.Printf("env:\n%#+v\n", Env)
 	Env.Print()
 }
