@@ -16,9 +16,9 @@ func init() {
 		err error
 	)
 	if CFG.Env.Qbt.LocalConnect {
-		cli, err = qbt.NewCli(CFG.Env.Qbt.Host)
+		cli, err = qbt.NewCli(CFG.Env.Qbt.Url)
 	} else {
-		cli, err = qbt.NewCli(CFG.Env.Qbt.Host, CFG.Env.Qbt.Username, CFG.Env.Qbt.Password)
+		cli, err = qbt.NewCli(CFG.Env.Qbt.Url, CFG.Env.Qbt.Username, CFG.Env.Qbt.Password)
 	}
 	errs.PanicErr(err)
 	Qbt = cli

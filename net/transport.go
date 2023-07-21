@@ -63,10 +63,3 @@ func ScanCRLF(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	// Request more data.
 	return 0, nil, nil
 }
-type S struct {
-	TT struct {
-		MustContain    string 
-		MustNotContain string
-		useRegex       bool
-	}
-}

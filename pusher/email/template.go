@@ -81,12 +81,12 @@ const def = `<!DOCTYPE html>
 
 var template string
 
-func init() {
+func tmpInit() {
 	template = def
 	if p := CFG.Env.Pusher.Email.TemplatePath; p != "" {
 		b, err := os.ReadFile(p)
 		if err != nil {
-			log.Printf("load email template file fail:%s \n", err)
+			log.Printf("load email template file fail:%suse default \n", err)
 		} else {
 			template = string(b)
 		}

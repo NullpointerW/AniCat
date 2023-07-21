@@ -17,10 +17,7 @@ func DoFetch(f Fetch, ms int) (recvd bool, err error) {
 			if err != nil {
 				return false, err
 			}
-			if recvd {
-				return true, nil
-			}
+			return recvd, nil
 		}
 	}
-
 }

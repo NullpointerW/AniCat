@@ -18,7 +18,6 @@ var (
 
 type Sender struct{}
 
-
 func (_ Sender) Push(p pusher.Payload) error {
 	if sender == nil {
 		util.Debugln("email push disable")
@@ -59,5 +58,6 @@ func init() {
 		sender.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	log.Println("email dialer init completed")
-
+	CFG.Env.EmailPrint()
+	tmpInit()
 }
