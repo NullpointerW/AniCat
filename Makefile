@@ -8,7 +8,7 @@ all:
 	$(MAKE) linux
 
 windows:
-	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BUILDIR)/$(NAME)-$@-amd64.exe
+	GOARCH=amd64 GOOS=windows $(GOBUILD) '-H=windowsgui' -o $(BUILDIR)/$(NAME)-$@-amd64.exe
 	zip -j $(BUILDIR)/$(NAME)-$@-amd64.zip $(BUILDIR)/$(NAME)-$@-amd64.exe
 
 linux:
