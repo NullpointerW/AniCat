@@ -77,7 +77,7 @@ type Extra struct {
 
 func (ex *Extra) NoArgs() bool {
 	opt := ex.RssOption
-	return opt.SubtitleGroup == "" && opt.MustContain == "" && opt.MustNotContain == ""
+	return  opt.MustContain == "" && opt.MustNotContain == ""
 }
 
 // The tag used when adding a torrent with qbt

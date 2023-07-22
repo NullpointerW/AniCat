@@ -102,7 +102,7 @@ func (s *Subject) checkDL() (err error) {
 		util.Debugln("subj:", s.SubjId, "is rss typ,start check DL")
 		if s.Typ == TV && s.EndTime != "" {
 			util.Debugln("subj:", s.SubjId, "is TV and epi fin ")
-			e, err := util.ParseTime(s.EndTime,util.YMDParseLayout)
+			e, err := util.ParseTime(s.EndTime, util.YMDParseLayout)
 			util.Debugln("subj:", s.SubjId, "epi endtime is ", util.ParseTimeStr(e))
 			if err != nil {
 				return err
@@ -226,6 +226,13 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		})
 		mErr.Add(err)
 		mErr.Add(s.writeJson())
+
+		episNum := s.Episode
+		if episNum != 0 && len(s.Pushed) >= episNum {
+			log.Printf("subj%d[rss] is compl \n", s.SubjId)
+			s.terminate()
+		}
+		
 		return mErr.Err()
 	} else { //Movie
 		if _, e := s.Pushed[torr.Hash]; e {
