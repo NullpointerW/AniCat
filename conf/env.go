@@ -3,6 +3,7 @@ package conf
 import (
 	// "io"
 	"runtime"
+	"strings"
 
 	"log"
 	"os"
@@ -17,21 +18,56 @@ var (
 	projlk = "https://github.com/NullpointerW/AniCat"
 )
 
+type QbtProxyTyp int
+
+func (ptyp QbtProxyTyp) convertCode(p string) QbtProxyTyp {
+	p = strings.ToLower(p)
+	switch p {
+	case "http":
+		return Http
+	case "httpa", "http-auth":
+		return HttpA
+	case "socks5":
+		return Socks5
+	case "socks5a", "socks5-auth":
+		return Socks5A
+	default:
+		return Unknown
+	}
+}
+
+const (
+	Http    QbtProxyTyp = iota + 1 // HTTP proxy without authentication
+	Socks5                         // SOCKS5 proxy without authentication
+	HttpA                          // HTTP proxy with authentication
+	Socks5A                        // SOCKS5 proxy with authentication
+	Unknown
+)
+
 var Env Environment
 
 type Environment struct {
-	Port int `yaml:"port"`
-	Qbt  struct {
+	Port             int    `yaml:"port"`
+	SubjPath         string `yaml:"path"`
+	DropOnDumplicate bool   `yaml:"dropDumplicate"`
+	Crawl            struct {
+		Proxies []string `yaml:"proxies"`
+	} `yaml:"crawl"`
+	Qbt struct {
 		Url          string `yaml:"url"`
 		Username     string `yaml:"username"`
 		Password     string `yaml:"password"`
 		LocalConnect bool   `yaml:"localed"`
 		Timeout      int    `yaml:"timeout"`
+		Proxy        struct {
+			Type     string `yaml:"type"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			Peer     bool   `yaml:"password"`
+			
+		} `yaml:"proxy"`
 	} `yaml:"qbittorrent"`
-	Proxies          []string `yaml:"proxies"`
-	SubjPath         string   `yaml:"path"`
-	DropOnDumplicate bool     `yaml:"dropDumplicate"`
-	Pusher           struct {
+	Pusher struct {
 		Email struct {
 			Host         string `yaml:"host"`
 			Port         int    `yaml:"port"`
@@ -46,22 +82,22 @@ type Environment struct {
 func (env *Environment) Print() {
 	log.Println("port:", env.Port)
 	log.Println("subject path:", env.SubjPath)
-
-	if len(env.Proxies) != 0 {
-		log.Println("scraper proxies:", env.Proxies)
-	}
 	if env.DropOnDumplicate {
 		log.Println("drop dumplicate:", "yes")
 	}
 
-	log.Println("qbt weburl:",env.Qbt.Url)
-	log.Println("qbt api request timeout(ms):",env.Qbt.Timeout)
+	if len(env.Crawl.Proxies) != 0 {
+		log.Println("scraper proxies:", env.Crawl.Proxies)
+	}
+
+	log.Println("qbt weburl:", env.Qbt.Url)
+	log.Println("qbt api request timeout(ms):", env.Qbt.Timeout)
 }
 
 func (env *Environment) EmailPrint() {
 	log.Println("host:", env.Pusher.Email.Host)
 	log.Println("port:", env.Pusher.Email.Port)
-	log.Println("username:",env.Pusher.Email.Username)
+	log.Println("username:", env.Pusher.Email.Username)
 }
 
 func init() {

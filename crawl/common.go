@@ -17,9 +17,9 @@ func NewCollector() *colly.Collector {
 }
 
 func SetProxy(c *colly.Collector) {
-	if len(CFG.Env.Proxies) != 0 {
+	if len(CFG.Env.Crawl.Proxies) != 0 {
 		if p, err := proxy.RoundRobinProxySwitcher(
-			CFG.Env.Proxies...,
+			CFG.Env.Crawl.Proxies...,
 		); err == nil {
 			c.SetProxyFunc(p)
 		}
