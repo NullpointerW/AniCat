@@ -86,7 +86,8 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 			rn, err := renameTV(s, fn)
 			if err != nil {
 				merr.Add(err)
-				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn)) // mabye drop
+				// even rename failed ,Remove from the subfolder
+				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn)) // mabye drop?
 				continue
 			}
 			se := util.TrimExtensionAndGetEpi(rn)
