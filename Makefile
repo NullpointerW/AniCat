@@ -2,7 +2,7 @@ NAME=anicat
 BUILDIR=build
 BUILDIR_CLI=build/cli
 VERSION := $(patsubst v%,%,$(shell git describe --tags || echo "x.x.x"))
-GOBUILD=CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$(VERSION)"'      
+GOBUILD=CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$(VERSION)"'
 CLI_FILE=net/client/cli.go
 
 all: 
@@ -12,7 +12,7 @@ all:
 	$(MAKE) linux-cli
 
 windows:
-	GOARCH=amd64 GOOS=windows $(GOBUILD) '-ldflags -H=windowsgui' -o $(BUILDIR)/$(NAME)-$@-amd64.exe
+	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags '-H=windowsgui' -o $(BUILDIR)/$(NAME)-$@-amd64.exe
 	zip -j $(BUILDIR)/$(NAME)-$@-amd64.zip $(BUILDIR)/$(NAME)-$@-amd64.exe
 
 windows-cli:
