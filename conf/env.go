@@ -3,7 +3,6 @@ package conf
 import (
 	// "io"
 	"runtime"
-	"strings"
 
 	"log"
 	"os"
@@ -18,38 +17,12 @@ var (
 	projlk = "https://github.com/NullpointerW/AniCat"
 )
 
-type QbtProxyTyp int
-
-func (ptyp QbtProxyTyp) convertCode(p string) QbtProxyTyp {
-	p = strings.ToLower(p)
-	switch p {
-	case "http":
-		return Http
-	case "httpa", "http-auth":
-		return HttpA
-	case "socks5":
-		return Socks5
-	case "socks5a", "socks5-auth":
-		return Socks5A
-	default:
-		return Unknown
-	}
-}
-
-const (
-	Http    QbtProxyTyp = iota + 1 // HTTP proxy without authentication
-	Socks5                         // SOCKS5 proxy without authentication
-	HttpA                          // HTTP proxy with authentication
-	Socks5A                        // SOCKS5 proxy with authentication
-	Unknown
-)
-
 var Env Environment
 
 type Environment struct {
 	Port             int    `yaml:"port"`
 	SubjPath         string `yaml:"path"`
-	DropOnDumplicate bool   `yaml:"dropDumplicate"`
+	DropOnDumplicate bool   `yaml:"drop-dumplicate"`
 	Crawl            struct {
 		Proxies []string `yaml:"proxies"`
 	} `yaml:"crawl"`
@@ -60,11 +33,13 @@ type Environment struct {
 		LocalConnect bool   `yaml:"localed"`
 		Timeout      int    `yaml:"timeout"`
 		Proxy        struct {
+			Addr     string `yaml:"address"`
 			Type     string `yaml:"type"`
 			Username string `yaml:"username"`
 			Password string `yaml:"password"`
-			Peer     bool   `yaml:"password"`
-			
+			Peer     bool   `yaml:"peer"`
+			TorrOnly bool   `yaml:"torrent-only"`
+			Hslookup bool   `yaml:"host-lookup"`
 		} `yaml:"proxy"`
 	} `yaml:"qbittorrent"`
 	Pusher struct {
@@ -92,6 +67,9 @@ func (env *Environment) Print() {
 
 	log.Println("qbt weburl:", env.Qbt.Url)
 	log.Println("qbt api request timeout(ms):", env.Qbt.Timeout)
+	if env.Qbt.Proxy.Addr != "" && env.Qbt.Proxy.Type != "" {
+		log.Printf("qbt proxy addr:%s type:%s", env.Qbt.Proxy.Addr, env.Qbt.Proxy.Type)
+	}
 }
 
 func (env *Environment) EmailPrint() {
