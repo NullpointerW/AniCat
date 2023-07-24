@@ -8,6 +8,8 @@ CLI_FILE=net/client/cli.go
 all: 
 	$(MAKE) windows
 	$(MAKE) linux
+	$(MAKE) windows-cli
+	$(MAKE) linux-cli
 
 windows:
 	GOARCH=amd64 GOOS=windows $(GOBUILD) '-H=windowsgui' -o $(BUILDIR)/$(NAME)-$@-amd64.exe
