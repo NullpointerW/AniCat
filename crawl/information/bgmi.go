@@ -1,8 +1,10 @@
 package information
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	CR "github.com/NullpointerW/anicat/crawl"
@@ -10,6 +12,46 @@ import (
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 )
+
+var endpoint = "search/subject/%s?type=2&start=%d&max_results=%d"
+
+func BgmiApiSearch(searchstr string) (sid int, err error) {
+	ed := fmt.Sprintf(endpoint, searchstr, 0, 10)
+	fmt.Println(CR.BgmiRoot + ed)
+	req, err := http.NewRequest("GET", CR.BgmiRoot+ed, nil)
+	if err != nil {
+		return 0, nil
+	}
+	resp, err := CR.BgmiRequest(req)
+	if err != nil {
+		return 0, err
+	}
+	bsis := struct {
+		List []CR.BgmiSubjIntro `json:"list"`
+	}{}
+	jde := json.NewDecoder(resp.Body)
+	err = jde.Decode(&bsis)
+	if err != nil {
+		return 0, err
+	}
+	if len(bsis.List) == 0 {
+		return 0, fmt.Errorf("bgmiSearchApi: %w", errs.ErrCrawlNotFound)
+	}
+	var tatget *CR.BgmiSubjIntro
+	for _, bsi := range bsis.List {
+		fmt.Println(bsi.NameCN)
+		if bsi.NameCN == searchstr {
+			log.Printf("bgmiSearchApi: matched%#+v \n", bsi)
+			tatget = &bsi
+			break
+		}
+	}
+	if tatget == nil {
+		fmt.Println("???", bsis.List[0])
+		tatget = &bsis.List[0]
+	}
+	return tatget.Id, err
+}
 
 func BgmTVInfoScrape(sid int) (tips map[string]string, err error) {
 	url := infoBaseUrl + fmt.Sprintf(InfoAPIs["subject"], sid)
@@ -55,7 +97,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			sid := s[len(s)-1]
 			tips["sid"] = sid
 		} else {
-			err = errs.Custom("%w:bgmi info not found", errs.ErrCrawlNotFound)
+			err = fmt.Errorf("%w:bgmi info not found", errs.ErrCrawlNotFound)
 			return
 		}
 	})

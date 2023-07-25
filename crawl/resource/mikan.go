@@ -43,6 +43,10 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 		div[@id='sk-container']/
 		div[@class='central-container']/
 		ul[@class='list-inline an-ul']/li`)
+		// command is add ... -i ,even if rss source has been found,show the search list
+		if opt.Index > 0 {
+			a = nil
+		}
 		if len(a) != 0 {
 			ep, bgmurl, e := scrapeRssEndPoint(selectRss(a, searchstr), opt)
 			if e != nil {
@@ -71,7 +75,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 				url = htmlquery.InnerText(mglink)
 				isrss = false
 			} else {
-				err = errs.Custom("%w:name:%s", errs.ErrCrawlNotFound, searchstr)
+				err = fmt.Errorf("%w:name:%s", errs.ErrCrawlNotFound, searchstr)
 			}
 
 		}
@@ -184,7 +188,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = errs.Custom("collyError:%w", e)
+		err = fmt.Errorf("collyError:%w", e)
 	})
 
 	c.Visit(resourcesBaseUrl + endpoint)
@@ -192,7 +196,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 	return
 }
 
-func ListScrape(searchstr string, t LsTyp) (res any, err error) {
+func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
@@ -204,6 +208,9 @@ func ListScrape(searchstr string, t LsTyp) (res any, err error) {
 		div[@class='central-container']/
 		ul[@class='list-inline an-ul']/
 		li/a//@href`)
+		if searchls {
+			a = nil
+		}
 		if a != nil {
 			res, e = scrapeRssList(htmlquery.InnerText(a), t)
 			if e != nil {
@@ -256,12 +263,13 @@ func ListScrape(searchstr string, t LsTyp) (res any, err error) {
 					items = append(items, it)
 				}
 				if len(items) == 0 {
-					err = errs.Custom("%w: %s %s", errs.ErrCrawlNotFound, t.String(), searchstr)
+					err = fmt.Errorf("%w: %s %s", errs.ErrCrawlNotFound, t.String(), searchstr)
 				} else {
 					res, err = items, nil
+					fmt.Println(res)
 				}
 			case LSGroup:
-				err = errs.Custom("%w:search item `%s` is torrent type ", errs.ErrLsGroupUnavailableOnTorr, searchstr)
+				err = fmt.Errorf("%w:search item `%s` is torrent type ", errs.ErrLsGroupUnavailableOnTorr, searchstr)
 			default:
 				err = errs.ErrUnknownResCrawlLsType
 			}
@@ -274,10 +282,8 @@ func ListScrape(searchstr string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = errs.Custom("collyError:%w", e)
+		err = fmt.Errorf("collyError:%w", e)
 	})
-
-	CR.SetProxy(c)
 
 	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
 
@@ -356,7 +362,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = errs.Custom("collyError:%w", e)
+		err = fmt.Errorf("collyError:%w", e)
 	})
 
 	c.Visit(resourcesBaseUrl + endpoint)

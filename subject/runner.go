@@ -203,7 +203,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		se := util.TrimExtensionAndGetEpi(rename)
 		if th, e := s.Pushed[se]; e {
 			merr := errs.MultiErr{}
-			dumpliErr := errs.Custom("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
+			dumpliErr := fmt.Errorf("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
 			merr.Add(dumpliErr)
 			if CFG.Env.DropOnDumplicate && th != torr.Hash {
 				log.Println("delete ", torr.Name)
@@ -232,11 +232,11 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			log.Printf("subj%d[rss] is compl \n", s.SubjId)
 			s.terminate()
 		}
-		
+
 		return mErr.Err()
 	} else { //Movie
 		if _, e := s.Pushed[torr.Hash]; e {
-			return errs.Custom("%w:name:%s", errs.ErrItemAlreadyPushed, torr.Name)
+			return fmt.Errorf("%w:name:%s", errs.ErrItemAlreadyPushed, torr.Name)
 		}
 		mErr := errs.MultiErr{}
 		s.Pushed[torr.Hash] = ""

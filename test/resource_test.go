@@ -27,7 +27,7 @@ func TestCrawl(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	res, err := R.ListScrape("总之就是非常可爱 第二季", R.Ls)
+	res, err := R.ListScrape("总之就是非常可爱 第二季", R.Ls, false)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -36,7 +36,7 @@ func TestList(t *testing.T) {
 }
 
 func TestLsGroup(t *testing.T) {
-	res, err := R.ListScrape("总之就是非常可爱 第二季", R.LSGroup)
+	res, err := R.ListScrape("总之就是非常可爱 第二季", R.LSGroup, false)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

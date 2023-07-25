@@ -1,6 +1,7 @@
 package download
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -25,7 +26,7 @@ func setProxyTyp(qbtCfg *qbt.Config) error {
 	case "socks5a", "socks5-auth":
 		qbtCfg.ProxyType = qbt.Socks5A
 	default:
-		return errs.Custom("qbt:unknown proxy type %s", ptyp)
+		return fmt.Errorf("qbt:unknown proxy type %s", ptyp)
 	}
 	return nil
 }
@@ -36,7 +37,7 @@ func setProxy(qbtCfg *qbt.Config) error {
 	}
 	addr := strings.Split(CFG.Env.Qbt.Proxy.Addr, ":")
 	if len(addr) != 2 {
-		return errs.Custom("qbt:invalid proxy addr %s", CFG.Env.Qbt.Proxy.Addr)
+		return fmt.Errorf("qbt:invalid proxy addr %s", CFG.Env.Qbt.Proxy.Addr)
 	}
 	host := addr[0]
 	port, err := strconv.Atoi(addr[1])
@@ -76,12 +77,12 @@ func init() {
 	err = setProxy(&cfg)
 	if err != nil {
 		log.Println(err)
-	}else if  CFG.Env.Qbt.Proxy.Type != ""{
-		log.Printf("qbt proxy addr:%s type:%s",CFG.Env.Qbt.Proxy.Addr, CFG.Env.Qbt.Proxy.Type)
+	} else if CFG.Env.Qbt.Proxy.Type != "" {
+		log.Printf("qbt proxy addr:%s type:%s", CFG.Env.Qbt.Proxy.Addr, CFG.Env.Qbt.Proxy.Type)
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg))
 	log.Println("qBittorrent connected")
-	
+
 }
 
 func rssEnable(cfg *qbt.Config) {

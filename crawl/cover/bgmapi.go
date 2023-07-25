@@ -5,32 +5,19 @@ import (
 
 	"net/http"
 
-	"sync"
-
-	"github.com/NullpointerW/anicat/errs"
+	CR "github.com/NullpointerW/anicat/crawl"
 )
 
-var (
-	c *http.Client
-	o sync.Once
-)
+
 
 func Bgmimage(subjid int, typ, filepath string) (err error) {
-	o.Do(func() {
-		c = &http.Client{}
-	})
 	url := fmt.Sprintf(BangumiImageUrl, subjid, typ)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return
 	}
-	req.Header.Set("User-Agent", "github.com/NullpointerW/anicat")
-	resp, err := c.Do(req)
+	resp, err :=CR.BgmiRequest(req)
 	if err != nil {
-		return
-	}
-	if sc := resp.StatusCode; sc != 200 {
-		err = errs.Custom("bad request statusCdoe:%d", sc)
 		return
 	}
 	return downloadfile(filepath, resp.Body)

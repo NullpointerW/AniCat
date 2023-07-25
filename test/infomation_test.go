@@ -45,3 +45,12 @@ func TestTMDB(t *testing.T) {
 	pd,_:=util.ParseShort02Time(strings.ReplaceAll(d, " ", ""))
 	fmt.Println(pd)
 }
+
+func TestBgmiSearchApi(t *testing.T) {
+	sid,err:=I.BgmiApiSearch("龙与虎")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fmt.Println(sid)
+}

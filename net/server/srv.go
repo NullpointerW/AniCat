@@ -66,7 +66,7 @@ func process(c *N.Conn) {
 				c.Write(rep.N)
 				continue
 			}
-			
+
 			route(&rep)
 
 			if rep.Err != nil {
@@ -81,7 +81,9 @@ func process(c *N.Conn) {
 				c.Write(s)
 				continue
 			}
-			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems || rep.Opt == cmd.LsGroup || rep.Opt == cmd.Status || rep.Opt == cmd.Stop {
+			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems ||
+				rep.Opt == cmd.LsItems_searchlist || rep.Opt == cmd.LsGroup ||
+				rep.Opt == cmd.Status || rep.Opt == cmd.Stop {
 				c.Write(rep.N)
 				util.Debugln("ls::rep.N")
 				// util.Debugln(rep.N)

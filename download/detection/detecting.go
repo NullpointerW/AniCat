@@ -2,6 +2,7 @@ package detection
 
 import (
 	// "fmt"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -64,7 +65,7 @@ func send(sid int, torr qbt.Torrent) error {
 	s := subject.Manager.Get(sid)
 
 	if s == nil {
-		return errs.Custom("%w:sid:%d", errs.ErrSubjectNotFound, sid)
+		return fmt.Errorf("%w:sid:%d", errs.ErrSubjectNotFound, sid)
 	}
 	if s.Terminate {
 		return nil

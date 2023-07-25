@@ -2,10 +2,10 @@ package email
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 
 	CFG "github.com/NullpointerW/anicat/conf"
-	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/pusher"
 	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/gomail.v2"
@@ -37,7 +37,7 @@ func (_ Sender) Push(p pusher.Payload) error {
 	m.SetBody("text/html", Parse(p))
 
 	if err := sender.DialAndSend(m); err != nil {
-		return errs.Custom("send email error:%w", err)
+		return fmt.Errorf("send email error:%w", err)
 	}
 	return nil
 }

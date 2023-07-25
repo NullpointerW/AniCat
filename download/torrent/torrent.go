@@ -1,11 +1,13 @@
 package torrent
 
 import (
+	"fmt"
+
+	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	CFG "github.com/NullpointerW/anicat/conf"
 )
 
 func Add(url, path, tag string) (string, error) {
@@ -28,7 +30,7 @@ func Add(url, path, tag string) (string, error) {
 		return "", err
 	}
 	if !ok {
-		return "", errs.Custom("%w:get added torr hash fail,torr tag:%s", errs.ErrQbtDataNotFound, tag)
+		return "", fmt.Errorf("%w:get added torr hash fail,torr tag:%s", errs.ErrQbtDataNotFound, tag)
 	}
 
 	return torrs[0].Hash, nil
@@ -43,7 +45,7 @@ func Get(h string) (torr qbt.Torrent, err error) {
 		return torr, err
 	}
 	if len(torrs) == 0 {
-		return torr, errs.Custom("%w:torr hash:%s", errs.ErrTorrnetNotFound, h)
+		return torr, fmt.Errorf("%w:torr hash:%s", errs.ErrTorrnetNotFound, h)
 	}
 	torr = torrs[0]
 	return
@@ -83,7 +85,7 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 		}
 	}
 	if len(hits) == 0 {
-		return hits, errs.Custom("%w,No torrs found on savepath:%s", errs.ErrTorrnetOnSavePathNotFound, path)
+		return hits, fmt.Errorf("%w,No torrs found on savepath:%s", errs.ErrTorrnetOnSavePathNotFound, path)
 	}
 	return
 }

@@ -1,6 +1,7 @@
 package subject
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -27,12 +28,12 @@ func CaptureEpisNum(text string) (string, error) {
 			return episNum, nil
 		}
 	}
-	return "", errs.Custom("%w:%s", errs.ErrCannotCaptureEpisNum, text)
+	return "", fmt.Errorf("%w:%s", errs.ErrCannotCaptureEpisNum, text)
 }
 
 func RenameTV(s *Subject, torr qbt.Torrent) (string, error) {
 	if !util.IsVideofile(torr.Name) {
-		return "", errs.Custom("%s is not a video file", torr.Name)
+		return "", fmt.Errorf("%s is not a video file", torr.Name)
 	}
 	return renameTV(s, torr.Name)
 }

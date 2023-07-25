@@ -3,3 +3,4 @@
 .vscode
 output.log
 build/
+test/env.yaml

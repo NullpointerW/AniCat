@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/NullpointerW/anicat/errs"
@@ -29,7 +30,8 @@ const (
 	Del
 	Ls
 	LsItems
-	LsGroup // reserved command
+	LsItems_searchlist //lsi -s
+	LsGroup            // reserved command
 	Help
 
 	Status // TODO
@@ -63,7 +65,7 @@ func optionMode(o string) (Option, bool) {
 func Parse(cmds []string) (reply Command) {
 	sfxok := hasPrfx(cmds)
 	if !sfxok {
-		reply.Err = errs.Custom("%w:%s", errs.ErrUnknownCommand, cmds[0])
+		reply.Err = fmt.Errorf("%w:%s", errs.ErrUnknownCommand, cmds[0])
 		return
 	}
 	var o string
@@ -72,7 +74,7 @@ func Parse(cmds []string) (reply Command) {
 	}
 	opt, parsed := optionMode(o)
 	if !parsed {
-		reply.Err = errs.Custom("%w:%s", errs.ErrUnknownCommand, o)
+		reply.Err = fmt.Errorf("%w:%s", errs.ErrUnknownCommand, o)
 		return
 	}
 	reply.Opt = opt
@@ -83,7 +85,7 @@ func Parse(cmds []string) (reply Command) {
 				reply.Err = errs.ErrAddCommandMissingHelping
 				return
 			}
-			reply.Err = errs.Custom("%w:%s", errs.ErrMissingCommandArgument, `Use "anicat help " for more information about a command.`)
+			reply.Err = fmt.Errorf("%w:%s", errs.ErrMissingCommandArgument, `Use "anicat help " for more information about a command.`)
 			return
 		}
 		if opt == Del || (opt == Add && len(cmds) == 3) || opt == Status {
@@ -109,8 +111,14 @@ func Parse(cmds []string) (reply Command) {
 				reply.Flag.Using = true
 			}
 			return
-		} else { // lsi , lsg
+		} else { // lsi , lsg  //lsi -s
 			args := cmds[2:]
+			ext := strings.ToLower(args[len(args)-1])
+			// command is lsi ... -s,show search list 
+			if ext == "-s" {
+				reply.Opt = LsItems_searchlist
+				args = args[:len(args)-1]
+			}
 			reply.N = strings.Join(args, " ")
 			return
 		}

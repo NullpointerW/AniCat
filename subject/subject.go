@@ -12,6 +12,7 @@ import (
 	CC "github.com/NullpointerW/anicat/crawl/cover"
 	IC "github.com/NullpointerW/anicat/crawl/information"
 	RC "github.com/NullpointerW/anicat/crawl/resource"
+
 	// DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/download/rss"
 	"github.com/NullpointerW/anicat/download/torrent"
@@ -77,7 +78,7 @@ type Extra struct {
 
 func (ex *Extra) NoArgs() bool {
 	opt := ex.RssOption
-	return  opt.MustContain == "" && opt.MustNotContain == ""
+	return opt.MustContain == "" && opt.MustNotContain == ""
 }
 
 // The tag used when adding a torrent with qbt
@@ -119,7 +120,7 @@ func CreateSubject(n string, ext *Extra) error {
 
 	sid, _ := strconv.Atoi(tips[IC.SubjId])
 	if Manager.Get(sid) != nil {
-		return errs.Custom("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
+		return fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
 	err = subject.Loadfileds(tips)
@@ -184,7 +185,7 @@ func CreateSubject(n string, ext *Extra) error {
 	// 		return len(a) > 0, nil
 	// 	}, 3000)
 	// 	if err != nil {
-	// 		log.Println(errs.Custom("check rss matched item error:%w subjid:%d", err, subject.SubjId))
+	// 		log.Println(fmt.Errorf("check rss matched item error:%w subjid:%d", err, subject.SubjId))
 	// 		return nil
 	// 	}
 	// 	if !m {

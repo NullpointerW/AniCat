@@ -22,7 +22,7 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 	if typ == TMDB_TYP_MOVIE {
 		url = TMDB_HOST + fmt.Sprintf(TMDBAPIs["search"], TMDB_TYP_MOVIE, "")
 	}
-	
+
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
@@ -34,14 +34,14 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 		if nameH2 != nil {
 			name = htmlquery.InnerText(nameH2)
 		} else {
-			err = errs.ErrCrawlNotFound
+			err = fmt.Errorf("%w:TMDB info not found,search str:%s", errs.ErrCrawlNotFound, searchstr)
 			return
 		}
 		dateSpan := htmlquery.FindOne(doc, dateXpathExp)
 		if dateSpan != nil {
 			date = htmlquery.InnerText(dateSpan)
 		} else {
-			err = errs.Custom("%w:TMDB info not found", errs.ErrCrawlNotFound)
+			err = fmt.Errorf("%w:TMDB info not found", errs.ErrCrawlNotFound)
 			return
 		}
 	})

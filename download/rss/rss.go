@@ -1,10 +1,12 @@
 package rss
 
 import (
+	"fmt"
+
+	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/errs"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	CFG "github.com/NullpointerW/anicat/conf"
 )
 
 const RuleNamePrefix = "ADL-"
@@ -48,7 +50,7 @@ func AddAndGetItems(url, path string) (*qbt.Item, error) {
 		return nil, err
 	}
 	if !ok {
-		return nil, errs.Custom("%w:get all rss items fail,rss path:%s", errs.ErrQbtDataNotFound, path)
+		return nil, fmt.Errorf("%w:get all rss items fail,rss path:%s", errs.ErrQbtDataNotFound, path)
 	}
 	return it, nil
 }

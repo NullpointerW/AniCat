@@ -9,7 +9,7 @@ import (
 	"github.com/NullpointerW/anicat/net/cmd"
 	"github.com/NullpointerW/anicat/net/cmd/view"
 	"github.com/NullpointerW/anicat/subject"
-	util "github.com/NullpointerW/anicat/utils"
+	// util "github.com/NullpointerW/anicat/utils"
 )
 
 func route(c *cmd.Command) {
@@ -37,12 +37,11 @@ func route(c *cmd.Command) {
 		subject.Delete <- p
 		c.Err = p.Error()
 	case cmd.Ls:
-		util.Debugln("at cmd.Ls")
 		ls := subject.Manager.List()
 		c.N = view.TableRender.Ls(ls)
-		// util.Debugln("render table ::", c.N)
-	case cmd.LsItems:
-		l, err := CR.ListScrape(c.N, CR.Ls)
+	case cmd.LsItems, cmd.LsItems_searchlist:
+		isLsi_l := c.Opt == cmd.LsItems_searchlist
+		l, err := CR.ListScrape(c.N, CR.Ls, isLsi_l)
 		if err != nil {
 			c.Err = err
 			return
