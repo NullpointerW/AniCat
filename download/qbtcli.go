@@ -76,6 +76,8 @@ func init() {
 	err = setProxy(&cfg)
 	if err != nil {
 		log.Println(err)
+	}else if  CFG.Env.Qbt.Proxy.Type != ""{
+		log.Printf("qbt proxy addr:%s type:%s",CFG.Env.Qbt.Proxy.Addr, CFG.Env.Qbt.Proxy.Type)
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg))
 	log.Println("qBittorrent connected")

@@ -67,9 +67,7 @@ func (env *Environment) Print() {
 
 	log.Println("qbt weburl:", env.Qbt.Url)
 	log.Println("qbt api request timeout(ms):", env.Qbt.Timeout)
-	if env.Qbt.Proxy.Addr != "" && env.Qbt.Proxy.Type != "" {
-		log.Printf("qbt proxy addr:%s type:%s", env.Qbt.Proxy.Addr, env.Qbt.Proxy.Type)
-	}
+
 }
 
 func (env *Environment) EmailPrint() {

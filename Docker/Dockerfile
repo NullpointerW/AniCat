@@ -1,10 +1,11 @@
 FROM golang:1.20.2-alpine AS builder
 
+ARG VER=x.x.x
 WORKDIR /build
 ADD .  /build
 
 ENV  GOPROXY=https://goproxy.cn,direct 
-RUN go build -o anicat 
+RUN go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$VER"' -o anicat 
 
 FROM alpine:3.8
 
