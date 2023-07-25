@@ -96,7 +96,7 @@ func (s *Subject) RssPath() string {
 	return s.QbtTag()
 }
 
-func CreateSubject(n string, ext *Extra) error {
+func CreateSubject(n string, ext *Extra) (int, error) {
 	subject := new(Subject)
 
 	// for testing
@@ -104,7 +104,7 @@ func CreateSubject(n string, ext *Extra) error {
 
 	bgmurl, err := solveResource(n, subject, ext)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var tips map[string]string
@@ -115,31 +115,34 @@ func CreateSubject(n string, ext *Extra) error {
 		tips, err = IC.Scrape(n)
 	}
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	sid, _ := strconv.Atoi(tips[IC.SubjId])
+	sid, err := strconv.Atoi(tips[IC.SubjId])
+	if err != nil {
+		return 0, err
+	}
 	if Manager.Get(sid) != nil {
-		return fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
+		return 0, fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
 	err = subject.Loadfileds(tips)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	GetSeason(subject)
 	subject.trimName()
 	err = initFolder(subject)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	lastS, err := FindLastSeason(subject.Path)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	curr, err := strconv.Atoi(subject.Season)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if curr > lastS {
@@ -153,13 +156,13 @@ func CreateSubject(n string, ext *Extra) error {
 				for err == errs.ErrCoverDownLoadZeroSize {
 					retry++
 					if retry >= 3 {
-						return err
+						return 0, err
 					}
 					time.Sleep(500 * time.Millisecond)
 					err = CC.DOUBANCoverScraper.Scrape(cp, n)
 				}
 				if err != nil {
-					return err
+					return 0, err
 				}
 			}
 		}
@@ -167,7 +170,7 @@ func CreateSubject(n string, ext *Extra) error {
 
 	err = download(subject, ext)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// create Info-Json after init completed
@@ -193,7 +196,7 @@ func CreateSubject(n string, ext *Extra) error {
 	// 	}
 	// }
 
-	return nil
+	return sid, nil
 }
 
 func (subj *Subject) Loadfileds(tips map[string]string) error {

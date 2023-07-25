@@ -83,14 +83,12 @@ func process(c *N.Conn) {
 			}
 			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems ||
 				rep.Opt == cmd.LsItems_searchlist || rep.Opt == cmd.LsGroup ||
-				rep.Opt == cmd.Status || rep.Opt == cmd.Stop {
+				rep.Opt == cmd.Status || rep.Opt == cmd.Stop||rep.Opt ==cmd.Add {
 				c.Write(rep.N)
-				util.Debugln("ls::rep.N")
-				// util.Debugln(rep.N)
 				if rep.Opt == cmd.Stop {
 					os.Exit(0)
 				}
-			} else {
+			} else{
 				c.Write("OK")
 			}
 		} else {

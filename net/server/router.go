@@ -27,6 +27,9 @@ func route(c *cmd.Command) {
 		p := subject.NewPip(sc)
 		subject.Create <- p
 		c.Err = p.Error()
+		if c.Err==nil{
+			c.N= strconv.Itoa(p.Arg.(int))
+		}
 	case cmd.Del:
 		i, err := strconv.Atoi(c.N)
 		if err != nil {

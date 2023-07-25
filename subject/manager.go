@@ -11,14 +11,14 @@ type SubjC struct {
 }
 
 type Pip struct {
-	arg any
+	Arg any
 	err error
 	wg  sync.WaitGroup
 }
 
 func NewPip(a any) *Pip {
 	p := new(Pip)
-	p.arg = a
+	p.Arg = a
 	p.wg.Add(1)
 	return p
 }
@@ -100,14 +100,17 @@ func StartManagement() {
 	for {
 		select {
 		case p := <-Create:
-			sc := p.arg.(SubjC)
-			err := CreateSubject(sc.N, &sc.Extra)
+			sc := p.Arg.(SubjC)
+			sid, err := CreateSubject(sc.N, &sc.Extra)
 			if err != nil {
 				p.err = err
+			} else {
+				// send added subjId to peer
+				p.Arg = sid
 			}
 			p.wg.Done()
 		case p := <-Delete:
-			i := p.arg.(int)
+			i := p.Arg.(int)
 			s := Manager.Get(i)
 			if s != nil {
 				if !s.Terminate {
