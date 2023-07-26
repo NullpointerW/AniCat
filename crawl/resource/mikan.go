@@ -266,7 +266,6 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 					err = fmt.Errorf("%w: %s %s", errs.ErrCrawlNotFound, t.String(), searchstr)
 				} else {
 					res, err = items, nil
-					fmt.Println(res)
 				}
 			case LSGroup:
 				err = fmt.Errorf("%w:search item `%s` is torrent type ", errs.ErrLsGroupUnavailableOnTorr, searchstr)

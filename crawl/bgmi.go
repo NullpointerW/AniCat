@@ -3,6 +3,7 @@ package crawl
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"sync"
 )
@@ -27,7 +28,9 @@ type BgmiSubjIntro struct {
 
 func BgmiRequest(req *http.Request) (*http.Response, error) {
 	o.Do(func() {
-		c = &http.Client{}
+		c = &http.Client{
+			Timeout: 10 * time.Second,
+		}
 	})
 	req.Header.Set("User-Agent", "github.com/NullpointerW/anicat")
 	resp, err := c.Do(req)

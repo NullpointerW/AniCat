@@ -9,6 +9,7 @@ import (
 
 	CR "github.com/NullpointerW/anicat/crawl"
 	"github.com/NullpointerW/anicat/errs"
+	util "github.com/NullpointerW/anicat/utils"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 )
@@ -17,7 +18,7 @@ var endpoint = "search/subject/%s?type=2&start=%d&max_results=%d"
 
 func BgmiApiSearch(searchstr string) (sid int, err error) {
 	ed := fmt.Sprintf(endpoint, searchstr, 0, 10)
-	fmt.Println(CR.BgmiRoot + ed)
+	log.Println("bgmi search api: request", CR.BgmiRoot+ed)
 	req, err := http.NewRequest("GET", CR.BgmiRoot+ed, nil)
 	if err != nil {
 		return 0, nil
@@ -39,7 +40,7 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 	}
 	var tatget *CR.BgmiSubjIntro
 	for _, bsi := range bsis.List {
-		fmt.Println(bsi.NameCN)
+		util.Debugln(bsi.NameCN)
 		if bsi.NameCN == searchstr {
 			log.Printf("bgmiSearchApi: matched%#+v \n", bsi)
 			tatget = &bsi
@@ -47,7 +48,6 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 		}
 	}
 	if tatget == nil {
-		fmt.Println("???", bsis.List[0])
 		tatget = &bsis.List[0]
 	}
 	return tatget.Id, err
@@ -60,12 +60,14 @@ func BgmTVInfoScrape(sid int) (tips map[string]string, err error) {
 }
 
 func Scrape(searchstr string) (tips map[string]string, err error) {
-	p, err := InfoPageScrape(searchstr)
+	sid, err := BgmiApiSearch(searchstr)
+	// p, err := InfoPageScrape(searchstr)
 	if err != nil {
 		return tips, err
 	}
-	url := infoBaseUrl + p
-	tips, err = DoScrape(url)
+	tips, err = BgmTVInfoScrape(sid)
+	// url := infoBaseUrl + p
+	// tips, err = DoScrape(url)
 	return
 }
 
@@ -116,6 +118,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 	return tips, err
 }
 
+// Deprecated: use bgmi search api
 func InfoPageScrape(searchstr string) (p string, err error) {
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {

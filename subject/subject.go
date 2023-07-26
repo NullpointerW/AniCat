@@ -288,7 +288,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	} else {
 		subj.ResourceTyp = Torrent
 	}
-	log.Println(u, bgm, isrss)
+	util.Debugln("resource:",u, "bgmi url:",bgm, "is rss:",isrss)
 	return bgm, nil
 }
 
