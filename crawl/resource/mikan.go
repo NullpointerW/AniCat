@@ -82,14 +82,13 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("searching resource from mikan: ", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = e
+		err = fmt.Errorf("search failed from mikan: %w",e)
+		log.Println(err)
 	})
-
-	CR.SetProxy(c)
 
 	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
 
@@ -184,11 +183,12 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("mikan: found rss resource, fetching", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = fmt.Errorf("collyError:%w", e)
+		err = fmt.Errorf("fetch rss resource failed: %w", e)
+		log.Println(err)
 	})
 
 	c.Visit(resourcesBaseUrl + endpoint)
@@ -277,11 +277,12 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("searching list from mikan", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = fmt.Errorf("collyError:%w", e)
+		err = fmt.Errorf("search resource list failed:%w", e)
+		log.Println(err)
 	})
 
 	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
@@ -341,8 +342,8 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 			rgs = append(rgs, rg)
 		}
 		if len(rgs) == 0 {
-			log.Println("flag---not found")
-			err = errs.ErrCrawlNotFound
+			// log.Println("flag---not found")
+			err = fmt.Errorf("%w:cannot found any rss group from %s ", errs.ErrCrawlNotFound, r.Request.URL.String())
 			return
 		}
 		if t == LSGroup {
@@ -357,11 +358,12 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("fetching rss groups from", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = fmt.Errorf("collyError:%w", e)
+		err = fmt.Errorf("fetch rss groups failed: %w", e)
+		log.Println(err)
 	})
 
 	c.Visit(resourcesBaseUrl + endpoint)

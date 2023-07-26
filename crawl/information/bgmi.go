@@ -105,10 +105,12 @@ func DoScrape(url string) (tips map[string]string, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("searching info from bgmiTV", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
+		e = fmt.Errorf("search info failed: %w", e)
+		log.Println(e)
 		err = e
 	})
 
@@ -138,11 +140,12 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("fetching info from", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		log.Println("Something went wrong:", e)
+		e = fmt.Errorf("fetch info failed: %w", e)
+		log.Println(e)
 		err = e
 	})
 

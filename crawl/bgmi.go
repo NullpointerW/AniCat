@@ -38,7 +38,7 @@ func BgmiRequest(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	if sc := resp.StatusCode; sc != 200 {
-		err = fmt.Errorf("bad request statusCdoe:%d", sc)
+		err = fmt.Errorf("bgmiRequest: bad request statusCdoe:%d", sc)
 		return nil, err
 	}
 	return resp, nil

@@ -63,11 +63,13 @@ func TouchCoverImg(fpath, cover string) (err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("scraping cover from DOUBAN", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
+		e=fmt.Errorf("scrap cover failed: %w",e)
 		err = e
+		log.Println(e)
 	})
 
 	c.Visit(u)
@@ -86,11 +88,13 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("searching cover from DOUBAN", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
+		e=fmt.Errorf("search cover failed: %w",e)
 		err = e
+		log.Println(err)
 	})
 
 	c.OnScraped(func(r *colly.Response) {

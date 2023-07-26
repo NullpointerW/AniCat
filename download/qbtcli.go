@@ -81,8 +81,16 @@ func init() {
 		log.Printf("qbt proxy addr:%s type:%s", CFG.Env.Qbt.Proxy.Addr, CFG.Env.Qbt.Proxy.Type)
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg))
-	log.Println("qBittorrent connected")
-
+	ver, err := Qbt.GetVersion()
+	if err != nil {
+		ver = "Version:unkown"
+	}
+	log.Println("qBittorrent connected", ver)
+	ver, err = Qbt.GetApiVersion()
+	if err != nil {
+		ver = "Version:unkown"
+	}
+	log.Println("api version:", ver)
 }
 
 func rssEnable(cfg *qbt.Config) {

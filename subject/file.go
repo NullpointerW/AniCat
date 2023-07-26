@@ -119,10 +119,18 @@ func (s *Subject) RmRes() error {
 		wrap.Handle(func() error {
 			return TORR.DelViaCateg(s.QbtCateg())
 		})
-		wrap.Handle(func() error {
-			categ := s.QbtTag()
-			return DL.Qbt.RmCategoies(categ)
-		})
+
+		// There is a possibility that categories cannot be completely deleted,
+		// so it needs to be repeated multiple times
+		// to ensure they are truly removed
+		rep := 2
+		for i := 0; i < rep; i++ {
+			wrap.Handle(func() error {
+				categ := s.QbtTag()
+				return DL.Qbt.RmCategoies(categ)
+			})
+		}
+
 		wrap.Handle(func() error {
 			return rss.RmRss(s.RssPath())
 		})

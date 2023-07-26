@@ -195,7 +195,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 	// 		return errs.WarnRssRuleNotMatched
 	// 	}
 	// }
-
+	log.Printf("create subj%d succeeded \n", sid)
 	return sid, nil
 }
 
@@ -288,7 +288,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	} else {
 		subj.ResourceTyp = Torrent
 	}
-	util.Debugln("resource:",u, "bgmi url:",bgm, "is rss:",isrss)
+	util.Debugln("resource:", u, "bgmi url:", bgm, "is rss:", isrss)
 	return bgm, nil
 }
 
