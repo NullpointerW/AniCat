@@ -9,7 +9,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/NullpointerW/anicat)](https://goreportcard.com/report/github.com/NullpointerW/anicat) [![Go Report Card](https://img.shields.io/badge/go-v1.20-blue)](https://tip.golang.org/doc/go1.20)
 ## 功能特点
  * 傻瓜式: 无需配置任何网站的账号或者rss订阅，只需输入想要追踪的番剧名即可一键添加
- * 支持下载后的文件自动重命名，方便媒体软件进行刮削 e.g:
+ * 支持下载后的剧集自动重命名，方便媒体软件进行刮削 e.g:
   ```
   [UHA-WINGS]Bocchi the Rock![05][x264][1080p]>>孤独摇滚！S01E05
   ```
@@ -18,27 +18,27 @@
  
  ## 部署
  ### linux 
- 推荐使用docker-compose 部署
- * 新建应用目录
+ 推荐使用 docker-compose 部署
+ * 创建应用目录
 ``` bash
-     mkdir -p /usr/opt/anicat && cd /usr/opt/anicat
+mkdir -p /usr/opt/anicat && cd /usr/opt/anicat
    ```
  * 下载配置文件并修改
 ``` bash
-     mkdir cfg && wget -P ./cfg/ https://raw.githubusercontent.com/NullpointerW/AniCat/master/env.yaml && vim ./cfg/env.yaml
+mkdir cfg && wget -P ./cfg/ https://raw.githubusercontent.com/NullpointerW/AniCat/master/env.yaml && vim ./cfg/env.yaml
    ```
  * 修改配置文件
 ```yaml
-port: 8080 # 监听端口
-path: /bangumi # 番剧下载路径 
-drop-dumplicate: on # 若存在同一集数的文件，则删除重复项（建议开启)
+port: 8080 # 监听端口 docker-compose 部署时无需更改
+path: /bangumi # 番剧下载路径 docker-compose 部署时无需更改
+drop-dumplicate: on # 若存在相同集数，则删除重复项（建议开启)
 qbittorrent:
   url: http://qb:8989 # qbt-api url,在docker-compose环境中,host为qb
   username: admin
   password: adminadmin
   localed: yes # 本机登录，如果qbt开启了本地登录选项，则可不用填写用户名和密码，docker-compose部署则可忽视此项
   timeout: 3500 # qbt-api请求的超时时间，有时任务添加到qbt上，调用api后无法立即响应到数据
-  proxy:
+  proxy: # qbt代理配置 可选项
     address: remote:7890 # 配置qbt的代理地址
     type: http # 类型可为 http,socks5等 详见qbt wiki
     host-lookup: on # 使用代理查询域名
@@ -62,7 +62,7 @@ push: # 配置推送服务，如无此需求则可省略
   
  * 下载docker-compose yaml
 ``` bash 
-    wget https://raw.githubusercontent.com/NullpointerW/AniCat/master/Docker/docker-compose.yml
+wget https://raw.githubusercontent.com/NullpointerW/AniCat/master/Docker/docker-compose.yml
    ```
 
 ``` yaml
@@ -107,4 +107,4 @@ docker compose up -d
    ```
 
 ### windows
- 
+ * [下载qbittorrent](https://www.qbittorrent.org/download.php)（版本≥ v4.1）
