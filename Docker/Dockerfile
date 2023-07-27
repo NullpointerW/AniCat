@@ -3,9 +3,9 @@ FROM golang:1.20.2-alpine AS builder
 ARG VER=x.x.x
 WORKDIR /build
 ADD .  /build
-
 ENV  GOPROXY=https://goproxy.cn,direct 
-RUN go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$VER"' -o anicat 
+RUN echo "version---${VER}"
+RUN go build  -ldflags " -X "github.com/NullpointerW/anicat/conf.Ver=${VER}"" -o anicat 
 
 FROM alpine:3.8
 
@@ -17,4 +17,4 @@ COPY --from=builder /build/anicat  /opt/anicat
 
 EXPOSE 8080
 
-CMD ["/bin/sh", "-c", "./anicat -d $DEBUG"]
+CMD ["/bin/sh", "-c", "./anicat -d=$DEBUG"]
