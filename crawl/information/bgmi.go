@@ -114,8 +114,6 @@ func DoScrape(url string) (tips map[string]string, err error) {
 		err = e
 	})
 
-	CR.SetProxy(c)
-
 	c.Visit(url)
 	return tips, err
 }
