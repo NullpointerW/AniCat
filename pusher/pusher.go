@@ -1,6 +1,23 @@
 package pusher
 
+
 type Payload struct {
+// can customize template such as the following format:
+//  <body>
+// 	 <h1>bgmi_name: ${name}</h1>
+// 	 <h2>epi: ${epi}</h2>
+// 	 <ul>
+// 		 <li>bmgiTVid: ${id}</li>
+// 		 <li>file_name: ${dlname}</li>
+// 		 <li>file_size: ${size}</li>
+// 	 </ul>
+// 	 <img src="http://api.bgm.tv/v0/subjects/${id}/image?type=medium">
+// 	 <p>dl_compl</p>
+// 	 <p>Enjoy it,</p>
+// 	 <p>AniCat</p>
+// 	 </div>
+//  </body>
+//
 	SubjectId    int    // ${id}
 	SubjectName  string // ${name}
 	DownLoadName string // ${dlname}

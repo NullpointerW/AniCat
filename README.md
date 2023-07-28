@@ -7,14 +7,14 @@
 通过命令行交互的一键追番工具
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/NullpointerW/anicat)](https://goreportcard.com/report/github.com/NullpointerW/anicat) [![Go Report Card](https://img.shields.io/badge/go-v1.20-blue)](https://tip.golang.org/doc/go1.20)
-## 功能特点
- * 傻瓜式: 无需配置任何网站的账号或者rss订阅，只需输入想要追踪的番剧名即可一键添加
+## 功能
+ * 傻瓜式: 无需配置任何网站的账号或者rss订阅，只需输入番剧名即可一键订阅
  * 支持下载后的剧集自动重命名，方便媒体软件进行刮削 e.g:
   ```
   [UHA-WINGS]Bocchi the Rock![05][x264][1080p]>>孤独摇滚！S01E05
   ```
  * 支持字幕组筛选、关键字正则过滤
- * 番剧下载完成后推送服务(目前支持邮件)
+ * 下载完成后提醒推送(目前支持邮件)
  
  ## 部署
  ### linux 
@@ -27,6 +27,7 @@ mkdir -p /usr/opt/anicat && cd /usr/opt/anicat
 ``` bash
 mkdir cfg && wget -P ./cfg/ https://raw.githubusercontent.com/NullpointerW/AniCat/master/env.yaml && vim ./cfg/env.yaml
    ```
+   <span id="cfg_jmp"></span>  
  * 修改配置文件
 ```yaml
 port: 8080 # 监听端口 docker-compose部署无需更改
@@ -107,10 +108,51 @@ docker compose up -d
 
 ### windows
  * [下载qbittorrent](https://www.qbittorrent.org/download.php)（版本≥ v4.1）并安装
- * [下载可执行文件](https://github.com/NullpointerW/AniCat/releases)和env.yaml到任意文件夹下,配置yaml后运行
+ * [下载可执行文件](https://github.com/NullpointerW/AniCat/releases)和[配置文件](#cfg_jmp)到任意文件夹下,修改后运行
  ``` shell
  PS D:\anicatv0.0.2b> .\anicat-windows-amd64.exe -d -e=./cfg/env.yaml
  -d 开启debug模式
  -e 设置配置文件路径,默认为./env.yaml
   ```
-  
+
+## 使用命令
+ ### 订阅
+ 使用`add`命令订阅番剧,成功后返回sid
+ ``` bash
+add LV1魔王与独居废勇者
+ ```
+ ![add-gif](static/add.gif)
+ 可选择字幕组和通过正则筛选剧集
+ ```bash
+add 孤独摇滚 -g 千夏字幕组 --rg --mc 简体 --mn \s?0[1-5]|1[0-1]
+ -g,--group 选择字幕组
+ --rg       使用正则
+ --mc       包含
+ --mn       排除
+ ```
+选择千夏字幕组,排除1-5，10-11集，字幕语言为简体中文
+ ### 退订
+ 使用`rm`命令退订番剧
+ ``` bash
+rm 376106 
+ 通过番剧的sid来删除
+ sid与它在bgmiTV上的subjectID一致
+ 可通过`ls`命令查看sid
+ ```
+ ### 浏览资源列表
+使用`lsi`命令浏览该番剧的资源列表
+ ``` bash
+lsi 孤独摇滚
+ ```
+ ![lsi-gif](static/lsi.gif)
+ 如果要浏览的番剧资源没有rss组或者在2013年之前（mikan的rss资源组从2013年开始收录），则lsi将会展示种子搜索列表
+ 在添加该番剧时可用-i,--index参数指定下载资源的列表索引
+``` bash
+lsi 龙与虎
+```
+ ![lsi-gif](static/lsi-torrlist.gif)
+ 在lsi 命令末尾添加-s参数,可优先展示搜索列表，列如`lsi 孤独摇滚 -s`
+ ### 查看已订阅列表
+ 使用`ls`查看所有已订阅番剧的具体信息
+ ### 查看文件的下载状态
+ 使用`lsi`通过sid查看该番剧的下载状态
