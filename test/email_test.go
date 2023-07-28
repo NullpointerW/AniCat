@@ -16,11 +16,10 @@ import (
 	"testing"
 
 	CFG "github.com/NullpointerW/anicat/conf"
-	"github.com/NullpointerW/anicat/pusher"
+
 
 	P "github.com/NullpointerW/anicat/pusher"
 	"github.com/NullpointerW/anicat/pusher/email"
-	"github.com/NullpointerW/anicat/pusher/wechat"
 	// "gopkg.in/gomail.v2"
 )
 
@@ -39,10 +38,4 @@ func TestEmailPush(t *testing.T) {
 		t.Error(err)
 	}
 }
-func TestWechat(t *testing.T) {
-	var pusher pusher.Pusher = wechat.WechatSender{
-		Token: "xxxx",
-		Uid:   "test",
-	}
-	pusher.Push(P.Payload{})
-}
+

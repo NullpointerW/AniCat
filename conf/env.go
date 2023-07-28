@@ -78,6 +78,10 @@ func (env *Environment) EmailPrint() {
 
 func init() {
 	flaginit()
+	if Testing{
+		// skip
+		return
+	}
 	b, err := os.ReadFile(EnvPath)
 	errs.PanicErr(err)
 	errs.PanicErr(yaml.Unmarshal(b, &Env))

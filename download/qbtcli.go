@@ -59,6 +59,10 @@ func setProxy(qbtCfg *qbt.Config) error {
 }
 
 func init() {
+	if CFG.Testing{
+		// skip
+		return
+	}
 	var (
 		cli *qbt.Client
 		err error

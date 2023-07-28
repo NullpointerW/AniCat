@@ -42,7 +42,7 @@ func (c *Conn) Read() (string, error) {
 }
 
 func DropCR(data []byte) []byte {
-	if len(data) > 0 && data[len(data)-1] == '\r' {
+	if len(data) > 0 && data[len(data)-1] == CR {
 		return data[0 : len(data)-1]
 	}
 	return data
@@ -52,7 +52,7 @@ func ScanCRLF(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
 	}
-	if i := bytes.Index(data, []byte{'\r', '\n'}); i >= 0 {
+	if i := bytes.Index(data, []byte{CR, LF}); i >= 0 {
 		// We have a full newline-terminated line.
 		return i + 2, DropCR(data[0:i]), nil
 	}
