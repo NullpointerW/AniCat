@@ -115,7 +115,7 @@ docker compose up -d
  -e 设置配置文件路径,默认为./env.yaml
   ```
 
-## 使用命令
+## 命令/使用
  ### 订阅
  使用`add`命令订阅番剧,成功后返回sid
  ``` bash
@@ -162,6 +162,14 @@ ls
   ``` bash
 stat 376106
  ```
+ ### 邮件提醒
+ 如果要使用提醒功能，请配置stmp服务器信息内置模板的如下：
+ ![email-pusher](static/email-push.jpg)
+
+### 在媒体库上打开
+ 通过infuse、Plex、Jellyfin 打开番剧下载目录进行自动刮削并观看:
+ ![infuse-list](static/infuse-list.jpg)
+ ![infuse-detail](static/infuse-detail.jpg)
  ## 客户端
 * [下载客户端](https://github.com/NullpointerW/AniCat/releases)
 * 运行
@@ -180,11 +188,11 @@ stat 376106
        [Bangumi 番组计划](https://bgm.tv/)
        [豆瓣](https://www.douban.com/)
  ### 常见问题
-  Q1: 为什么订阅总是失败返回EOF或者wsarecv: An existing connection was forcibly closed by the remote host.之类的网络错误?
-  A1: 如果在国内环境，因为GFW的关系，访问Mikan，TMDB可能会受阻，建议开启代理；如果启用代理后仍然频繁失败，则有可能是当前ip访问频率过高，触发了服务器的流量限制/反爬策略，建议过一会再进行尝试订阅，或者为爬虫设置多个代理节点
-
-  Q2: 为什么有时候订阅番剧要等待这么长时间？
-  A2: `add`命令所需要执行时间受多个方面的因素影响(GFW干扰  代理节点故障 本地网络阻塞 服务器负载过高 等诸多因素） ，快则2-3秒，慢则几十秒都是有可能的
+  Q1: 为什么订阅总是失败返回EOF或者wsarecv: An existing connection was forcibly closed by the remote host.之类的网络错误? \
+  A1: 如果在国内环境，因为GFW的关系，访问Mikan，TMDB可能会受阻，建议开启代理; \
+   如果启用代理后仍然频繁失败，则有可能是当前ip访问频率过高，触发了服务器的流量限制/反爬策略，建议过一会再进行尝试订阅，或者为爬虫设置多个代理节点。
+  Q2: 为什么有时候订阅番剧要等待这么长时间？\
+  A2: `add`命令的执行时间受多个方面的因素影响(GFW干扰  代理节点故障 本地网络阻塞 服务器负载过高 等诸多因素） ，快则2-3秒，慢则几十秒都是有可能的。
 
  ## 交流
  目前该项目还处于测试阶段，欢迎各位使用并提交问题以及改进点和新功能，如使用中有任何问题，请提交issues或者邮件联系我，email:voidmanwzp@gmail.com
