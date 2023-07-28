@@ -179,18 +179,18 @@ stat 376106
    默认连接地址为localhost:8080
  ## 说明
  ### 数据源
-   资源
+   资源\
        [Mikan Project](https://mikanani.me/)
-   信息采集
-       [Bangumi 番组计划](https://bgm.tv/)
+   信息采集\
+       [Bangumi 番组计划](https://bgm.tv/)\
        [TMDB](https://www.themoviedb.org/)
-   海报封面刮削
-       [Bangumi 番组计划](https://bgm.tv/)
+   海报封面刮削\
+       [Bangumi 番组计划](https://bgm.tv/)\
        [豆瓣](https://www.douban.com/)
  ### 常见问题
   Q1: 为什么订阅总是失败返回EOF或者wsarecv: An existing connection was forcibly closed by the remote host.之类的网络错误? \
   A1: 如果在国内环境，因为GFW的关系，访问Mikan，TMDB可能会受阻，建议开启代理; \
-   如果启用代理后仍然频繁失败，则有可能是当前ip访问频率过高，触发了服务器的流量限制/反爬策略，建议过一会再进行尝试订阅，或者为爬虫设置多个代理节点。
+   如果启用代理后仍然频繁失败，则有可能是当前ip访问频率过高，触发了服务器的流量限制/反爬策略，建议过一会再进行尝试订阅，或者为爬虫设置多个代理节点。\
   Q2: 为什么有时候订阅番剧要等待这么长时间？\
   A2: `add`命令的执行时间受多个方面的因素影响(GFW干扰  代理节点故障 本地网络阻塞 服务器负载过高 等诸多因素） ，快则2-3秒，慢则几十秒都是有可能的。
 
