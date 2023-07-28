@@ -121,7 +121,7 @@ docker compose up -d
  ``` bash
 add LV1魔王与独居废勇者
  ```
- ![add-gif](static/add.gif)
+ ![add-gif](static/add.gif)\
  可选择字幕组和通过正则筛选剧集
  ```bash
 add 孤独摇滚 -g 千夏字幕组 --rg --mc 简体 --mn \s?0[1-5]|1[0-1]
@@ -145,7 +145,7 @@ rm 376106
 lsi 孤独摇滚
  ```
  ![lsi-gif](static/lsi.gif)
- 如果要浏览的番剧资源没有rss组或者在2013年之前（Mikan Project的rss资源组从2013年开始收录），则`lsi`将会展示种子搜索列表
+ 如果要浏览的番剧资源没有rss组，或者在2013年之前（Mikan Project的rss资源组从2013年开始收录），则`lsi`将会展示种子搜索列表\
  在使用`add`添加该番剧时可用`-i`,`--index`参数指定下载资源的列表索引
 ``` bash
 lsi 龙与虎
@@ -163,13 +163,15 @@ ls
 stat 376106
  ```
  ### 邮件提醒
- 如果要使用提醒功能，请配置stmp服务器信息内置模板的如下：
- ![email-pusher](static/email-push.jpg)
+ 如果要使用提醒功能，请配置stmp服务器信息内置模板的如下：\
+ <img src="static/email-push.jpg" width="500">
+ <!--![email-pusher](static/email-push.jpg)-->
 
 ### 在媒体库上打开
- 通过infuse、Plex、Jellyfin 打开番剧下载目录进行自动刮削并观看:
- ![infuse-list](static/infuse-list.jpg)
- ![infuse-detail](static/infuse-detail.jpg)
+ 通过infuse、Plex、Jellyfin 打开番剧下载目录进行自动刮削并观看:\
+ <img src="static/infuse-list.jpg" width="500">
+<!-- ![infuse-list](static/infuse-list.jpg)
+ ![infuse-detail](static/infuse-detail.jpg)-->
  ## 客户端
 * [下载客户端](https://github.com/NullpointerW/AniCat/releases)
 * 运行
@@ -188,11 +190,13 @@ stat 376106
        [Bangumi 番组计划](https://bgm.tv/)\
        [豆瓣](https://www.douban.com/)
  ### 常见问题
-  Q1: 为什么订阅总是失败返回EOF或者wsarecv: An existing connection was forcibly closed by the remote host.之类的网络错误? \
-  A1: 如果在国内环境，因为GFW的关系，访问Mikan，TMDB可能会受阻，建议开启代理; \
-   如果启用代理后仍然频繁失败，则有可能是当前ip访问频率过高，触发了服务器的流量限制/反爬策略，建议过一会再进行尝试订阅，或者为爬虫设置多个代理节点。\
-  Q2: 为什么有时候订阅番剧要等待这么长时间？\
-  A2: `add`命令的执行时间受多个方面的因素影响(GFW干扰  代理节点故障 本地网络阻塞 服务器负载过高 等诸多因素） ，快则2-3秒，慢则几十秒都是有可能的。
+  Q1: &nbsp;为什么订阅总是失败并返回**EOF**或者**wsarecv: An existing connection was forcibly closed by the remote host**之类的网络错误? \
+  A1: &nbsp;如果在国内环境，因为GFW的关系，访问Mikan，TMDB可能会受阻，建议开启代理; \
+   如果启用代理后仍然频繁失败，则有可能是当前ip访问频率过高，触发了服务器的流量限制/反爬策略，建议过一会再进行尝试订阅，或者为爬虫设置多个代理节点。  
+
+     
+  Q2: &nbsp;为什么有时候订阅番剧要等待这么长时间？\
+  A2: &nbsp;`add`命令的执行时间受多个方面的因素影响(GFW干扰  代理节点故障 本地网络阻塞 服务器负载过高 等诸多因素），快则2-3秒，慢则几十秒都是有可能的。
 
  ## 交流
  目前该项目还处于测试阶段，欢迎各位使用并提交问题以及改进点和新功能，如使用中有任何问题，请提交issues或者邮件联系我，email:voidmanwzp@gmail.com
