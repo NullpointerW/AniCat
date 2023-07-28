@@ -180,10 +180,10 @@ stat 376106
  ## 说明
  ### 数据源
    资源\
-       [Mikan Project](https://mikanani.me/)
+       [Mikan Project](https://mikanani.me/)\
    信息采集\
        [Bangumi 番组计划](https://bgm.tv/)\
-       [TMDB](https://www.themoviedb.org/)
+       [TMDB](https://www.themoviedb.org/)\
    海报封面刮削\
        [Bangumi 番组计划](https://bgm.tv/)\
        [豆瓣](https://www.douban.com/)
