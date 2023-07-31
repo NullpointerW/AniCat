@@ -17,7 +17,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	// "github.com/charmbracelet/lipgloss"
-	 "github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 var (
@@ -54,7 +54,7 @@ type model struct {
 	welcome   bool
 	history   []string
 	textInput textinput.Model
-	// reply     string	
+	// reply     string
 	err error
 }
 
@@ -88,7 +88,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
+
 			input := m.textInput.Value()
+			if input == "cls" || input == "clear" {
+				m.history = nil
+				m.textInput.Reset()
+				return m, nil
+			}
 
 			m.welcome = true
 			m.textInput.Value()
