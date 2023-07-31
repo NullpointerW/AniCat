@@ -24,7 +24,7 @@ const (
 		"ls                           show all subjects\n         " +
 		"lsi [name]                   show resource list\n         " +
 		"lsg [name]                   show subtitleGroup list (rss type)\n         " +
-		"stat [subjid]                show detailed information of subject\n         " +
+		"subj [subjid]                show detailed information of subject\n         " +
 		"stat [subjid]                show downloading status with the subject\n         "+
 		"stop                         terminate program\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
