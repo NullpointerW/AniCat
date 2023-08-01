@@ -12,10 +12,12 @@ import (
 
 	"strings"
 
-	N "github.com/NullpointerW/anicat/net"
-
+	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+
 	// "github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/wordwrap"
 )
@@ -48,14 +50,29 @@ func main() {
 
 type (
 	errMsg error
+	mode   int
+)
+
+const (
+	text = mode(iota)
+	loading
+	tb
+	ls
 )
 
 type model struct {
 	welcome   bool
 	history   []string
+	spinner   spinner.Model
 	textInput textinput.Model
-	// reply     string
-	err error
+	table     table.Model
+	torrls    bool
+	mod       mode
+	ninput    string
+	recvtb    bool
+	// cmd       string
+	recv bool
+	err  error
 }
 
 func initialModel() *model {
@@ -65,13 +82,15 @@ func initialModel() *model {
 	ti.CharLimit = 156
 	ti.Width = 70
 
+	// magenta red `>`
 	ti.Prompt = wordwrap.String("\x1B[38;2;249;38;114m>\x1B[0m", 0)
-	// ti.PromptStyle = lipgloss.NewStyle().
 
-	// 	Foreground(lipgloss.Color("#FAFAFA")).
-	// 	Background(lipgloss.Color("#7D56F4"))
+	s := spinner.New()
+	s.Spinner = spinner.Dot
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
 	return &model{
+		spinner:   s,
 		textInput: ti,
 		err:       nil,
 	}
@@ -82,35 +101,72 @@ func (m *model) Init() tea.Cmd {
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd   tea.Cmd
+		reply string
+	)
+
+	if m.recv {
+		select {
+		case reply = <-send:
+			m.recv = false
+			if m.recvtb {
+				m.mod = tb
+				goto mod
+			}
+			reply = "\n" + reply
+			m.history = append(m.history, reply)
+			m.textInput.Focus()
+			m.mod = text
+			return m, nil
+		default:
+			m.spinner, cmd = m.spinner.Update(msg)
+			return m, cmd
+		}
+	}
+mod:
+	switch m.mod {
+	case tb:
+		// first into
+		if m.recvtb {
+			atb, istorr, err := NewTable(reply)
+			if err != nil {
+				// ls
+			} else {
+				m.torrls = istorr
+				m.table = atb
+				m.recvtb = false
+			}
+		}
+		return m.tableUpdate(msg, m.torrls)
+	default:
+	}
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
-
 			input := m.textInput.Value()
 			if input == "cls" || input == "clear" {
 				m.history = nil
 				m.textInput.Reset()
 				return m, nil
 			}
+			if t := getCmdTyp(input); t == Ls || t == Lsi { // tb
+				m.recvtb = true
+			}
 
 			m.welcome = true
 			m.textInput.Value()
 			m.history = append(m.history, input)
-			tcpConn.Write([]byte(input + N.CRLF))
-			var reply string
-			if scanok := conn.Scan(); scanok {
-				reply = conn.Text()
-			} else {
-				reply = conn.Err().Error()
-			}
-			reply = "\n" + reply
-			m.history = append(m.history, reply)
-			m.textInput.Reset()
-			return m, nil
 
+			recv <- input
+			m.recv = true
+			m.mod = loading
+			m.textInput.Blur()
+			m.textInput.Reset()
+
+			return m, m.spinner.Tick
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		}
@@ -129,8 +185,16 @@ func (m *model) View() string {
 	if !m.welcome {
 		return fmt.Sprintln("AniCat Cliv2") + m.textInput.View()
 	} else {
-		last := strings.Join(m.history, "\n")
-		return last + "\n" +
-			m.textInput.View()
+		switch m.mod {
+		case loading:
+			return fmt.Sprintf("\n\n   %s Loading \n\n", m.spinner.View())
+
+		case tb:
+			return m.tableView()
+		default:
+			last := strings.Join(m.history, "\n")
+			return last + "\n" +
+				m.textInput.View()
+		}
 	}
 }
