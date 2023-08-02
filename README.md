@@ -1,7 +1,7 @@
 # AniCat
 
 <p align="center">
-    <img title="pre" src="static/cmd-pre.gif" alt="" width=75%>
+    <img title="pre" src="doc/cmd-pre.gif" alt="" width=75%>
 </p>
 
 通过命令行交互的一键追番工具
@@ -121,7 +121,7 @@ docker compose up -d
  ``` bash
 add LV1魔王与独居废勇者
  ```
- ![add-gif](static/add.gif)\
+ ![add-gif](doc/add.gif)\
  可选择字幕组和通过正则筛选剧集
  ```bash
 add 孤独摇滚 -g 千夏字幕组 --rg --mc 简体 --mn \s?0[1-5]|1[0-1]
@@ -144,14 +144,14 @@ rm 376106
  ``` bash
 lsi 孤独摇滚
  ```
- ![lsi-gif](static/lsi.gif)
+ ![lsi-gif](doc/lsi.gif)
 #### 老番资源列表
  如果要浏览的番剧资源没有rss组，或者在2013年之前（Mikan Project的rss资源组从2013年开始收录），则`lsi`将会展示种子搜索列表\
  在使用`add`添加该番剧时可用`-i`,`--index`参数指定下载资源的列表索引
 ``` bash
 lsi 龙与虎
  ```
- ![lsi-gif](static/lsi-torrlist.gif)
+ ![lsi-gif](doc/lsi-torrlist.gif)
  在lsi 命令末尾添加-s参数,可优先展示搜索列表，列如`lsi 孤独摇滚 -s`
  ### 查看已订阅列表
  使用`ls`查看所有已订阅番剧的具体信息
@@ -166,17 +166,17 @@ stat 376106
  ### 邮件提醒
  如果要使用提醒功能，请配置stmp服务器信息\
  内置模板的如下：\
- <img src="static/email-push.jpg" width="500">
- <!--![email-pusher](static/email-push.jpg)-->
+ <img src="doc/email-push.jpg" width="500">
+ <!--![email-pusher](doc/email-push.jpg)-->
 
 ### 在媒体库上打开
  通过infuse、Plex、Jellyfin 打开番剧下载目录进行自动刮削并观看:\
- <img src="static/infuse-list.jpg" width="500">
- <img src="static/infuse-detail.jpg" width="500">
+ <img src="doc/infuse-list.jpg" width="500">
+ <img src="doc/infuse-detail.jpg" width="500">
  注: 有多个季的番剧将会在同一文件夹下，（文件夹命名规则和TMDB一致）例如：\
- <img src="static/mseason.jpg" width="500">
-<!-- ![infuse-list](static/infuse-list.jpg)
- ![infuse-detail](static/infuse-detail.jpg)-->
+ <img src="doc/mseason.jpg" width="500">
+<!-- ![infuse-list](doc/infuse-list.jpg)
+ ![infuse-detail](doc/infuse-detail.jpg)-->
  ## 客户端
 * [下载客户端](https://github.com/NullpointerW/AniCat/releases)
 * 运行
