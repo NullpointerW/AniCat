@@ -8,26 +8,13 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	N "github.com/NullpointerW/anicat/net"
 )
 
 var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.HiddenBorder()).
 	BorderForeground(lipgloss.Color("240"))
-
-type TorrItem struct {
-	Name       string `json:"name"`
-	Size       string `json:"size"`
-	UpdateTime string `json:"uptime"`
-}
-
-type Subj struct {
-	Sid     int    `json:"sid"`
-	Typ     string `json:"type"`
-	Name    string `json:"name"`
-	Episode string `json:"epi"`
-	Status  string `json:"status"`
-	Compl   string `json:"compl"`
-}
 
 func (m *model) tableUpdate(msg tea.Msg, istorr bool) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -57,8 +44,8 @@ func (m *model) tableView() string {
 
 func NewTable(raw string) (table.Model, bool, error) {
 	var (
-		torrls []TorrItem
-		subjls []Subj
+		torrls []N.TorrItem
+		subjls []N.Subj
 	)
 	t := "torrls"
 	err := json.Unmarshal([]byte(raw), &torrls)
@@ -85,12 +72,12 @@ func NewTable(raw string) (table.Model, bool, error) {
 		return newTable(columns, tr), true, nil
 	case "subjls":
 		columns := []table.Column{
-			{Title: "sid", Width: 4},
-			{Title: "type", Width: 4},
-			{Title: "name", Width: 10},
+			{Title: "sid", Width: 12},
+			{Title: "type", Width: 10},
+			{Title: "name", Width: 30},
 			{Title: "epi", Width: 4},
-			{Title: "status", Width: 4},
-			{Title: "compl", Width: 4},
+			{Title: "status", Width: 10},
+			{Title: "compl", Width: 10},
 		}
 		var tr []table.Row
 		for _, subj := range subjls {

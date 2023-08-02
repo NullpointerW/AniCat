@@ -1,11 +1,13 @@
 package view
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
+	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/subject"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	"github.com/liushuochen/gotable"
@@ -181,5 +183,38 @@ func (_ tb) Ls(ls []subject.Subject) string {
 }
 
 func (_ tb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
+	return ""
+}
+
+type JsonRender struct{}
+
+func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
+	return ""
+}
+func (_ JsonRender) TorrList(its []CR.Item) string {
+	return ""
+}
+func (_ JsonRender) Ls(ls []subject.Subject) string {
+	var sbjs []N.Subj
+	for _, s := range ls {
+		sbj := N.Subj{}
+		sbj.Sid = s.SubjId
+		sbj.Name = s.Name
+		sbj.Typ = s.Typ.String()
+		sbj.Compl = "N"
+		if s.Terminate {
+			sbj.Compl = "Y"
+		}
+		sbj.Status = "updating"
+		if s.Finished {
+			sbj.Status = "fin"
+		}
+		sbj.Episode = strconv.Itoa(s.Episode)
+		sbjs = append(sbjs, sbj)
+	}
+	b, _ := json.Marshal(sbjs)
+	return string(b)
+}
+func (_ JsonRender) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
 	return ""
 }

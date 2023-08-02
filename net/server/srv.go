@@ -135,7 +135,7 @@ func process(c *N.Conn) {
 					continue
 				}
 	
-				route(&rep)
+				routev2(&rep)
 	
 				if rep.Err != nil {
 					util.Debugln("ls::in err{}")
@@ -152,6 +152,7 @@ func process(c *N.Conn) {
 				if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems ||
 					rep.Opt == cmd.LsItems_searchlist || rep.Opt == cmd.LsGroup ||
 					rep.Opt == cmd.Status || rep.Opt == cmd.Stop || rep.Opt == cmd.Add {
+						fmt.Println(rep.N)
 					c.Write(rep.N)
 					if rep.Opt == cmd.Stop {
 						os.Exit(0)

@@ -131,7 +131,7 @@ func routev2(c *cmd.Command) {
 		c.Err = p.Error()
 	case cmd.Ls:
 		ls := subject.Manager.List()
-		c.N = view.TableRender.Ls(ls)
+		c.N = view.JsonRender{}.Ls(ls)
 	case cmd.LsItems, cmd.LsItems_searchlist:
 		isLsi_l := c.Opt == cmd.LsItems_searchlist
 		l, err := CR.ListScrape(c.N, CR.Ls, isLsi_l)
