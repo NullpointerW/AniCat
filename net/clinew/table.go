@@ -23,6 +23,7 @@ func (m *model) tableUpdate(msg tea.Msg, istorr bool) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc":
 			m.mod = text
+			m.textInput.Focus()
 			return m, cmd
 		case "ctrl+c":
 			return m, tea.Quit
@@ -44,12 +45,12 @@ func (m *model) tableView() string {
 
 func NewTable(raw string) (table.Model, bool, error) {
 	var (
-		torrls []N.TorrItem
+		statls []N.Stat
 		subjls []N.Subj
 	)
-	t := "torrls"
-	err := json.Unmarshal([]byte(raw), &torrls)
-	if err != nil || len(torrls) == 0 || torrls[0].Size == "" {
+	t := "statls"
+	err := json.Unmarshal([]byte(raw), &statls)
+	if err != nil || len(statls) == 0 || statls[0].Size == "" {
 		err = json.Unmarshal([]byte(raw), &subjls)
 		if err != nil || len(subjls) == 0 || subjls[0].Sid == 0 {
 			t = "unkonwn"
@@ -58,18 +59,19 @@ func NewTable(raw string) (table.Model, bool, error) {
 		}
 	}
 	switch t {
-	case "torrls":
+	case "statls":
 		columns := []table.Column{
-			{Title: "index", Width: 4},
-			{Title: "name", Width: 10},
-			{Title: "size", Width: 4},
-			{Title: "uptime", Width: 4},
+			{Title: "file", Width: 30},
+			{Title: "size", Width: 10},
+			{Title: "fin", Width: 12},
 		}
 		var tr []table.Row
-		for i, torr := range torrls {
-			tr = append(tr, []string{strconv.Itoa(i), torr.Name, torr.Size})
+		for _, stat := range statls {
+			tr = append(tr, []string{stat.File, stat.Size, stat.Progress})
 		}
-		return newTable(columns, tr), true, nil
+		tb := newTable(columns, tr)
+		// tb.Blur()
+		return tb, false, nil
 	case "subjls":
 		columns := []table.Column{
 			{Title: "sid", Width: 12},
@@ -81,9 +83,12 @@ func NewTable(raw string) (table.Model, bool, error) {
 		}
 		var tr []table.Row
 		for _, subj := range subjls {
-			tr = append(tr, []string{strconv.Itoa(subj.Sid), subj.Typ, subj.Name, subj.Episode, subj.Status, subj.Compl})
+			tr = append(tr, []string{strconv.Itoa(subj.Sid), subj.Typ, subj.Name, subj.Episode,
+				subj.Status, subj.Compl})
 		}
-		return newTable(columns, tr), false, nil
+		tb := newTable(columns, tr)
+		// tb.Blur()
+		return tb, false, nil
 
 	default:
 		return table.Model{}, false, fmt.Errorf("unkonwn raw type")

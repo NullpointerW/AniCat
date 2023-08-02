@@ -12,6 +12,7 @@ import (
 
 	"strings"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -42,7 +43,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	p := tea.NewProgram(initialModel())
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -66,13 +67,16 @@ type model struct {
 	spinner   spinner.Model
 	textInput textinput.Model
 	table     table.Model
-	torrls    bool
+	statls    bool
 	mod       mode
 	ninput    string
 	recvtb    bool
+	recvls    bool
 	// cmd       string
-	recv bool
-	err  error
+	recv  bool
+	err   error
+	list  list.Model
+	list1 list.Model
 }
 
 func initialModel() *model {
@@ -100,6 +104,13 @@ func (m *model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
+func (m *model) replyAppend(reply string) {
+	reply = "\n" + reply
+	m.history = append(m.history, reply)
+	m.textInput.Focus()
+	m.mod = text
+}
+
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd   tea.Cmd
@@ -114,11 +125,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.mod = tb
 				goto mod
 			}
-			reply = "\n" + reply
-			m.history = append(m.history, reply)
-			m.textInput.Focus()
-			m.mod = text
+			if m.recvls {
+				m.mod = ls
+				goto mod
+			}
+
+			m.replyAppend(reply)
 			return m, nil
+
 		default:
 			m.spinner, cmd = m.spinner.Update(msg)
 			return m, cmd
@@ -129,16 +143,17 @@ mod:
 	case tb:
 		// first into
 		if m.recvtb {
-			atb, istorr, err := NewTable(reply)
+			atb, isstat, err := NewTable(reply)
 			if err != nil {
-				// ls
-			} else {
-				m.torrls = istorr
+				m.replyAppend(reply)
+				return m, nil
+			} else { // ls
+				m.statls = isstat
 				m.table = atb
 				m.recvtb = false
 			}
 		}
-		return m.tableUpdate(msg, m.torrls)
+		return m.tableUpdate(msg, m.statls)
 	default:
 	}
 
@@ -152,8 +167,11 @@ mod:
 				m.textInput.Reset()
 				return m, nil
 			}
-			if t := getCmdTyp(input); t == Ls || t == Lsi { // tb
+			switch t := getCmdTyp(input); t {
+			case Ls, Stat: // tb
 				m.recvtb = true
+			case Lsi:
+				m.recvls = true
 			}
 
 			m.welcome = true
@@ -188,7 +206,6 @@ func (m *model) View() string {
 		switch m.mod {
 		case loading:
 			return fmt.Sprintf("\n\n   %s Loading \n\n", m.spinner.View())
-
 		case tb:
 			return m.tableView()
 		default:

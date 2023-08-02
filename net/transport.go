@@ -6,8 +6,12 @@ import (
 	"io"
 	"net"
 	"sync"
-
 )
+
+type RssGroup struct {
+	RssName string     `json:"rssName"`
+	Items   []TorrItem `json:"items"`
+}
 
 type TorrItem struct {
 	Name       string `json:"name"`
@@ -22,6 +26,12 @@ type Subj struct {
 	Episode string `json:"epi"`
 	Status  string `json:"status"`
 	Compl   string `json:"compl"`
+}
+
+type Stat struct {
+	File     string `json:"file"`
+	Size     string `json:"size"`
+	Progress string `json:"progress"`
 }
 
 var (

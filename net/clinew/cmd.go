@@ -8,6 +8,7 @@ const (
 	Ls = cmdtyp(iota)
 	Lsi
 	Text
+	Stat
 )
 
 func getCmdTyp(s string) cmdtyp {
