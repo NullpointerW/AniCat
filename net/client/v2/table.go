@@ -16,7 +16,7 @@ var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.HiddenBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
-func (m *model) tableUpdate(msg tea.Msg, istorr bool) (tea.Model, tea.Cmd) {
+func (m *model) tableUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -28,8 +28,8 @@ func (m *model) tableUpdate(msg tea.Msg, istorr bool) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "enter":
-			if istorr {
-				m.ninput = "add " + getArg(m.history[len(m.history)-1]) + "-i " + m.table.SelectedRow()[0]
+			if m.isstatls {
+				m.isstatls = false
 				m.mod = text
 				return m, cmd
 			}

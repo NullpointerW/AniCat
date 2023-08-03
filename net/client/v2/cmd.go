@@ -36,7 +36,7 @@ func getCmdTyp(s string) cmdtyp {
 
 func getArg(s string) string {
 	args := strings.Fields(s)
-	var si, ei int
+	si, ei := 1, len(args)
 	cts := strings.ToLower(args[len(args)-1]) == "-s"
 	if cts {
 		ei = len(args) - 1
@@ -44,8 +44,6 @@ func getArg(s string) string {
 
 	if strings.ToLower(args[0]) == "anicat" {
 		si = 2
-	} else {
-		si = 1
 	}
 	return strings.Join(args[si:ei], " ")
 }

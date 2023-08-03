@@ -2,12 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	// "fmt"
 	"strconv"
+	"strings"
 
 	N "github.com/NullpointerW/anicat/net"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 )
 
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
@@ -23,10 +27,22 @@ func (i item) FilterValue() string { return i.title }
 func (m *model) torrlsUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
-			{
+		{
+			switch msg.String() {
+			case "ctrl+c":
 				return m, tea.Quit
+			case "esc":
+				m.istrls = false
+				m.mod = text
+				m.textInput.Focus()
+				return m, nil
+			case "enter":
+				m.istrls = false
+				// panic("DEBUG_PANIC: " + m.history[len(m.history)-1])
+				idx := strings.Split(m.list.SelectedItem().(item).title, ".")[0]
+				cmd := "add " + getArg(m.history[len(m.history)-1]) + " -i " + idx
+				m.sendCmd(cmd)
+				return m, m.spinner.Tick
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -39,8 +55,12 @@ func (m *model) torrlsUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View2() string {
-	return docStyle.Render(m.list.View())
+func (m *model) listView() string {
+	if m.istrls {
+		return docStyle.Render(m.list.View())
+	}
+	return "rsslist"
+
 }
 
 type lsirtyp int
@@ -48,7 +68,7 @@ type lsirtyp int
 const (
 	torr = lsirtyp(iota)
 	rss
-	t
+	er
 )
 
 func lsiReturnTyp(raw string) lsirtyp {
@@ -56,15 +76,17 @@ func lsiReturnTyp(raw string) lsirtyp {
 		rssGroups []N.RssGroup
 		torrls    []N.TorrItem
 	)
-	json.Unmarshal([]byte(raw), &rssGroups)
-	if len(rssGroups) != 0 {
+	err := json.Unmarshal([]byte(raw), &rssGroups)
+	if len(rssGroups) != 0 && err == nil && rssGroups[0].RssName != "" {
 		return rss
 	}
-	json.Unmarshal([]byte(raw), &torrls)
-	if len(torrls) != 0 {
+
+	err = json.Unmarshal([]byte(raw), &torrls)
+	if len(torrls) != 0 && err == nil && torrls[0].Name != "" {
 		return torr
 	}
-	return t
+
+	return er
 }
 
 func (m *model) NewTorrlist(raw string) {
@@ -75,10 +97,15 @@ func (m *model) NewTorrlist(raw string) {
 	json.Unmarshal([]byte(raw), &torrls)
 	for i, t := range torrls {
 		it := item{}
-		it.title = strconv.Itoa(i) + "." + t.Name
-		it.desc = t.UpdateTime + "|" + t.Size
+		it.title = strconv.Itoa(i+1) + "." + t.Name
+		it.desc = t.UpdateTime + " | " + t.Size
 		items = append(items, it)
 	}
-	m.list.Title = "Torrent List"
-	m.list = list.New(items, list.NewDefaultDelegate(), 0, 0)
+	w, h, _ := term.GetSize(int(os.Stdout.Fd()))
+	wd, hd := docStyle.GetFrameSize()
+	m.list = list.New(items, list.NewDefaultDelegate(), w-wd, h-hd)
+	m.list.Title = "torrents"
+}
+
+func (m *model) NewRsslist(raw string) {
 }

@@ -39,7 +39,7 @@ func Listen() {
 
 func process(c *N.Conn) {
 	c.Write("PONG")
-	
+
 	fsMsg, newcli := true, false
 	for {
 		if msg, err := c.Read(); err == nil {
@@ -107,7 +107,7 @@ func process(c *N.Conn) {
 	}
 	if newcli { // new cli block
 		c.Write("RECV_CLI_VER")
-        for{
+		for {
 			if msg, err := c.Read(); err == nil {
 				util.Debugf("msg_len:%d cmd:%s \n", len(msg), msg)
 				if len(msg) == 0 {
@@ -134,9 +134,9 @@ func process(c *N.Conn) {
 					c.Write(rep.N)
 					continue
 				}
-	
+
 				routev2(&rep)
-	
+
 				if rep.Err != nil {
 					util.Debugln("ls::in err{}")
 					var s string
@@ -145,14 +145,14 @@ func process(c *N.Conn) {
 					} else {
 						s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
 					}
-	
+
 					c.Write(s)
 					continue
 				}
 				if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems ||
 					rep.Opt == cmd.LsItems_searchlist || rep.Opt == cmd.LsGroup ||
 					rep.Opt == cmd.Status || rep.Opt == cmd.Stop || rep.Opt == cmd.Add {
-						fmt.Println(rep.N)
+					util.Debugln(rep.N)
 					c.Write(rep.N)
 					if rep.Opt == cmd.Stop {
 						os.Exit(0)

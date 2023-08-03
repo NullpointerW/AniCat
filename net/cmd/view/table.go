@@ -192,7 +192,16 @@ func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
 	return ""
 }
 func (_ JsonRender) TorrList(its []CR.Item) string {
-	return ""
+	var torrls []N.TorrItem
+	for _, t := range its {
+		torr := N.TorrItem{}
+		torr.Name = t.Name
+		torr.Size = t.Size
+		torr.UpdateTime = t.UpdateTime
+		torrls = append(torrls, torr)
+	}
+	b, _ := json.Marshal(torrls)
+	return string(b)
 }
 func (_ JsonRender) Ls(ls []subject.Subject) string {
 	var sbjs []N.Subj

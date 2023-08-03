@@ -61,22 +61,24 @@ const (
 	ls
 )
 
+// debug
+var errmsg string
+
 type model struct {
 	welcome   bool
 	history   []string
 	spinner   spinner.Model
 	textInput textinput.Model
 	table     table.Model
-	statls    bool
+	isstatls  bool
 	mod       mode
-	ninput    string
 	recvtb    bool
 	recvls    bool
-	// cmd       string
-	recv  bool
-	err   error
-	list  list.Model
-	list1 list.Model
+	recv      bool
+	err       error
+	list      list.Model
+	chdlist   list.Model
+	istrls    bool
 }
 
 func initialModel() *model {
@@ -141,19 +143,40 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 mod:
 	switch m.mod {
 	case tb:
-		// first into
+		// first into tb
 		if m.recvtb {
+			m.recvtb = false
 			atb, isstat, err := NewTable(reply)
 			if err != nil {
 				m.replyAppend(reply)
 				return m, nil
 			} else { // ls
-				m.statls = isstat
+				m.isstatls = isstat
 				m.table = atb
-				m.recvtb = false
 			}
 		}
-		return m.tableUpdate(msg, m.statls)
+		return m.tableUpdate(msg)
+	case ls:
+		// first into ls
+		if m.recvls {
+			m.recvls = false
+			typ := lsiReturnTyp(reply)
+			if typ == er {
+				// m.replyAppend(reply)
+				m.replyAppend(errmsg)
+				return m, nil
+			}
+			if typ == torr {
+				m.istrls = true
+				m.NewTorrlist(reply)
+			} else {
+				m.NewRsslist(reply)
+			}
+		}
+		if m.istrls {
+			return m.torrlsUpdate(msg)
+		}
+
 	default:
 	}
 
@@ -208,10 +231,21 @@ func (m *model) View() string {
 			return fmt.Sprintf("\n\n   %s Loading \n\n", m.spinner.View())
 		case tb:
 			return m.tableView()
+		case ls:
+			return m.listView()
 		default:
 			last := strings.Join(m.history, "\n")
 			return last + "\n" +
 				m.textInput.View()
 		}
 	}
+}
+
+func (m *model) sendCmd(cmd string) {
+	m.history = append(m.history, cmd)
+	recv <- cmd
+	m.recv = true
+	m.mod = loading
+	m.textInput.Blur()
+	m.textInput.Reset()
 }

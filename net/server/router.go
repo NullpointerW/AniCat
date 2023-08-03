@@ -145,7 +145,7 @@ func routev2(c *cmd.Command) {
 		if RssGroupSlice {
 			ls = view.TableRender.RssGroup(rgs)
 		} else if ItemSlice {
-			ls = view.TableRender.TorrList(its)
+			ls = view.JsonRender{}.TorrList(its)
 		} else {
 			c.Err = errs.ErrUndefinedCrawlListType
 		}
