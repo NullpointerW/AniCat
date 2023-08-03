@@ -78,6 +78,7 @@ type model struct {
 	err       error
 	list      list.Model
 	chdlist   list.Model
+	ischdls   bool
 	istrls    bool
 }
 

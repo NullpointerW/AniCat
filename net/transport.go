@@ -8,10 +8,10 @@ import (
 	"sync"
 )
 
-type RssGroup struct {
-	RssName string     `json:"rssName"`
-	Items   []TorrItem `json:"items"`
-}
+// type RssGroup struct {
+// 	RssName string     `json:"rssName"`
+// 	Items   []TorrItem `json:"items"`
+// }
 
 type TorrItem struct {
 	Name       string `json:"name"`
