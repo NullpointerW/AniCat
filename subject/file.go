@@ -26,7 +26,7 @@ func Scan() {
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
 			if f.IsDir() {
-				log.Println("scan:found folder:" + home + string(os.PathSeparator) + f.Name())
+				log.Println("scan: found folder: " + home + string(os.PathSeparator) + f.Name())
 				fs, err := os.ReadDir(home + `/` + f.Name())
 				if err != nil {
 					log.Println(err)

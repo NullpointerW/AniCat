@@ -71,7 +71,7 @@ func send(sid int, torr qbt.Torrent) error {
 		return nil
 	}
 
-	log.Printf("pushing---->torrfn:%s,savepath:%s,tag:%s,categ:%s \n", torr.Name, torr.SavePath,
+	log.Printf("pushing----> torrfn=%s,\nsavepath=%s,\ntag=%s,\ncateg=%s\n", torr.Name, torr.SavePath,
 		torr.Tags, torr.Category)
 
 	select {

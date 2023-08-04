@@ -136,7 +136,7 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	}
 	tlen := len(arts)
 	if tlen == 0 {
-		log.Println("there is no arts matched , check the rss match rule!", "sid:", s.SubjId)
+		log.Println("there is no arts matched , check the rss match rule!", "sid=", s.SubjId)
 		return true, nil
 	}
 	util.Debugln("rss total len is", tlen, "sid is", s.SubjId)
@@ -151,7 +151,7 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	// 	}
 	// }
 	c := len(s.RssTorrents)
-	util.Debugf("subj sid:%d total series:%d local series:%d,local cmpl series:%d ", s.SubjId, tlen, c, c)
+	util.Debugf("subj%d total series=%d local series=%d,local cmpl series=%d ", s.SubjId, tlen, c, c)
 	return c >= tlen, nil
 }
 
@@ -194,6 +194,13 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 	if s.RssTorrents == nil {
 		s.RssTorrents = map[string]struct{}{}
 	}
+
+	// perf: skip rename process
+	if _, e := s.RssTorrents[torr.Hash]; e {
+		util.Debugln("skip rename")
+		return nil
+	}
+
 	s.RssTorrents[torr.Hash] = struct{}{}
 	if s.Typ == TV {
 		rename, err := RenameTV(s, torr)
@@ -203,7 +210,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		se := util.TrimExtensionAndGetEpi(rename)
 		if th, e := s.Pushed[se]; e {
 			merr := errs.MultiErr{}
-			dumpliErr := fmt.Errorf("%w:origin_name=%s,rename:%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
+			dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
 			merr.Add(dumpliErr)
 			if CFG.Env.DropOnDumplicate && th != torr.Hash {
 				log.Println("delete ", torr.Name)
@@ -236,7 +243,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		return mErr.Err()
 	} else { //Movie
 		if _, e := s.Pushed[torr.Hash]; e {
-			return fmt.Errorf("%w:name:%s", errs.ErrItemAlreadyPushed, torr.Name)
+			return fmt.Errorf("%w: name=%s", errs.ErrItemAlreadyPushed, torr.Name)
 		}
 		mErr := errs.MultiErr{}
 		s.Pushed[torr.Hash] = ""
@@ -254,7 +261,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 }
 
 func (s *Subject) terminate() {
-	util.Debugf("subj sid:%d terminate ", s.SubjId)
+	util.Debugf("subj%d terminate ", s.SubjId)
 	s.Terminate, s.Finished = true, true
 	s.writeJson()
 	s.Exit()
