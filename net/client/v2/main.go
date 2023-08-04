@@ -65,21 +65,16 @@ const (
 var errmsg string
 
 type model struct {
-	welcome   bool
-	history   []string
-	spinner   spinner.Model
-	textInput textinput.Model
-	table     table.Model
-	isstatls  bool
-	mod       mode
-	recvtb    bool
-	recvls    bool
-	recv      bool
-	err       error
-	list      list.Model
-	chdlist   list.Model
-	ischdls   bool
-	istrls    bool
+	welcome                   bool
+	history                   []string
+	spinner                   spinner.Model
+	textInput                 textinput.Model
+	table                     table.Model
+	mod                       mode
+	recv, recvtb, recvls      bool
+	err                       error
+	list, chdlist             list.Model
+	istrls, ischdls, isstatls bool
 }
 
 func initialModel() *model {
@@ -174,8 +169,12 @@ mod:
 				m.NewRsslist(reply)
 			}
 		}
-		if m.istrls {
+		if m.istrls { // torrent list
 			return m.torrlsUpdate(msg)
+		} else if m.ischdls { // rss child
+			return m.rssChildlsUpdate(msg)
+		} else { // rss
+			return m.rsslsUpdate(msg)
 		}
 
 	default:

@@ -189,7 +189,20 @@ func (_ tb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
 type JsonRender struct{}
 
 func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
-	return ""
+	var rgsMap map[string][]N.TorrItem=make(map[string][]N.TorrItem)
+	for _, r := range rgs {
+		var nits []N.TorrItem
+		for _, it := range r.Items {
+			nit := N.TorrItem{}
+			nit.Name = it.Name
+			nit.Size = it.Size
+			nit.UpdateTime = it.UpdateTime
+			nits = append(nits, nit)
+		}
+		rgsMap[r.Name] = nits
+	}
+	b, _ := json.Marshal(rgsMap)
+	return string(b)
 }
 func (_ JsonRender) TorrList(its []CR.Item) string {
 	var torrls []N.TorrItem

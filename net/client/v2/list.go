@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	// "fmt"
 	"os"
 	"strconv"
@@ -15,8 +16,6 @@ import (
 )
 
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
-
-var RssGroup map[string][]N.TorrItem
 
 type item struct {
 	title, desc string
@@ -34,10 +33,12 @@ func (m *model) torrlsUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c":
 				return m, tea.Quit
 			case "esc":
-				m.istrls = false
-				m.mod = text
-				m.textInput.Focus()
-				return m, nil
+				if m.list.FilterState() == list.Unfiltered {
+					m.istrls = false
+					m.mod = text
+					m.textInput.Focus()
+					return m, nil
+				}
 			case "enter":
 				m.istrls = false
 				// panic("DEBUG_PANIC: " + m.history[len(m.history)-1])
@@ -65,17 +66,17 @@ func (m *model) rsslsUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c":
 				return m, tea.Quit
 			case "esc":
-				m.istrls = false
-				m.mod = text
-				m.textInput.Focus()
-				return m, nil
+				if m.list.FilterState() == list.Unfiltered {
+					m.istrls = false
+					m.mod = text
+					m.textInput.Focus()
+					return m, nil
+				}
 			case "enter":
-				m.istrls = false
-				// panic("DEBUG_PANIC: " + m.history[len(m.history)-1])
-				idx := strings.Split(m.list.SelectedItem().(item).title, ".")[0]
-				cmd := "add " + getArg(m.history[len(m.history)-1]) + " -i " + idx
-				m.sendCmd(cmd)
-				return m, m.spinner.Tick
+				m.ischdls = true
+				m.loadChidlist(m.list.SelectedItem().FilterValue())
+				// blur
+				// m.chdlist.Select(-1)
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -96,17 +97,10 @@ func (m *model) rssChildlsUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c":
 				return m, tea.Quit
 			case "esc":
-				m.istrls = false
-				m.mod = text
-				m.textInput.Focus()
-				return m, nil
-			case "enter":
-				m.istrls = false
-				// panic("DEBUG_PANIC: " + m.history[len(m.history)-1])
-				idx := strings.Split(m.list.SelectedItem().(item).title, ".")[0]
-				cmd := "add " + getArg(m.history[len(m.history)-1]) + " -i " + idx
-				m.sendCmd(cmd)
-				return m, m.spinner.Tick
+				if m.chdlist.FilterState() == list.Unfiltered {
+					m.ischdls = false
+					return m, nil
+				}
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -115,16 +109,16 @@ func (m *model) rssChildlsUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
+	m.chdlist, cmd = m.chdlist.Update(msg)
 	return m, cmd
 }
 
 func (m *model) listView() string {
-	if m.istrls {
+	if m.ischdls {
+		return docStyle.Render(m.chdlist.View())
+	} else {
 		return docStyle.Render(m.list.View())
 	}
-	return "rsslist"
-
 }
 
 type lsirtyp int
@@ -137,11 +131,10 @@ const (
 
 func lsiReturnTyp(raw string) lsirtyp {
 	var (
-		rssGroups map[string]N.TorrItem
-		torrls    []N.TorrItem
+		torrls []N.TorrItem
 	)
-	err := json.Unmarshal([]byte(raw), &rssGroups)
-	if len(rssGroups) != 0 && err == nil {
+	err := json.Unmarshal([]byte(raw), &RssGroup)
+	if len(RssGroup) != 0 && err == nil {
 		return rss
 	}
 
@@ -172,5 +165,39 @@ func (m *model) NewTorrlist(raw string) {
 	m.list.Title = "torrents"
 }
 
+var RssGroup map[string][]N.TorrItem
+
 func (m *model) NewRsslist(raw string) {
+	var items []list.Item
+	// json.Unmarshal([]byte(raw), &RssGroup)
+	for group, its := range RssGroup {
+		it := item{}
+		total := strconv.Itoa(len(its))
+		up := its[0].UpdateTime
+		it.title = group
+		it.desc = fmt.Sprintf("total: %s | lastUpdate: %s", total, up)
+		items = append(items, it)
+	}
+	w, h, _ := term.GetSize(int(os.Stdout.Fd()))
+	wd, hd := docStyle.GetFrameSize()
+	// panic(fmt.Sprintln("width", w-wd, "heigh", h-hd))
+	m.list = list.New(items, list.NewDefaultDelegate(), w-wd, h-hd)
+	m.list.Title = "subtitle groups"
+}
+
+func (m *model) loadChidlist(group string) {
+	var (
+		chdItems []list.Item
+		its      []N.TorrItem = RssGroup[group]
+	)
+	for _, itd := range its {
+		it := item{}
+		it.title = itd.Name
+		it.desc = fmt.Sprintf("updateTime: %s | size: %s", itd.UpdateTime, itd.Size)
+		chdItems = append(chdItems, it)
+	}
+	w, h, _ := term.GetSize(int(os.Stdout.Fd()))
+	wd, hd := docStyle.GetFrameSize()
+	m.chdlist = list.New(chdItems, list.NewDefaultDelegate(), w-wd, h-hd)
+	m.chdlist.Title = "items"
 }

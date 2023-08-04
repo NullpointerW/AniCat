@@ -143,7 +143,7 @@ func routev2(c *cmd.Command) {
 		rgs, RssGroupSlice := l.([]CR.RssGroup)
 		its, ItemSlice := l.([]CR.Item)
 		if RssGroupSlice {
-			ls = view.TableRender.RssGroup(rgs)
+			ls = view.JsonRender{}.RssGroup(rgs)
 		} else if ItemSlice {
 			ls = view.JsonRender{}.TorrList(its)
 		} else {
