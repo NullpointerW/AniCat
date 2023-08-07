@@ -8,10 +8,12 @@ import (
 )
 
 var (
-	ErrCrawlNotFound            = errors.New("content not crawled")
+	ErrCrawlNotFound            = errors.New("crawl not found")
 	ErrCoverDownLoadZeroSize    = errors.New("cover file download zero size after multiple attempts")
 	ErrUnknownResCrawlLsType    = errors.New("unknown resource ls crawl type")
 	ErrLsGroupUnavailableOnTorr = errors.New("command `ls group` is unavailableOnTorrent type")
+
+	ErrBgmTVApiPrefix = errors.New("bgmTV api")
 
 	ErrTorrnetNotFound           = errors.New("there are no torrent files on qbt")
 	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")

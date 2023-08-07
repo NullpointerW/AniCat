@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"sync"
+
+	"github.com/NullpointerW/anicat/errs"
 )
 
 var (
@@ -38,7 +40,7 @@ func BgmiRequest(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	if sc := resp.StatusCode; sc != 200 {
-		err = fmt.Errorf("bgmiRequest: bad request statusCdoe:%d", sc)
+		err = fmt.Errorf("%w: bad request statusCdoe:%d", errs.ErrBgmTVApiPrefix, sc)
 		return nil, err
 	}
 	return resp, nil

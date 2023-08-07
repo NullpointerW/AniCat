@@ -57,7 +57,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			isrss = true
 			bgmUrl = bgmurl
 		} else {
-			log.Println(searchstr, " rss source not found")
+			log.Println(searchstr, "rss source not found")
 			if opt.Index <= 0 {
 				opt.Index = 1
 			}
@@ -75,22 +75,22 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 				url = htmlquery.InnerText(mglink)
 				isrss = false
 			} else {
-				err = fmt.Errorf("%w:name:%s", errs.ErrCrawlNotFound, searchstr)
+				err = fmt.Errorf("%w: %s", errs.ErrCrawlNotFound, searchstr)
 			}
 
 		}
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("searching resource from mikan: ", r.URL)
+		log.Println("searching resource from mikan:", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = fmt.Errorf("search failed from mikan: %w",e)
+		err = fmt.Errorf("search failed from mikan: %w", e)
 		log.Println(err)
 	})
 
-	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
+	c.Visit(BuildSearching(CR.UrlEncode(searchstr)))
 
 	return
 }
@@ -277,15 +277,15 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("searching list from mikan", r.URL)
+		log.Println("searching list from mikan:", r.URL)
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		err = fmt.Errorf("search resource list failed:%w", e)
+		err = fmt.Errorf("search resource list failed: %w", e)
 		log.Println(err)
 	})
 
-	c.Visit(BuildSearching(CR.ConstructSearch(searchstr)))
+	c.Visit(BuildSearching(CR.UrlEncode(searchstr)))
 
 	return
 }
@@ -343,7 +343,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 		}
 		if len(rgs) == 0 {
 			// log.Println("flag---not found")
-			err = fmt.Errorf("%w:cannot found any rss group from %s ", errs.ErrCrawlNotFound, r.Request.URL.String())
+			err = fmt.Errorf("%w: cannot found any rss group from %s ", errs.ErrCrawlNotFound, r.Request.URL.String())
 			return
 		}
 		if t == LSGroup {

@@ -26,7 +26,7 @@ func SetProxy(c *colly.Collector) {
 	}
 }
 
-func ConstructSearch(s string) (utoa string) {
+func UrlEncode(s string) (utoa string) {
 	a := url.QueryEscape(strings.ReplaceAll(s, " ", "+"))
 	utoa = strings.ReplaceAll(a, "%2B", "+")
 	return

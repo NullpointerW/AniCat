@@ -34,14 +34,14 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 		if nameH2 != nil {
 			name = htmlquery.InnerText(nameH2)
 		} else {
-			err = fmt.Errorf("%w:TMDB info not found,search str:%s", errs.ErrCrawlNotFound, searchstr)
+			err = fmt.Errorf("%w: TMDB info not found,search str=%s", errs.ErrCrawlNotFound, searchstr)
 			return
 		}
 		dateSpan := htmlquery.FindOne(doc, dateXpathExp)
 		if dateSpan != nil {
 			date = htmlquery.InnerText(dateSpan)
 		} else {
-			err = fmt.Errorf("%w:TMDB info not found", errs.ErrCrawlNotFound)
+			err = fmt.Errorf("%w: TMDB info not found", errs.ErrCrawlNotFound)
 			return
 		}
 	})
@@ -54,11 +54,11 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		e=fmt.Errorf("search/fetch folder info failed: %w",e)
+		e = fmt.Errorf("search/fetch folder info failed: %w", e)
 		log.Println(e)
 		err = e
 	})
 
-	c.Visit(url + CR.ConstructSearch(searchstr))
+	c.Visit(url + CR.UrlEncode(searchstr))
 	return name, date, err
 }

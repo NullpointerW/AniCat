@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/NullpointerW/anicat/net/cmd"
@@ -22,5 +23,8 @@ func TestStrParse(t *testing.T) {
 }
 
 func TestPrintHelp(t *testing.T) {
-	fmt.Print(cmd.TestingString())
+	s := ""
+	ss := strings.Split(s, "sep")
+	fmt.Println(len(ss))
+	fmt.Println(ss[0])
 }

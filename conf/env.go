@@ -23,7 +23,11 @@ type Environment struct {
 	Port             int    `yaml:"port"`
 	SubjPath         string `yaml:"path"`
 	DropOnDumplicate bool   `yaml:"drop-dumplicate"`
-	Crawl            struct {
+	RssFilter        struct {
+		Contain   []string `yaml:"contain"`
+		Exclusion []string `yaml:"exclusion"`
+	} `yaml:"rss-filter"`
+	Crawl struct {
 		Proxies []string `yaml:"proxies"`
 	} `yaml:"crawl"`
 	Qbt struct {
@@ -76,9 +80,13 @@ func (env *Environment) EmailPrint() {
 	log.Println("username:", env.Pusher.Email.Username)
 }
 
+func (env *Environment) EnabledFilter() bool {
+	return len(env.RssFilter.Contain) > 0 && len(env.RssFilter.Exclusion) > 0
+}
+
 func init() {
 	flaginit()
-	if Testing{
+	if Testing {
 		// skip
 		return
 	}

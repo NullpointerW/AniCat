@@ -17,15 +17,17 @@ import (
 var endpoint = "search/subject/%s?type=2&start=%d&max_results=%d"
 
 func BgmiApiSearch(searchstr string) (sid int, err error) {
-	ed := fmt.Sprintf(endpoint, searchstr, 0, 10)
+	searchstr = CR.UrlEncode(searchstr)
+	ed := fmt.Sprintf(endpoint, searchstr, 0,
+		10)
 	log.Println("bgmi search api: request", CR.BgmiRoot+ed)
 	req, err := http.NewRequest("GET", CR.BgmiRoot+ed, nil)
 	if err != nil {
-		return 0, nil
+		return 0, fmt.Errorf("%w: %w", errs.ErrBgmTVApiPrefix, err)
 	}
 	resp, err := CR.BgmiRequest(req)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %w", errs.ErrBgmTVApiPrefix, err)
 	}
 	bsis := struct {
 		List []CR.BgmiSubjIntro `json:"list"`
@@ -33,16 +35,16 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 	jde := json.NewDecoder(resp.Body)
 	err = jde.Decode(&bsis)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %w", errs.ErrBgmTVApiPrefix, err)
 	}
 	if len(bsis.List) == 0 {
-		return 0, fmt.Errorf("bgmiSearchApi: %w", errs.ErrCrawlNotFound)
+		return 0, fmt.Errorf("%w: %w", errs.ErrBgmTVApiPrefix, errs.ErrCrawlNotFound)
 	}
 	var tatget *CR.BgmiSubjIntro
 	for _, bsi := range bsis.List {
 		util.Debugln(bsi.NameCN)
 		if bsi.NameCN == searchstr {
-			log.Printf("bgmiSearchApi: matched%#+v \n", bsi)
+			log.Printf("%s: matched%#+v \n", errs.ErrBgmTVApiPrefix, bsi)
 			tatget = &bsi
 			break
 		}
@@ -99,7 +101,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			sid := s[len(s)-1]
 			tips["sid"] = sid
 		} else {
-			err = fmt.Errorf("%w:bgmi info not found", errs.ErrCrawlNotFound)
+			err = fmt.Errorf("%w: bgmi info", errs.ErrCrawlNotFound)
 			return
 		}
 	})
@@ -147,7 +149,7 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		err = e
 	})
 
-	c.Visit(BuildInfoSearching(CR.ConstructSearch(searchstr)))
+	c.Visit(BuildInfoSearching(CR.UrlEncode(searchstr)))
 	return p, err
 }
 

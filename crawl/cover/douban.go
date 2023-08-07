@@ -46,7 +46,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		a := htmlquery.FindOne(doc, exp)
 		m := htmlquery.InnerText(a)
 		dl := strings.ReplaceAll(m, `/m/`, `/l/`)
-		log.Println("douban cover: file url:", dl)
+		log.Println("DOUBAN cover: file url:", dl)
 		//download
 
 		resp, e := http.Get(dl)
@@ -67,7 +67,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		e=fmt.Errorf("scrap cover failed: %w",e)
+		e = fmt.Errorf("scrap DOUBAN cover failed: %w", e)
 		err = e
 		log.Println(e)
 	})
@@ -92,7 +92,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		e=fmt.Errorf("search cover failed: %w",e)
+		e = fmt.Errorf("search cover failed: %w", e)
 		err = e
 		log.Println(err)
 	})
@@ -101,7 +101,7 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 		log.Printf("coverScrapUrl=%s \n", cUrl)
 	})
 
-	parseParam := CR.ConstructSearch(coverName)
+	parseParam := CR.UrlEncode(coverName)
 	c.Visit(fmt.Sprintf(DouBancoverSearchUrl, parseParam))
 
 	return
@@ -115,7 +115,7 @@ func downloadfile(filepath string, remote io.ReadCloser) error {
 	defer remote.Close()
 	defer f.Close()
 	wn, err := io.Copy(f, remote)
-	log.Printf("cover file downloaded size:%d", wn)
+	log.Printf("cover file downloaded size: %d", wn)
 	if err != nil {
 		return err
 	}

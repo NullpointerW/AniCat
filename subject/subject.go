@@ -14,6 +14,7 @@ import (
 	RC "github.com/NullpointerW/anicat/crawl/resource"
 
 	// DL "github.com/NullpointerW/anicat/download"
+	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/download/rss"
 	"github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -79,6 +80,24 @@ type Extra struct {
 func (ex *Extra) NoArgs() bool {
 	opt := ex.RssOption
 	return opt.MustContain == "" && opt.MustNotContain == ""
+}
+
+func BuildFilterReg(vbs []string) string {
+
+	var reg string
+
+	const tmp = `(?=.*?%s)`
+	if len(vbs) != 0 {
+		reg += "(?i)"
+		for _, ct := range vbs {
+			vb := strings.ReplaceAll(ct, ",", "|")
+			vb = "(" + vb + ")"
+			reg += fmt.Sprintf(tmp, vb)
+		}
+		return reg
+	} else {
+		return ""
+	}
 }
 
 // The tag used when adding a torrent with qbt
@@ -311,7 +330,27 @@ func download(subj *Subject, ext *Extra) error {
 				if err != nil {
 					return err
 				}
+
+				fl := func(d string, ct, els []string) (bool, error) {
+					cts, clss := BuildFilterReg(ct), BuildFilterReg(els)
+					ctreg, err := regexp.Compile(cts)
+					if err != nil {
+						return false, err
+					}
+					clsreg, err := regexp.Compile(clss)
+					if err != nil {
+						return false, err
+					}
+					return ctreg.MatchString(d) && !clsreg.MatchString(d), nil
+				}
+				enaFl := CFG.Env.EnabledFilter()
+
 				if re.MatchString(desc) {
+					if enaFl {
+						if matchedfl,err:=fl(desc, CFG.Env.RssFilter.Contain, CFG.Env.RssFilter.Exclusion) {
+							continue
+						}
+					}
 					log.Printf("%d:%s  matched collection %s \n", subj.SubjId, subj.Name, desc)
 					err = rss.RmRss(subj.RssPath())
 					if err != nil {
@@ -333,7 +372,6 @@ func download(subj *Subject, ext *Extra) error {
 		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath())
 		return err
 	} else {
-
 		err := torrent.AddCategroy(subj.QbtCateg())
 		if err != nil {
 			return err
@@ -346,8 +384,16 @@ func download(subj *Subject, ext *Extra) error {
 		}
 		if ext != nil {
 			r.UseRegex = ext.RssOption.UseRegex
-			r.MustContain = ext.RssOption.MustContain
-			r.MustNotContain = ext.RssOption.MustNotContain
+			if ext.NoArgs() {
+				if CFG.Env.EnabledFilter() {
+					// use global filter
+					r.UseRegex = true
+					r.MustContain, r.MustNotContain = BuildFilterReg(CFG.Env.RssFilter.Contain), BuildFilterReg(CFG.Env.RssFilter.Exclusion)
+				}
+			} else {
+				r.MustContain = ext.RssOption.MustContain
+				r.MustNotContain = ext.RssOption.MustNotContain
+			}
 		}
 		err = rss.Download(r, subj.RssPath())
 		return err

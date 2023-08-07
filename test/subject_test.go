@@ -43,7 +43,7 @@ func TestScan(t *testing.T) {
 }
 
 func TestCreateSubj(t *testing.T) {
-	_,err := subject.CreateSubject("未闻花名", nil)
+	_, err := subject.CreateSubject("未闻花名", nil)
 	errs.NoError(t, err)
 }
 
@@ -71,8 +71,7 @@ func TestGetSeason(t *testing.T) {
 	t.Log(s.Season)
 }
 
-
-func TestExtra(t *testing.T){
+func TestExtra(t *testing.T) {
 	re, err := regexp.Compile(`\[[^\]]*\d+(\.\d+)\s*[Gg][Bb][^\]]*\]`)
 	if err != nil {
 		fmt.Println("正则表达式编译失败：", err)
@@ -89,16 +88,15 @@ func TestExtra(t *testing.T){
 	}
 }
 
-
 func TestFoundLastS(t *testing.T) {
-	l,err:=subject.FindLastSeason(`D:\anicat\吹响！悠风号 (201504)`)
-	if err!=nil{
+	l, err := subject.FindLastSeason(`D:\anicat\吹响！悠风号 (201504)`)
+	if err != nil {
 		t.Error(l)
 		t.FailNow()
 	}
 	t.Log(l)
 }
-func TestReg(t *testing.T){
+func TestReg(t *testing.T) {
 	str := "这是第一季的节目"
 	re := regexp.MustCompile(`第(.)季`)
 	match := re.FindStringSubmatch(str)
@@ -108,4 +106,9 @@ func TestReg(t *testing.T){
 	} else {
 		fmt.Println("未匹配到季节")
 	}
+}
+
+func TestBuildFilterReg(t *testing.T) {
+	reg := subject.BuildFilterReg([]string{"1080p,1080x1920p", "简体中文,CHS","v2"})
+	fmt.Println(reg)
 }

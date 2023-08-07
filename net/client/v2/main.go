@@ -18,9 +18,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
 	// "github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wordwrap"
+	// "github.com/muesli/reflow/wordwrap"
 )
 
 var (
@@ -85,7 +84,8 @@ func initialModel() *model {
 	ti.Width = 70
 
 	// magenta red `>`
-	ti.Prompt = wordwrap.String("\x1B[38;2;249;38;114m>\x1B[0m", 0)
+	// ti.Prompt = wordwrap.String("\x1B[38;2;249;38;114m>\x1B[0m", 0)
+	ti.PromptStyle = ti.PromptStyle.Foreground(lipgloss.Color("#F92672"))
 
 	s := spinner.New()
 	s.Spinner = spinner.Dot
@@ -159,7 +159,7 @@ mod:
 			typ := lsiReturnTyp(reply)
 			if typ == er {
 				// m.replyAppend(reply)
-				m.replyAppend(errmsg)
+				m.replyAppend(reply)
 				return m, nil
 			}
 			if typ == torr {
@@ -234,9 +234,16 @@ func (m *model) View() string {
 		case ls:
 			return m.listView()
 		default:
-			last := strings.Join(m.history, "\n")
-			return last + "\n" +
+			var last string
+			if len(m.history) == 0 {
+				return m.textInput.View()
+			} else {
+				last = strings.Join(m.history[:len(m.history)-1], "\n")
+				last = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render(last)
+				return last + "\n" + "\n" +
+				m.history[len(m.history)-1] + "\n" + "\n" +
 				m.textInput.View()
+			}
 		}
 	}
 }
