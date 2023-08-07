@@ -108,13 +108,22 @@ docker compose up -d
 
 ### windows
  * [下载qbittorrent](https://www.qbittorrent.org/download.php)（版本≥ v4.1）并安装
+ * 开启qbittorrent的webui
  * [下载可执行文件](https://github.com/NullpointerW/AniCat/releases)和[配置文件](#cfg_jmp)到任意文件夹下,修改后运行
  ``` shell
  PS D:\anicatv0.0.2b> .\anicat-windows-amd64.exe -d -e=./cfg/env.yaml
  -d 开启debug模式
  -e 设置配置文件路径,默认为./env.yaml
   ```
-
+ ## 客户端
+* [下载客户端`anicat-linux-cli`](https://github.com/NullpointerW/AniCat/releases)
+* 运行
+``` bash
+ ./anicat-linux-cli-amd64 -h anicat-host.com -p 1006
+ -h 主机名
+ -p 端口号
+ ```
+   默认连接地址为localhost:8080
 ## 命令/使用
  ### 订阅
  使用`add`命令订阅番剧,成功后返回sid
@@ -177,13 +186,7 @@ stat 376106
  <img src="doc/mseason.jpg" width="500">
 <!-- ![infuse-list](doc/infuse-list.jpg)
  ![infuse-detail](doc/infuse-detail.jpg)-->
- ## 客户端
-* [下载客户端](https://github.com/NullpointerW/AniCat/releases)
-* 运行
-``` bash
- ./anicat-linux-cli-amd64 -h anicat-host.com -p 1006
- ```
-   默认连接地址为localhost:8080
+
  ## 说明
  ### 数据源
    资源\
