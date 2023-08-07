@@ -116,7 +116,7 @@ docker compose up -d
  -e 设置配置文件路径,默认为./env.yaml
   ```
  ## 客户端
-* [下载客户端`anicat-linux-cli`](https://github.com/NullpointerW/AniCat/releases)
+* [下载客户端`anicat-{platform}-cli`](https://github.com/NullpointerW/AniCat/releases)
 * 运行
 ``` bash
  ./anicat-linux-cli-amd64 -h anicat-host.com -p 1006
