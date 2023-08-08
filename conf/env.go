@@ -64,6 +64,11 @@ func (env *Environment) Print() {
 	if env.DropOnDumplicate {
 		log.Println("drop dumplicate:", "yes")
 	}
+	if env.EnabledFilter() {
+		log.Println("golbal filter enable")
+		log.Println("contain words:", env.RssFilter.Contain)
+		log.Println("exclusion words:", env.RssFilter.Exclusion)
+	}
 
 	if len(env.Crawl.Proxies) != 0 {
 		log.Println("scraper proxies:", env.Crawl.Proxies)
@@ -81,7 +86,7 @@ func (env *Environment) EmailPrint() {
 }
 
 func (env *Environment) EnabledFilter() bool {
-	return len(env.RssFilter.Contain) > 0 && len(env.RssFilter.Exclusion) > 0
+	return len(env.RssFilter.Contain) > 0 || len(env.RssFilter.Exclusion) > 0
 }
 
 func init() {

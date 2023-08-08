@@ -82,10 +82,8 @@ func (ex *Extra) NoArgs() bool {
 	return opt.MustContain == "" && opt.MustNotContain == ""
 }
 
-func BuildFilterReg(vbs []string) string {
-
+func BuildFilterPerlReg(vbs []string) string {
 	var reg string
-
 	const tmp = `(?=.*?%s)`
 	if len(vbs) != 0 {
 		reg += "(?i)"
@@ -98,6 +96,78 @@ func BuildFilterReg(vbs []string) string {
 	} else {
 		return ""
 	}
+}
+
+func BuildFilterRegs(vbs []string) []string {
+	if len(vbs) != 0 {
+		regs := make([]string, 0, len(vbs))
+		for _, ct := range vbs {
+			vb := strings.ReplaceAll(ct, ",", "|")
+			vb = "(?i)" + vb
+			regs = append(regs, vb)
+		}
+		return regs
+	} else {
+		return nil
+	}
+}
+
+func FilterWithRegs(s string, contains, exclusions []string) bool {
+	var (
+		containOk, exclusionOk bool
+	)
+	if len(contains) == 0 {
+		containOk = true
+	}
+	if len(exclusions) == 0 {
+		exclusionOk = true
+	}
+	if !containOk {
+		containOks := make([]bool, 0, len(contains))
+		for _, reg := range contains {
+			var ok bool
+			csreg, err := regexp.Compile(reg)
+			if err != nil {
+				log.Println(fmt.Errorf("golbal filter contains regexp error: %w", err))
+				ok = true
+			} else {
+				ok = csreg.MatchString(s)
+				util.Debugln(csreg.String(),":",ok)
+			}
+			containOks = append(containOks, ok)
+		}
+		containOk = true
+		for _, ok := range containOks {
+			if !ok {
+				containOk = false
+				break
+			}
+		}
+	}
+
+	if !exclusionOk {
+		exclusionOks := make([]bool, 0, len(exclusions))
+		for _, reg := range exclusions {
+			var ok bool
+			clsreg, err := regexp.Compile(reg)
+			if err != nil {
+				log.Println(fmt.Errorf("golbal filter exclusions regexp error: %w", err))
+				ok = true
+			} else {
+				ok = !clsreg.MatchString(s)
+				util.Debugln(clsreg.String(),":",ok)
+			}
+			exclusionOks = append(exclusionOks, ok)
+		}
+		exclusionOk = true
+		for _, ok := range exclusionOks {
+			if !ok {
+				exclusionOk = false
+				break
+			}
+		}
+	}
+	return containOk && exclusionOk
 }
 
 // The tag used when adding a torrent with qbt
@@ -331,23 +401,14 @@ func download(subj *Subject, ext *Extra) error {
 					return err
 				}
 
-				fl := func(d string, ct, els []string) (bool, error) {
-					cts, clss := BuildFilterReg(ct), BuildFilterReg(els)
-					ctreg, err := regexp.Compile(cts)
-					if err != nil {
-						return false, err
-					}
-					clsreg, err := regexp.Compile(clss)
-					if err != nil {
-						return false, err
-					}
-					return ctreg.MatchString(d) && !clsreg.MatchString(d), nil
-				}
 				enaFl := CFG.Env.EnabledFilter()
 
 				if re.MatchString(desc) {
 					if enaFl {
-						if matchedfl,err:=fl(desc, CFG.Env.RssFilter.Contain, CFG.Env.RssFilter.Exclusion) {
+						contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
+						exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
+						if !FilterWithRegs(desc, contains, exclusions) {
+							log.Printf("golbal filter: %s filtered", desc)
 							continue
 						}
 					}
@@ -388,7 +449,7 @@ func download(subj *Subject, ext *Extra) error {
 				if CFG.Env.EnabledFilter() {
 					// use global filter
 					r.UseRegex = true
-					r.MustContain, r.MustNotContain = BuildFilterReg(CFG.Env.RssFilter.Contain), BuildFilterReg(CFG.Env.RssFilter.Exclusion)
+					r.MustContain, r.MustNotContain = BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion)
 				}
 			} else {
 				r.MustContain = ext.RssOption.MustContain

@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+
 	// "strings"
 
 	// "strings"
@@ -102,13 +103,22 @@ func TestReg(t *testing.T) {
 	match := re.FindStringSubmatch(str)
 	if len(match) > 1 {
 		season := match[1]
-		fmt.Printf("匹配到的季节为：%s\n", season)
+		fmt.Printf("匹配到的季：%s\n", season)
 	} else {
-		fmt.Println("未匹配到季节")
+		fmt.Println("未匹配到季")
 	}
 }
 
 func TestBuildFilterReg(t *testing.T) {
-	reg := subject.BuildFilterReg([]string{"1080p,1080x1920p", "简体中文,CHS","v2"})
+	reg := subject.BuildFilterPerlReg([]string{"1080p,1080x1920p", "简体中文,CHS", "v2"})
 	fmt.Println(reg)
+}
+
+func TestFilterReg(t *testing.T) {
+	cs := subject.BuildFilterRegs([]string{"1080p,1080x1920p", "简体中文,CHS"})
+	fmt.Println(cs)
+	cls := subject.BuildFilterRegs([]string{"外挂"})
+	fmt.Println(cls)
+	ok := subject.FilterWithRegs("[Lilith-Raws] Okashi na Tensei - 06 [Baha][WebDL 1080p AVC AAC][CHS]", cs, cls)
+	fmt.Println(ok)
 }
