@@ -85,7 +85,7 @@ func Parse(cmds []string) (reply Command) {
 				reply.Err = errs.ErrAddCommandMissingHelping
 				return
 			}
-			reply.Err = fmt.Errorf("%w:%s", errs.ErrMissingCommandArgument, `Use "anicat help " for more information about a command.`)
+			reply.Err = fmt.Errorf("%w:%s", errs.ErrMissingCommandArgument, `Use "(anicat) help " for more information about a command.`)
 			return
 		}
 		if opt == Del || (opt == Add && len(cmds) == 3) || opt == Status {
