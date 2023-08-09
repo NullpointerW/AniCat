@@ -11,6 +11,7 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/net/cmd"
+	"github.com/NullpointerW/anicat/net/cmd/view"
 	util "github.com/NullpointerW/anicat/utils"
 )
 
@@ -39,13 +40,16 @@ func Listen() {
 
 func process(c *N.Conn) {
 	c.Write("PONG")
-
-	fsMsg, newcli := true, false
+	var (
+		fsMsg              = true
+		render view.Render = view.AsciiRender{}
+	)
 	for {
 		if msg, err := c.Read(); err == nil {
 			if fsMsg && msg == "NEW_CLI" {
-				newcli = true
-				break
+				c.Write("RECV_CLI_VER")
+				render = view.JsonRender{}
+				continue
 			}
 			// old cli
 			fsMsg = false
@@ -74,9 +78,7 @@ func process(c *N.Conn) {
 				c.Write(rep.N)
 				continue
 			}
-
-			route(&rep)
-
+			route(&rep, render)
 			if rep.Err != nil {
 				util.Debugln("ls::in err{}")
 				var s string
@@ -103,68 +105,6 @@ func process(c *N.Conn) {
 			log.Printf("conn closed: %s", err)
 			c.TcpConn.Close()
 			break
-		}
-	}
-	if newcli { // new cli block
-		c.Write("RECV_CLI_VER")
-		for {
-			if msg, err := c.Read(); err == nil {
-				util.Debugf("msg_len:%d cmd:%s \n", len(msg), msg)
-				if len(msg) == 0 {
-					c.Write("PONG")
-					continue
-				}
-				cmds := cmd.ParseArgs(msg)
-				if len(cmds) == 0 {
-					c.Write("PONG")
-					continue
-				}
-				rep := cmd.Parse(cmds)
-				if rep.Err != nil {
-					s := ""
-					if rep.Err == errs.ErrAddCommandMissingHelping {
-						s = rep.N
-					} else {
-						s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
-					}
-					c.Write(s)
-					continue
-				}
-				if rep.Opt == cmd.Help {
-					c.Write(rep.N)
-					continue
-				}
-
-				routev2(&rep)
-
-				if rep.Err != nil {
-					util.Debugln("ls::in err{}")
-					var s string
-					if rep.Err == errs.WarnRssRuleNotMatched || rep.Err == errs.WarnReservedCommand_lsg {
-						s = fmt.Sprintln(cmd.Yellow, rep.Err.Error(), cmd.Reset)
-					} else {
-						s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
-					}
-
-					c.Write(s)
-					continue
-				}
-				if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems ||
-					rep.Opt == cmd.LsItems_searchlist || rep.Opt == cmd.LsGroup ||
-					rep.Opt == cmd.Status || rep.Opt == cmd.Stop || rep.Opt == cmd.Add {
-					util.Debugln(rep.N)
-					c.Write(rep.N)
-					if rep.Opt == cmd.Stop {
-						os.Exit(0)
-					}
-				} else {
-					c.Write("OK")
-				}
-			} else {
-				log.Printf("conn closed: %s", err)
-				c.TcpConn.Close()
-				break
-			}
 		}
 	}
 }

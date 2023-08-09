@@ -10,22 +10,19 @@ import (
 	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/subject"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	"github.com/liushuochen/gotable"
 	"github.com/olekukonko/tablewriter"
 )
 
-type Table interface {
+type Render interface {
 	RssGroup(rgs []CR.RssGroup) string
 	TorrList(its []CR.Item) string
 	Ls(ls []subject.Subject) string
-	Status(subj *subject.Subject, torrs []qbt.Torrent) string
+	Status(subj *subject.Subject, torrs ...qbt.Torrent) string
 }
 
-var TableRender = mergTb{}
+type AsciiRender struct{}
 
-type mergTb struct{}
-
-func (_ mergTb) RssGroup(rgs []CR.RssGroup) string {
+func (_ AsciiRender) RssGroup(rgs []CR.RssGroup) string {
 	var row [][]string
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
@@ -45,7 +42,7 @@ func (_ mergTb) RssGroup(rgs []CR.RssGroup) string {
 	return "\n" + tableString.String()
 }
 
-func (_ mergTb) TorrList(its []CR.Item) string {
+func (_ AsciiRender) TorrList(its []CR.Item) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
 	table.SetHeader([]string{"index", "name", "size", "updateTime"})
@@ -65,7 +62,7 @@ func (_ mergTb) TorrList(its []CR.Item) string {
 	return "\n" + tableString.String()
 }
 
-func (_ mergTb) Ls(ls []subject.Subject) string {
+func (_ AsciiRender) Ls(ls []subject.Subject) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
 	table.SetHeader([]string{"sid", "type", "name", "episode", "status", "compl"})
@@ -94,7 +91,7 @@ func (_ mergTb) Ls(ls []subject.Subject) string {
 	return "\n" + tableString.String()
 }
 
-func (_ mergTb) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
+func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
 	var row [][]string
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
@@ -136,60 +133,10 @@ func (_ mergTb) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
 	return "\n" + tableString.String()
 }
 
-type tb struct{}
-
-func (_ tb) RssGroup(rgs []CR.RssGroup) string {
-	createItemLStb := func(its []CR.Item) string {
-		tb, _ := gotable.Create("name", "size", "updateTime")
-		for _, it := range its {
-			tb.AddRow([]string{it.Name, it.Size, it.UpdateTime})
-		}
-		return "\n" + tb.String() + "\n"
-	}
-	ls := "\n"
-	for _, rg := range rgs {
-		ls += rg.Name
-		ls += createItemLStb(rg.Items)
-	}
-	return ls
-}
-func (_ tb) TorrList(its []CR.Item) string {
-	tb, _ := gotable.Create("index", "name", "size", "updateTime")
-	for i, it := range its {
-		tb.AddRow([]string{strconv.Itoa(i + 1), it.Name, it.Size, it.UpdateTime})
-	}
-	return "\n" + tb.String()
-}
-
-func (_ tb) Ls(ls []subject.Subject) string {
-	tb, _ := gotable.Create("sid", "type", "name", "episode", "status", "compl")
-	for _, s := range ls {
-		sid := strconv.Itoa(s.SubjId)
-		fin := "updating"
-		compl := "N"
-		epi := "*"
-		if s.Episode != 0 {
-			epi = strconv.Itoa(s.Episode)
-		}
-		if s.Finished {
-			fin = "fin"
-		}
-		if s.Terminate {
-			compl = "Y"
-		}
-		tb.AddRow([]string{sid, s.Typ.String(), s.Name, epi, fin, compl})
-	}
-	return "\n" + tb.String()
-}
-
-func (_ tb) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
-	return ""
-}
-
 type JsonRender struct{}
 
 func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
-	var rgsMap map[string][]N.TorrItem=make(map[string][]N.TorrItem)
+	var rgsMap map[string][]N.TorrItem = make(map[string][]N.TorrItem)
 	for _, r := range rgs {
 		var nits []N.TorrItem
 		for _, it := range r.Items {
@@ -237,6 +184,6 @@ func (_ JsonRender) Ls(ls []subject.Subject) string {
 	b, _ := json.Marshal(sbjs)
 	return string(b)
 }
-func (_ JsonRender) Status(subj *subject.Subject, torrs []qbt.Torrent) string {
+func (_ JsonRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
 	return ""
 }

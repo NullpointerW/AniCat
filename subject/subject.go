@@ -392,6 +392,7 @@ func download(subj *Subject, ext *Extra) error {
 		if err != nil {
 			return err
 		}
+		enaFl := CFG.Env.EnabledFilter()
 		for _, a := range it.Articles {
 			util.Debugln(a.Description)
 			desc := a.Description
@@ -400,8 +401,6 @@ func download(subj *Subject, ext *Extra) error {
 				if err != nil {
 					return err
 				}
-
-				enaFl := CFG.Env.EnabledFilter()
 
 				if re.MatchString(desc) {
 					if enaFl {
@@ -430,7 +429,8 @@ func download(subj *Subject, ext *Extra) error {
 		if err != nil {
 			return err
 		}
-		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath())
+		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
+		enaFl,BuildFilterPerlReg(CFG.Env.RssFilter.Contain),BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
 		return err
 	} else {
 		err := torrent.AddCategroy(subj.QbtCateg())
@@ -452,6 +452,7 @@ func download(subj *Subject, ext *Extra) error {
 					r.MustContain, r.MustNotContain = BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion)
 				}
 			} else {
+				r.UseRegex = ext.RssOption.UseRegex
 				r.MustContain = ext.RssOption.MustContain
 				r.MustNotContain = ext.RssOption.MustNotContain
 			}

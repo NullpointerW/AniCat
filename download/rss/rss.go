@@ -20,12 +20,16 @@ func Download(adlr qbt.AutoDLRule, path string) (err error) {
 	return err
 }
 
-func SetAutoDLRule(rssurl, categ, dlpath, rsspath string) error {
+func SetAutoDLRule(rssurl, categ, dlpath, rsspath string,
+	enableFilter bool, contain, exclusion string) error {
 	r := qbt.AutoDLRule{
 		Enabled:          true,
 		AffectedFeeds:    []string{rssurl},
 		SavePath:         dlpath,
 		AssignedCategory: categ,
+		UseRegex:         enableFilter,
+		MustContain:      contain,
+		MustNotContain:   exclusion,
 	}
 	err := DL.Qbt.SetAutoDLRule(RuleNamePrefix+rsspath, r)
 	return err
