@@ -452,7 +452,6 @@ func download(subj *Subject, ext *Extra) error {
 					r.MustContain, r.MustNotContain = BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion)
 				}
 			} else {
-				r.UseRegex = ext.RssOption.UseRegex
 				r.MustContain = ext.RssOption.MustContain
 				r.MustNotContain = ext.RssOption.MustNotContain
 			}

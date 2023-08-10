@@ -11,7 +11,7 @@ var (
 	Yellow   = string([]byte{27, 91, 51, 51, 109})
 	Cls      = "\033[2J\033[H"
 	Reset    = string([]byte{27, 91, 48, 109})
-	// $
+	// >
 	Cursor = "\033[?25h>"
 )
 

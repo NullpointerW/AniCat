@@ -32,13 +32,18 @@ func route(c *cmd.Command, r view.Render) {
 		}
 	case cmd.Del:
 		i, err := strconv.Atoi(c.N)
-		if err != nil {
+		if err != nil && c.N != "*" {
 			c.Err = err
 			return
 		}
-		p := subject.NewPip(i)
-		subject.Delete <- p
-		c.Err = p.Error()
+		var pip *subject.Pip
+		if c.N == "*" {
+			pip = subject.NewPip("*")
+		} else {
+			pip = subject.NewPip(i)
+		}
+		subject.Delete <- pip
+		c.Err = pip.Error()
 	case cmd.Ls:
 		ls := subject.Manager.List()
 		c.N = r.Ls(ls)
@@ -101,5 +106,3 @@ func route(c *cmd.Command, r view.Render) {
 		c.N = "exited."
 	}
 }
-
-

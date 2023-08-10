@@ -133,7 +133,9 @@ func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string 
 	return "\n" + tableString.String()
 }
 
-type JsonRender struct{}
+type JsonRender struct {
+	AsciiRender
+}
 
 func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
 	var rgsMap map[string][]N.TorrItem = make(map[string][]N.TorrItem)
@@ -184,6 +186,6 @@ func (_ JsonRender) Ls(ls []subject.Subject) string {
 	b, _ := json.Marshal(sbjs)
 	return string(b)
 }
-func (_ JsonRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
-	return ""
+func (jr JsonRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
+	return jr.AsciiRender.Status(subj, torrs...)
 }

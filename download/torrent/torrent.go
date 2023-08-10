@@ -101,7 +101,7 @@ func DLcompl(h string) (bool, error) {
 func DelViaCateg(categ string) error {
 	// util.Debugln("abs_path:", p)
 	torrs, err := GetViaCateg(categ)
-	if err != nil {
+	if err != nil && err != errs.ErrTorrnetNotFound {
 		return err
 	}
 	var hs []string

@@ -2,7 +2,10 @@ package subject
 
 import (
 	// "log"
+	"log"
 	"sync"
+
+	"github.com/NullpointerW/anicat/errs"
 )
 
 type SubjC struct {
@@ -69,10 +72,10 @@ func (m *SubjectManager) Add(s *Subject) {
 	m.copy = nil
 }
 
-func (m *SubjectManager) Remove(s *Subject) {
+func (m *SubjectManager) Remove(sid int) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	delete(m.sto, s.SubjId)
+	delete(m.sto, sid)
 	// delete(m.sp_sid, s.Path)
 	m.copy = nil
 }
@@ -96,6 +99,13 @@ func (m *SubjectManager) List() (ls []Subject) {
 	return ls
 }
 
+func (m *SubjectManager) Clear() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	// alloc a new map
+	m.sto = make(map[int]*Subject)
+}
+
 func StartManagement() {
 	for {
 		select {
@@ -110,19 +120,48 @@ func StartManagement() {
 			}
 			p.wg.Done()
 		case p := <-Delete:
-			i := p.Arg.(int)
+			i, _ := p.Arg.(int)
+			errWrap := errs.ErrWrapper{}
+			// rm *
+			// rmove all subjects
+			if i == 0 && p.Arg.(string) == "*" {
+				log.Println("rm: remove all subjects")
+				merr := errs.MultiErr{}
+				for _, s := range Manager.List() {
+					if !s.Terminate {
+						s.Exit()
+					}
+					errWrap.Handle(func() error {
+						return s.RmRes()
+					})
+					errWrap.Handle(func() error {
+						return RmFolder(&s)
+					})
+					if errWrap.Error() == nil {
+						Manager.Remove(s.SubjId)
+					}
+					merr.Add(errWrap.Error())
+					errWrap.Rset()
+				}
+				p.err = merr.Err()
+				p.wg.Done()
+				continue
+			}
 			s := Manager.Get(i)
 			if s != nil {
 				if !s.Terminate {
 					s.Exit()
 				}
-				Manager.Remove(s)
-				s.RmRes()
-				err := RmFolder(s)
-				if err != nil {
-					p.err = err
+				errWrap.Handle(func() error {
+					return s.RmRes()
+				})
+				errWrap.Handle(func() error {
+					return RmFolder(s)
+				})
+				if errWrap.Error() == nil {
+					Manager.Remove(s.SubjId)
 				}
-
+				p.err = errWrap.Error()
 			}
 			p.wg.Done()
 		}

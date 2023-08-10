@@ -91,3 +91,7 @@ func (wp *ErrWrapper) Handle(t Thrower) {
 func (wp *ErrWrapper) Error() error {
 	return wp.e
 }
+
+func (wp *ErrWrapper) Rset() {
+	wp.e = nil
+}
