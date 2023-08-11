@@ -1,7 +1,5 @@
 package information
 
-
-
 const (
 	infoBaseUrl      = `https://bgm.tv`
 	infoPageXpathExp = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='main'][2]/div[@class='columns clearit']/div[@id='columnSearchB']/ul[@id='browserItemList']/li[1]/div[@class='inner']/h3/a[@class='l']/@href`
@@ -12,6 +10,7 @@ const (
 const (
 	SubjId            = "sid"
 	SubjName          = "中文名"
+	SubjOriginName    = "originName"
 	SubjEpisode       = "话数"
 	SubjStartTime     = "放送开始"
 	SubjMoveStartTime = "上映年度"
@@ -34,4 +33,4 @@ const (
 	TMDB_TYP_MOVIE = "movie"
 )
 
-
+const OriginNameXpath = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='headerSubject']/h1[@class='nameSingle']/a`

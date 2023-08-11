@@ -100,6 +100,9 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			s := strings.Split(url, `/`)
 			sid := s[len(s)-1]
 			tips["sid"] = sid
+			// fetch origin name
+			a := htmlquery.FindOne(doc, OriginNameXpath)
+			tips[SubjOriginName] = htmlquery.InnerText(a)
 		} else {
 			err = fmt.Errorf("%w: bgmi info", errs.ErrCrawlNotFound)
 			return

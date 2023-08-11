@@ -1,10 +1,14 @@
 package crawl
 
 import (
+	"io"
+	"log"
 	"net/url"
+	"os"
 	"strings"
 
 	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/errs"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
 )
@@ -30,4 +34,22 @@ func UrlEncode(s string) (utoa string) {
 	a := url.QueryEscape(strings.ReplaceAll(s, " ", "+"))
 	utoa = strings.ReplaceAll(a, "%2B", "+")
 	return
+}
+
+func Downloadfile(filepath string, remote io.ReadCloser) error {
+	f, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return err
+	}
+	defer remote.Close()
+	defer f.Close()
+	wn, err := io.Copy(f, remote)
+	log.Printf("cover file downloaded size: %d", wn)
+	if err != nil {
+		return err
+	}
+	if wn == 0 {
+		return errs.ErrCoverDownLoadZeroSize
+	}
+	return nil
 }

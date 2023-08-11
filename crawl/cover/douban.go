@@ -2,16 +2,13 @@ package cover
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	CR "github.com/NullpointerW/anicat/crawl"
-	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
@@ -55,7 +52,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 			return
 		}
 
-		e = downloadfile(fpath, resp.Body)
+		e = CR.Downloadfile(fpath, resp.Body)
 		if e != nil {
 			err = e
 			return
@@ -105,22 +102,4 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 	c.Visit(fmt.Sprintf(DouBancoverSearchUrl, parseParam))
 
 	return
-}
-
-func downloadfile(filepath string, remote io.ReadCloser) error {
-	f, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
-	if err != nil {
-		return err
-	}
-	defer remote.Close()
-	defer f.Close()
-	wn, err := io.Copy(f, remote)
-	log.Printf("cover file downloaded size: %d", wn)
-	if err != nil {
-		return err
-	}
-	if wn == 0 {
-		return errs.ErrCoverDownLoadZeroSize
-	}
-	return nil
 }

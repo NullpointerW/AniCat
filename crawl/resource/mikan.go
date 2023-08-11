@@ -39,10 +39,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			err = e
 			return
 		}
-		a := htmlquery.Find(doc, `/html/body[@class='main']/
-		div[@id='sk-container']/
-		div[@class='central-container']/
-		ul[@class='list-inline an-ul']/li`)
+		a := htmlquery.Find(doc, MikanRssLiXpath)
 		// command is add ... -i ,even if rss source has been found,show the search list
 		if opt.Index > 0 {
 			a = nil
@@ -204,15 +201,12 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 			err = e
 			return
 		}
-		a := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/
-		div[@class='central-container']/
-		ul[@class='list-inline an-ul']/
-		li/a//@href`)
+		a := htmlquery.Find(doc, MikanRssLiXpath)
 		if searchls {
 			a = nil
 		}
 		if a != nil {
-			res, e = scrapeRssList(htmlquery.InnerText(a), t)
+			res, e = scrapeRssList(selectRss(a, searchstr), t)
 			if e != nil {
 				err = e
 				return

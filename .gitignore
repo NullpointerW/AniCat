@@ -4,3 +4,4 @@
 output.log
 build/
 test/env.yaml
+__debug_bin.exe

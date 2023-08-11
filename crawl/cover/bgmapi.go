@@ -8,19 +8,17 @@ import (
 	CR "github.com/NullpointerW/anicat/crawl"
 )
 
-
-
 func Bgmimage(subjid int, typ, filepath string) (err error) {
 	url := fmt.Sprintf(BangumiImageUrl, subjid, typ)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return
 	}
-	resp, err :=CR.BgmiRequest(req)
+	resp, err := CR.BgmiRequest(req)
 	if err != nil {
 		return
 	}
-	return downloadfile(filepath, resp.Body)
+	return CR.Downloadfile(filepath, resp.Body)
 }
 
 // shorthand for Bgmimage(id,"large",filepath)

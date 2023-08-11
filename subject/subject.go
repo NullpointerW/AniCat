@@ -2,6 +2,7 @@ package subject
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -29,6 +30,7 @@ type Subject struct {
 	SubjId      int         `json:"subjId"`
 	FolderName  string      `json:"folderName"` // source from tmdb
 	Name        string      `json:"name"`
+	OriginName  string      `json:"orginName"`
 	Path        string      `json:"path"`
 	Finished    bool        `json:"finished"`
 	Episode     int         `json:"episode"`
@@ -132,7 +134,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 				ok = true
 			} else {
 				ok = csreg.MatchString(s)
-				util.Debugln(csreg.String(),":",ok)
+				util.Debugln(csreg.String(), ":", ok)
 			}
 			containOks = append(containOks, ok)
 		}
@@ -155,7 +157,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 				ok = true
 			} else {
 				ok = !clsreg.MatchString(s)
-				util.Debugln(clsreg.String(),":",ok)
+				util.Debugln(clsreg.String(), ":", ok)
 			}
 			exclusionOks = append(exclusionOks, ok)
 		}
@@ -290,6 +292,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 
 func (subj *Subject) Loadfileds(tips map[string]string) error {
 	subj.Name = tips[IC.SubjName]
+	subj.OriginName = tips[IC.SubjOriginName]
 	if _, e := tips[IC.SubjStartTime]; e {
 		subj.Typ = TV
 	} else {
@@ -312,23 +315,33 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 		subj.Finished = true
 	}
 	subj.Alias = tips[IC.Alias]
-	// source from tmdb
+
+	// fetch folder info,source from tmdb
 	var tmdbTyp = IC.TMDB_TYP_TV
 	if subj.Typ == MOVIE {
 		tmdbTyp = IC.TMDB_TYP_MOVIE
 	}
 	var err error
+	// First, attempt to search for the folder using the subject's Name
 	subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.Name)
 	if err != nil {
-		if err == errs.ErrCrawlNotFound {
+		if errors.Is(err, errs.ErrCrawlNotFound) {
+			// If the search failed because the folder was not found,
+			// try again using the subject's OriginName
+			subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.OriginName)
+		}
+		if errors.Is(err, errs.ErrCrawlNotFound) {
+			// If the search still cannot found, try using each alias from the subject's Alias field
 			for _, n := range strings.Split(subj.Alias, "|") {
 				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				if err == nil {
 					return nil
-				} else if err != errs.ErrCrawlNotFound {
+				} else if !errors.Is(err, errs.ErrCrawlNotFound) {
+					// If the search failed with an error other than ErrCrawlNotFound, return the error
 					return err
 				}
 			}
+			// If all aliases failed, try removing the season number from the subject's Name and search again
 			re := regexp.MustCompile(`第(.)季`)
 			match := re.FindStringSubmatch(subj.Name)
 			if len(match) > 1 {
@@ -430,7 +443,7 @@ func download(subj *Subject, ext *Extra) error {
 			return err
 		}
 		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
-		enaFl,BuildFilterPerlReg(CFG.Env.RssFilter.Contain),BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
+			enaFl, BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
 		return err
 	} else {
 		err := torrent.AddCategroy(subj.QbtCateg())
