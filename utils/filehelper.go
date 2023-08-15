@@ -5,11 +5,26 @@ import (
 	"strings"
 )
 
-var videoExt = []string{".mp4", ".rmvb", ".avi", ".flv", ".m2v", ".mkv", ".wmv", ".mp3", ".wav", ".mov"}
+var (
+	videoExt = []string{".mp4", ".rmvb", ".avi", ".flv", ".m2v", ".mkv", ".wmv", ".mp3", ".wav", ".mov"}
+
+	subtitleExt = []string{".srt", ".ass", ".sub"}
+)
 
 func IsVideofile(fn string) bool {
 	for _, ext := range videoExt {
-		if strings.HasSuffix(fn, ext) {
+		cmpFn := strings.ToLower(fn)
+		if strings.HasSuffix(cmpFn, ext) {
+			return true
+		}
+	}
+	return false
+}
+
+func IsSubtitleFile(fn string) bool {
+	for _, ext := range subtitleExt {
+		cmpFn := strings.ToLower(fn)
+		if strings.HasSuffix(cmpFn, ext) {
 			return true
 		}
 	}

@@ -122,3 +122,19 @@ func TestFilterReg(t *testing.T) {
 	ok := subject.FilterWithRegs("[Lilith-Raws] Okashi na Tensei - 06 [Baha][WebDL 1080p AVC AAC][CHS]", cs, cls)
 	fmt.Println(ok)
 }
+
+func TestSubsReg(t *testing.T) {
+	CHSReg, err := regexp.Compile(subject.CHSSubStationReg)
+	if err != nil {
+		t.Error(err)
+	}
+	ok := CHSReg.MatchString("[Lilith-Raws] Okashi na Tensei - 06 [Baha][WebDL 1080p AVC AAC][]Chs.ast")
+	fmt.Println(ok)
+
+	CHSReg, err = regexp.Compile(subject.CHTSubStationReg)
+	if err != nil {
+		t.Error(err)
+	}
+	ok = CHSReg.MatchString("[Lilith-Raws] Okashi na Tensei - 06 [Baha][WebDL 1080p AVC AAC][]繁体中文.ast")
+	fmt.Println(ok)
+}

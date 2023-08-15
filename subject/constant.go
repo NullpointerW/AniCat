@@ -57,9 +57,9 @@ var sregs = []string{reg0, reg1}
 const (
 	reg0v_epi = `\[(\d{2})[vV]` // [02v1] // \[(\d+)\w*\]
 	reg1_epi  = `\[(\d+)\]`     // [02]
-	reg2_epi = `- ?(\d+)`      // - 02
-	reg3_epi = `\[(\d+)[集话]\]` // [02集]
-	reg4_epi = `第(\d+)[话集]`    // 第02集
+	reg2_epi  = `- ?(\d+)`      // - 02
+	reg3_epi  = `\[(\d+)[集话]\]` // [02集]
+	reg4_epi  = `第(\d+)[话集]`    // 第02集
 )
 
 const (
@@ -69,4 +69,9 @@ const (
 
 var coll_regs = []string{reg0_coll, reg1_coll}
 
-var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi,reg3_epi,reg4_epi}
+var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi, reg3_epi, reg4_epi}
+
+const (
+	CHSSubStationReg = "(?i)简体|簡體|简中|簡中|chs"
+	CHTSubStationReg = "(?i)繁体|繁體|正體中文|正体中文|繁中|cht"
+)

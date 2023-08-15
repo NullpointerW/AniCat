@@ -33,7 +33,7 @@ func CaptureEpisNum(text string) (string, error) {
 
 func RenameTV(s *Subject, torr qbt.Torrent) (string, error) {
 	if !util.IsVideofile(torr.Name) {
-		return "", fmt.Errorf("%s is not a video file", torr.Name)
+		log.Printf("%s is not a video file,may external subtitles", torr.Name)
 	}
 	return renameTV(s, torr.Name)
 }
@@ -100,9 +100,34 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 			if !CFG.Env.DropOnDumplicate {
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
 			}
+			// feat 0.0.3b: support external subtitles
+		} else if fn := f.Name; util.IsSubtitleFile(fn) {
+			fn = util.FileSeparatorConv(fn)
+			sep := strings.Split(fn, "/")
+			fn = sep[len(sep)-1]
+			// remove subtitleFile to outside
+			merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
 		}
 	}
 	DL.Wait(1000) // wati for qbt moving files
 	merr.Add(os.RemoveAll(torr.ContentPath))
 	return merr.Err()
+}
+
+func renameSubRssTorr(s *Subject, torr qbt.Torrent) {
+
+}
+
+func renameSubtitleFile(fn string) string {
+	reg, _ := regexp.Compile(CHSSubStationReg)
+	ok := reg.MatchString(fn)
+	if ok {
+		return "chs"
+	}
+	reg, _ = regexp.Compile(CHTSubStationReg)
+	ok = reg.MatchString(fn)
+	if ok {
+		return "cht"
+	}
+	return ""
 }
