@@ -60,6 +60,7 @@ const (
 	reg2_epi  = `- ?(\d+)`      // - 02
 	reg3_epi  = `\[(\d+)[集话]\]` // [02集]
 	reg4_epi  = `第(\d+)[话集]`    // 第02集
+	regSpecial =`#\s*(\d+)`
 )
 
 const (

@@ -203,28 +203,39 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 
 	s.RssTorrents[torr.Hash] = struct{}{}
 	if s.Typ == TV {
-		rename, err := RenameTV(s, torr)
-		if err != nil {
-			return err
-		}
-		se := util.TrimExtensionAndGetEpi(rename)
-		if th, e := s.Pushed[se]; e {
-			merr := errs.MultiErr{}
-			dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
-			merr.Add(dumpliErr)
-			if CFG.Env.DropOnDumplicate && th != torr.Hash {
-				log.Println("delete ", torr.Name)
-				merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
+		var se = ""
+		if checkSingleVideo(torr) {
+			rename, err := renameTV(s, torr.Name)
+			if err != nil {
+				return err
 			}
-			return merr.Err()
-		}
-		err = DL.Qbt.RenameFile(torr.Hash, torr.Name, rename)
-		if err != nil {
-			return err
+			se = util.TrimExtensionAndGetEpi(rename)
+			if th, e := s.Pushed[se]; e {
+				merr := errs.MultiErr{}
+				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
+				merr.Add(dumpliErr)
+				if CFG.Env.DropOnDumplicate && th != torr.Hash {
+					log.Println("delete ", torr.Name)
+					merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
+				}
+				return merr.Err()
+			}
+			err = DL.Qbt.RenameFile(torr.Hash, torr.Name, rename)
+			if err != nil {
+				return err
+			}
+			s.Pushed[se] = torr.Hash
+		} else {
+			log.Printf("%s is not a video file,may external subtitles", torr.Name)
+			ok, rn, err := renameSubRssTorr(s, torr)
+			log.Println(err)
+			if !ok {
+				return nil
+			}
+			se = util.TrimExtensionAndGetEpi(rn)
 		}
 		mErr := errs.MultiErr{}
-		s.Pushed[se] = torr.Hash
-		err = pusher.Push(P.Payload{
+		err := pusher.Push(P.Payload{
 			SubjectId:    s.SubjId,
 			SubjectName:  s.Name,
 			DownLoadName: torr.Name,

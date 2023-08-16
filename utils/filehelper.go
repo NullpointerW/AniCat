@@ -43,6 +43,9 @@ func FileSeparatorConv(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
 }
 
+// trim the rename file ext and name
+// eg：
+// example S01E02 => S01E02
 func TrimExtensionAndGetEpi(fn string) string {
 	sep := "."
 	sp := strings.Split(fn, sep)

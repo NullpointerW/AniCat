@@ -31,11 +31,8 @@ func CaptureEpisNum(text string) (string, error) {
 	return "", fmt.Errorf("%w:%s", errs.ErrCannotCaptureEpisNum, text)
 }
 
-func RenameTV(s *Subject, torr qbt.Torrent) (string, error) {
-	if !util.IsVideofile(torr.Name) {
-		log.Printf("%s is not a video file,may external subtitles", torr.Name)
-	}
-	return renameTV(s, torr.Name)
+func checkSingleVideo(torr qbt.Torrent) bool {
+	return util.IsVideofile(torr.Name)
 }
 
 func renameTV(s *Subject, fn string) (string, error) {
@@ -114,8 +111,74 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 	return merr.Err()
 }
 
-func renameSubRssTorr(s *Subject, torr qbt.Torrent) {
+func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename string, err error) {
+	fs, err := DL.Qbt.Files(torr.Hash)
+	if err != nil {
+		return false, "", err
+	}
+	merr := errs.MultiErr{}
+	var subFsList []string
 
+	for _, f := range fs {
+		if fn := f.Name; util.IsVideofile(fn) {
+			fn = util.FileSeparatorConv(fn)
+			sep := strings.Split(fn, "/")
+			fn = sep[len(sep)-1]
+			rn, err := renameTV(s, fn)
+			if err != nil {
+				merr.Add(err)
+				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
+				continue
+			}
+			rename = rn
+			se := util.TrimExtensionAndGetEpi(rn)
+			if th, e := s.Pushed[se]; e {
+				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rn)
+				merr.Add(dumpliErr)
+				if CFG.Env.DropOnDumplicate && th != torr.Hash {
+					log.Println("delete ", torr.Name)
+					merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
+					return false, rn, merr.Err()
+				} else if !CFG.Env.DropOnDumplicate {
+					merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
+				} // if we find some same episode files during the traversal of the current hash files
+				// and enable `dropOnDumplicate`
+				// then leave it on the current path ,and delete folder onecely for all at the end
+			} else {
+				err = DL.Qbt.RenameFile(torr.Hash, f.Name, rn)
+				if err != nil {
+					merr.Add(err)
+					continue
+				}
+				s.Pushed[se] = torr.Hash
+				videoRnOk = true
+			}
+		} else if fn := f.Name; util.IsSubtitleFile(fn) {
+			subFsList = append(subFsList, fn)
+		}
+	}
+	// subFiles rename process
+	for _, fullFn := range subFsList {
+		fn := fullFn
+		fn = util.FileSeparatorConv(fn)
+		sep := strings.Split(fn, "/")
+		fn = sep[len(sep)-1]
+		subrn := fn
+		sublang := renameSubtitleFile(fn)
+		if sublang != "" && rename != "" {
+			seps := strings.Split(rename, ".")
+			seps = seps[:len(seps)-1]
+			extSep := strings.Split(fn, ".")
+			ext := extSep[len(extSep)-1]
+			subrn = strings.Join(seps, "") + "-" + sublang + "." + ext
+			log.Printf("rename subtitleFile: %s to %s \n", fullFn, subrn)
+		}
+		// remove subtitleFile to outside
+		merr.Add(DL.Qbt.RenameFile(torr.Hash, fn, subrn))
+	}
+	DL.Wait(1000) // wati for qbt moving files
+	merr.Add(os.RemoveAll(torr.ContentPath))
+	return videoRnOk, rename, merr.Err()
 }
 
 func renameSubtitleFile(fn string) string {
