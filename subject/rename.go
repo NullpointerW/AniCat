@@ -28,6 +28,22 @@ func CaptureEpisNum(text string) (string, error) {
 			return episNum, nil
 		}
 	}
+	regexper := regexp.MustCompile(regSpecial)
+	matchs := regexper.FindAllStringSubmatch(text, -1)
+	if matchs != nil {
+		if l := len(matchs); l == 1 {
+			episNum := matchs[0][1]
+			if len([]byte(episNum)) == 1 {
+				return "0" + episNum, nil
+			}
+			return episNum, nil
+		}
+		episNum := matchs[1][1]
+		if len([]byte(episNum)) == 1 {
+			return "0" + episNum, nil
+		}
+		return episNum, nil
+	}
 	return "", fmt.Errorf("%w:%s", errs.ErrCannotCaptureEpisNum, text)
 }
 
@@ -141,7 +157,8 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 					return false, rn, merr.Err()
 				} else if !CFG.Env.DropOnDumplicate {
 					merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
-				} // if we find some same episode files during the traversal of the current hash files
+				}
+				// if we find some same episode files during the traversal of the current hash files
 				// and enable `dropOnDumplicate`
 				// then leave it on the current path ,and delete folder onecely for all at the end
 			} else {
@@ -174,7 +191,7 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 			log.Printf("rename subtitleFile: %s to %s \n", fullFn, subrn)
 		}
 		// remove subtitleFile to outside
-		merr.Add(DL.Qbt.RenameFile(torr.Hash, fn, subrn))
+		merr.Add(DL.Qbt.RenameFile(torr.Hash, fullFn, subrn))
 	}
 	DL.Wait(1000) // wati for qbt moving files
 	merr.Add(os.RemoveAll(torr.ContentPath))
