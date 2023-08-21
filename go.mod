@@ -10,7 +10,6 @@ require (
 )
 
 require (
-	github.com/atotto/clipboard v0.1.5 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
@@ -50,6 +49,7 @@ require (
 	github.com/liushuochen/gotable v0.0.0-20221119160816-1113793e7092
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
+	github.com/sirupsen/logrus v1.9.3
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/net v0.9.0
