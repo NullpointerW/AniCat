@@ -4,16 +4,52 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-
-	// "os"
+	"os"
 	"strings"
-	"sync"
+	"time"
 )
 
-var (
-	logger *slog.Logger
-	init_  sync.Once
-)
+var defaultLogger *EnhanceLogger
+
+func init() {
+	defaultLogger = New("text", "Info", time.RFC3339, os.Stderr)
+}
+
+type EnhanceLogger struct {
+	inner *slog.Logger
+}
+
+func (el *EnhanceLogger) Debug(s Struct, a ...any) {
+	el.inner.Debug(Msg(a...), s...)
+}
+
+func (el *EnhanceLogger) Debugf(s Struct, format string, a ...any) {
+	el.inner.Debug(Msgf(format, a...), s...)
+}
+
+func (el *EnhanceLogger) Info(s Struct, a ...any) {
+	el.inner.Info(Msg(a...), s...)
+}
+
+func (el *EnhanceLogger) Infof(s Struct, format string, a ...any) {
+	el.inner.Info(Msgf(format, a...), s...)
+}
+
+func (el *EnhanceLogger) Warn(s Struct, a ...any) {
+	el.inner.Warn(Msg(a...), s...)
+}
+
+func (el *EnhanceLogger) Warnf(s Struct, format string, a ...any) {
+	el.inner.Warn(Msgf(format, a...), s...)
+}
+
+func (el *EnhanceLogger) Error(s Struct, a ...any) {
+	el.inner.Error(Msg(a...), s...)
+}
+
+func (el *EnhanceLogger) Errorf(s Struct, format string, a ...any) {
+	el.inner.Error(Msgf(format, a...), s...)
+}
 
 func slogLevel(l string) slog.Level {
 	switch strings.ToLower(l) {
@@ -23,6 +59,8 @@ func slogLevel(l string) slog.Level {
 		return slog.LevelWarn
 	case "err", "error":
 		return slog.LevelError
+	case "silent", "mute":
+		return slog.LevelError + 1
 	default:
 		return slog.LevelInfo
 	}
@@ -30,13 +68,7 @@ func slogLevel(l string) slog.Level {
 
 type Struct []any
 
-func Init(handleType, level, timeLayout string, out io.Writer) {
-	init_.Do(func() {
-		logInit(handleType, level, timeLayout, out)
-	})
-}
-
-func logInit(handleType, level, timeLayout string, out io.Writer) {
+func New(handleType, level, timeLayout string, out io.Writer) *EnhanceLogger {
 	timeAttrFunc := timeFormat(timeLayout)
 	opt := &slog.HandlerOptions{
 		ReplaceAttr: timeAttrFunc,
@@ -49,7 +81,9 @@ func logInit(handleType, level, timeLayout string, out io.Writer) {
 	default:
 		handler = slog.NewTextHandler(out, opt)
 	}
-	logger = slog.New(handler)
+	return &EnhanceLogger{
+		slog.New(handler),
+	}
 }
 
 func timeFormat(layout string) func(groups []string, a slog.Attr) slog.Attr {
@@ -58,29 +92,24 @@ func timeFormat(layout string) func(groups []string, a slog.Attr) slog.Attr {
 			t := a.Value.Time()
 			a.Value = slog.StringValue(t.Format(layout))
 		}
-		if a.Key == slog.MessageKey {
-			a.Key = ""
-		}
 		return a
 	}
 }
 
-// func init() {
-// 	timeAttrFunc := timeFormat("2006-01-02T15:04:05.999")
-// 	opt := &slog.HandlerOptions{
-// 		ReplaceAttr: timeAttrFunc,
-// 		Level:       level,
-// 	}
-// 	logger = slog.New(slog.NewTextHandler(os.Stderr, opt))
-// }
-
 func Msg(a ...any) string {
-	String := fmt.Sprint(a...)
-	return strings.TrimSuffix(String, "\n")
+	return fmt.Sprint(a...)
 }
 
 func Msgf(format string, a ...any) string {
 	return fmt.Sprintf(format, a...)
+}
+
+func Debug(s Struct, a ...any) {
+	defaultLogger.inner.Debug(Msg(a...), s...)
+}
+
+func Debugf(s Struct, format string, a ...any) {
+	defaultLogger.inner.Debug(Msgf(format, a...), s...)
 }
 
 // Spaces will not like the fmt.Println() that added between operands and a newline is appended.
@@ -88,33 +117,25 @@ func Msgf(format string, a ...any) string {
 //
 //	Info(Struct{"test","log.Info()"},"here is a testing", " ", "log.Info()")
 func Info(s Struct, a ...any) {
-	logger.Info(Msg(a...), s...)
+	defaultLogger.inner.Info(Msg(a...), s...)
 }
 
 func Infof(s Struct, format string, a ...any) {
-	logger.Info(Msgf(format, a...), s...)
+	defaultLogger.inner.Info(Msgf(format, a...), s...)
 }
 
 func Warn(s Struct, a ...any) {
-	logger.Warn(Msg(a...), s...)
+	defaultLogger.inner.Warn(Msg(a...), s...)
 }
 
 func Warnf(s Struct, format string, a ...any) {
-	logger.Warn(Msgf(format, a...), s...)
-}
-
-func Debug(s Struct, a ...any) {
-	logger.Debug(Msg(a...), s...)
-}
-
-func Debugf(s Struct, format string, a ...any) {
-	logger.Debug(Msgf(format, a...), s...)
+	defaultLogger.inner.Warn(Msgf(format, a...), s...)
 }
 
 func Error(s Struct, a ...any) {
-	logger.Error(Msg(a...), s...)
+	defaultLogger.inner.Error(Msg(a...), s...)
 }
 
 func Errorf(s Struct, format string, a ...any) {
-	logger.Error(Msgf(format, a...), s...)
+	defaultLogger.inner.Error(Msgf(format, a...), s...)
 }

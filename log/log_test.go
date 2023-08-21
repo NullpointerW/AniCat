@@ -1,11 +1,10 @@
 package log
 
 import (
-	// "fmt"
 	"errors"
 	"os"
 	"testing"
-	// "log/slog"
+	"time"
 )
 
 type TestSturct struct {
@@ -14,7 +13,6 @@ type TestSturct struct {
 }
 
 func TestInfo(t *testing.T) {
-	Init("text", "error", "2006-01-02T15:04:05.999", os.Stderr)
 	Infof(Struct{"my-test", 2, "hota l", "won z"}, "here is a testing %s", "no.1")
 	Info(Struct{"my-test", 2, "hota l", "won z"}, "here is a testing")
 	Info(Struct{"my-test", 2, "hota l", "won z"}, "here is a testing2")
@@ -23,8 +21,13 @@ func TestInfo(t *testing.T) {
 
 func TestError(t *testing.T) {
 	err := errors.New("we got problem")
-	Init("text", "error", "2006-01-02T15:04:05.999", os.Stderr)
+
 	Errorf(Struct{"error", err, "hota l", "won z"}, "")
+	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing")
+	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing2")
+	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing", " ", "2")
+	logger := New("json", "mute", time.RFC3339Nano, os.Stderr)
+	logger.Errorf(Struct{"error", err, "hota l", "won z"}, "")
 	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing")
 	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing2")
 	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing", " ", "2")
