@@ -1,34 +1,84 @@
-package log
+package log_test
 
 import (
-	"errors"
 	"os"
 	"testing"
-	"time"
+	"github.com/NullpointerW/anicat/log"
 )
 
-type TestSturct struct {
-	Wall int
-	Ext  int
+func TestDebug(t *testing.T) {
+	log.Init("text", "debug", "2006年01月02日", os.Stderr)
+	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
+	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
+	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
+	log.Info(log.Struct{"test", "info"}, "hello", "world")
+	log.Info(log.Struct{"test", "info"}, "hello", " ", "world")
+	log.Infof(log.Struct{"test", "info"}, "hello %s", " world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", "world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", " ", "world")
+	log.Warnf(log.Struct{"test", "warn"}, "hello %s", " world")
+	log.Error(log.Struct{"test", "error"}, "hello", "world")
+	log.Error(log.Struct{"test", "error"}, "hello", " ", "world")
+	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
 }
 
 func TestInfo(t *testing.T) {
-	Infof(Struct{"my-test", 2, "hota l", "won z"}, "here is a testing %s", "no.1")
-	Info(Struct{"my-test", 2, "hota l", "won z"}, "here is a testing")
-	Info(Struct{"my-test", 2, "hota l", "won z"}, "here is a testing2")
-	Info(Struct{"test", 2, "log.Info()"}, "here is a testing", " ", "2")
+	log.Init("text", "info", "2006年01月02日", os.Stderr)
+	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
+	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
+	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
+	log.Info(log.Struct{"test", "info"}, "hello", "world")
+	log.Info(log.Struct{"test", "info"}, "hello", " ", "world")
+	log.Infof(log.Struct{"test", "info"}, "hello %s", " world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", "world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", " ", "world")
+	log.Warnf(log.Struct{"test", "warn"}, "hello %s", " world")
+	log.Error(log.Struct{"test", "error"}, "hello", "world")
+	log.Error(log.Struct{"test", "error"}, "hello", " ", "world")
+	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
 }
-
+func TestWarn(t *testing.T) {
+	log.Init("text", "Warn", "2006年01月02日", os.Stderr)
+	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
+	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
+	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
+	log.Info(log.Struct{"test", "info"}, "hello", "world")
+	log.Info(log.Struct{"test", "info"}, "hello", " ", "world")
+	log.Infof(log.Struct{"test", "info"}, "hello %s", " world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", "world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", " ", "world")
+	log.Warnf(log.Struct{"test", "warn"}, "hello %s", " world")
+	log.Error(log.Struct{"test", "error"}, "hello", "world")
+	log.Error(log.Struct{"test", "error"}, "hello", " ", "world")
+	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
+}
 func TestError(t *testing.T) {
-	err := errors.New("we got problem")
-
-	Errorf(Struct{"error", err, "hota l", "won z"}, "")
-	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing")
-	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing2")
-	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing", " ", "2")
-	logger := New("json", "mute", time.RFC3339Nano, os.Stderr)
-	logger.Errorf(Struct{"error", err, "hota l", "won z"}, "")
-	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing")
-	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing2")
-	Error(Struct{"error", err, "hota l", "won z"}, "here is a testing", " ", "2")
+	log.Init("text", "err", "2006年01月02日", os.Stderr)
+	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
+	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
+	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
+	log.Info(log.Struct{"test", "info"}, "hello", "world")
+	log.Info(log.Struct{"test", "info"}, "hello", " ", "world")
+	log.Infof(log.Struct{"test", "info"}, "hello %s", " world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", "world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", " ", "world")
+	log.Warnf(log.Struct{"test", "warn"}, "hello %s", " world")
+	log.Error(log.Struct{"test", "error"}, "hello", "world")
+	log.Error(log.Struct{"test", "error"}, "hello", " ", "world")
+	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
+}
+func TestMute(t *testing.T) {
+	log.Init("text", "mute", "2006年01月02日", os.Stderr)
+	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
+	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
+	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
+	log.Info(log.Struct{"test", "info"}, "hello", "world")
+	log.Info(log.Struct{"test", "info"}, "hello", " ", "world")
+	log.Infof(log.Struct{"test", "info"}, "hello %s", " world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", "world")
+	log.Warn(log.Struct{"test", "warn"}, "hello", " ", "world")
+	log.Warnf(log.Struct{"test", "warn"}, "hello %s", " world")
+	log.Error(log.Struct{"test", "error"}, "hello", "world")
+	log.Error(log.Struct{"test", "error"}, "hello", " ", "world")
+	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
 }
