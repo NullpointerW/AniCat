@@ -12,7 +12,7 @@ import (
 var defaultLogger *EnhanceLogger
 
 func init() {
-	defaultLogger = New("text", "Info", time.RFC3339, os.Stderr)
+	defaultLogger = New("text", "Info", time.RFC3339, false, os.Stderr)
 }
 
 type EnhanceLogger struct {
@@ -36,9 +36,10 @@ func slogLevel(l string) slog.Level {
 	}
 }
 
-func New(handleType, level, timeLayout string, out io.Writer) *EnhanceLogger {
+func New(handleType, level, timeLayout string, shortSourceFile bool, out io.Writer) *EnhanceLogger {
 	timeAttrFunc := timeFormat(timeLayout)
 	opt := &slog.HandlerOptions{
+		AddSource:   shortSourceFile,
 		ReplaceAttr: timeAttrFunc,
 		Level:       slogLevel(level),
 	}
@@ -59,6 +60,16 @@ func timeFormat(layout string) func(groups []string, a slog.Attr) slog.Attr {
 		if a.Key == slog.TimeKey {
 			t := a.Value.Time()
 			a.Value = slog.StringValue(t.Format(layout))
+		}
+		if a.Key == slog.SourceKey {
+			if src, ok := a.Value.Any().(*slog.Source); ok {
+				shortPath := ""
+				fullPath := src.File
+				seps := strings.Split(fullPath, "/")
+				shortPath += seps[len(seps)-1]
+				shortPath += fmt.Sprintf(":%d", src.Line)
+				a.Value = slog.StringValue(shortPath)
+			}
 		}
 		return a
 	}

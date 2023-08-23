@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"io"
 	// "os"
 	eslog "github.com/NullpointerW/anicat/pkg/log"
@@ -16,14 +15,10 @@ var (
 type Struct []any
 
 // Warn: must use Init if imported, otherwise trigger nil pointer panic
-func Init(handleType, level, timeLayout string, out io.Writer) {
+func Init(handleType, level, timeLayout string, sourceFile bool, out io.Writer) {
 	init_.Do(func() {
-		logger = eslog.New(handleType, level, timeLayout, out)
+		logger = eslog.New(handleType, level, timeLayout, sourceFile, out)
 	})
-}
-
-func Msgf(format string, a ...any) string {
-	return fmt.Sprintf(format, a...)
 }
 
 func Info(s Struct, a ...any) {

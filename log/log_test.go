@@ -1,13 +1,13 @@
 package log_test
 
 import (
+	"github.com/NullpointerW/anicat/log"
 	"os"
 	"testing"
-	"github.com/NullpointerW/anicat/log"
 )
 
 func TestDebug(t *testing.T) {
-	log.Init("text", "debug", "2006年01月02日", os.Stderr)
+	log.Init("text", "debug", "2006年01月02日",true, os.Stderr)
 	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
 	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
 	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
@@ -23,7 +23,7 @@ func TestDebug(t *testing.T) {
 }
 
 func TestInfo(t *testing.T) {
-	log.Init("text", "info", "2006年01月02日", os.Stderr)
+	log.Init("text", "info", "2006年01月02日", true, os.Stderr)
 	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
 	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
 	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
@@ -38,7 +38,7 @@ func TestInfo(t *testing.T) {
 	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
 }
 func TestWarn(t *testing.T) {
-	log.Init("text", "Warn", "2006年01月02日", os.Stderr)
+	log.Init("text", "Warn", "2006年01月02日", true, os.Stderr)
 	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
 	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
 	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
@@ -53,7 +53,7 @@ func TestWarn(t *testing.T) {
 	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
 }
 func TestError(t *testing.T) {
-	log.Init("text", "err", "2006年01月02日", os.Stderr)
+	log.Init("text", "err", "2006年01月02日", true, os.Stderr)
 	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
 	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
 	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
@@ -68,7 +68,7 @@ func TestError(t *testing.T) {
 	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
 }
 func TestMute(t *testing.T) {
-	log.Init("text", "mute", "2006年01月02日", os.Stderr)
+	log.Init("text", "mute", "2006年01月02日", true, os.Stderr)
 	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
 	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
 	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")
