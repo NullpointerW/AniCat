@@ -14,6 +14,19 @@ var (
 
 type Struct []any
 
+func (s *Struct) Append(a ...any) {
+	*s = append(*s, a...)
+}
+
+func (s *Struct) Clear() {
+	*s = nil
+}
+
+func NewUrlStruct(a ...any) Struct {
+	s := Struct{"url"}
+	return append(s, a...)
+}
+
 // Warn: must use Init if imported, otherwise trigger nil pointer panic
 func Init(handleType, level, timeLayout string, sourceFile bool, out io.Writer) {
 	init_.Do(func() {

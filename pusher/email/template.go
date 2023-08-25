@@ -1,8 +1,7 @@
 package email
 
 import (
-	// "fmt"
-	"log"
+	"github.com/NullpointerW/anicat/log"
 	"os"
 	"strconv"
 	"strings"
@@ -86,7 +85,7 @@ func tmpInit() {
 	if p := CFG.Env.Pusher.Email.TemplatePath; p != "" {
 		b, err := os.ReadFile(p)
 		if err != nil {
-			log.Printf("load email template file fail:%suse default \n", err)
+			log.Error(log.Struct{"err", err}, "load email template failed,use builtin")
 		} else {
 			template = string(b)
 		}

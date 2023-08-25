@@ -2,13 +2,12 @@ package information
 
 import (
 	"fmt"
-	"log"
-	"strings"
-
 	CR "github.com/NullpointerW/anicat/crawl"
 	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/log"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
+	"strings"
 )
 
 var (
@@ -50,13 +49,13 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 		agent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 		r.Headers.Set("User-Agent", agent)
 		r.Headers.Set("Accept-Language", "zh-CN,zh;q=0.9")
-		log.Println("search/fetch folder info from TMDB", r.URL)
+		log.Info(log.NewUrlStruct(r.URL), "search/fetch folder info from TMDB")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		e = fmt.Errorf("search/fetch folder info failed: %w", e)
-		log.Println(e)
+		e = fmt.Errorf("search/fetch folder info from TMDB failed: %w", e)
 		err = e
+		log.Error(nil, err)
 	})
 
 	c.Visit(url + CR.UrlEncode(searchstr))

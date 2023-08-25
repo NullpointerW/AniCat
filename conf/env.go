@@ -1,15 +1,11 @@
 package conf
 
 import (
-	// "io"
-	"runtime"
-
-	"log"
-	"os"
-
 	"github.com/NullpointerW/anicat/errs"
-	util "github.com/NullpointerW/anicat/utils"
+	"github.com/NullpointerW/anicat/log"
 	"gopkg.in/yaml.v3"
+	"os"
+	"runtime"
 )
 
 var (
@@ -59,30 +55,29 @@ type Environment struct {
 }
 
 func (env *Environment) Print() {
-	log.Println("port:", env.Port)
-	log.Println("subject path:", env.SubjPath)
+	logStruct := log.Struct{"port", env.Port, "subject path", env.SubjPath}
 	if env.DropOnDumplicate {
-		log.Println("drop dumplicate:", "yes")
+		logStruct.Append("drop dumplicate:", "yes")
 	}
+	log.Info(logStruct, "basic setting")
+	logStruct.Clear()
 	if env.EnabledFilter() {
-		log.Println("golbal filter enable")
-		log.Println("contain words:", env.RssFilter.Contain)
-		log.Println("exclusion words:", env.RssFilter.Exclusion)
+		logStruct.Append("golbal filter", "enable", "contain words", env.RssFilter.Contain, "exclusion words", env.RssFilter.Exclusion)
+		log.Info(logStruct, "golbal filter setting")
+		logStruct.Clear()
 	}
 
 	if len(env.Crawl.Proxies) != 0 {
-		log.Println("scraper proxies:", env.Crawl.Proxies)
+		logStruct.Append("scraper proxies", env.Crawl.Proxies)
+		log.Info(logStruct, "crawling setting")
+		logStruct.Clear()
 	}
-
-	log.Println("qbt weburl:", env.Qbt.Url)
-	log.Println("qbt api request timeout(ms):", env.Qbt.Timeout)
-
+	logStruct.Append("qbt weburl", env.Qbt.Url, "qbt api request timeout(ms)", env.Qbt.Timeout)
+	log.Info(logStruct, "qbt setting")
 }
 
 func (env *Environment) EmailPrint() {
-	log.Println("host:", env.Pusher.Email.Host)
-	log.Println("port:", env.Pusher.Email.Port)
-	log.Println("username:", env.Pusher.Email.Username)
+	log.Info(log.Struct{"host", env.Pusher.Email.Host, "port:", env.Pusher.Email.Port, "username:", env.Pusher.Email.Username}, "SMTP setting")
 }
 
 func (env *Environment) EnabledFilter() bool {
@@ -101,29 +96,23 @@ func init() {
 	if Env.Qbt.Timeout <= 0 {
 		Env.Qbt.Timeout = 3000
 	}
-	log.Println("AniCat", "Ver."+Ver, "github:"+projlk)
-	// log.Printf("env:\n%#+v\n", Env)
+	log.Info(log.Struct{"ver", Ver, "github", projlk}, "AniCat")
 	Env.Print()
 }
 
 func loginit(debug bool) {
-	flag := log.Ldate | log.Lmicroseconds
+	var level = "info"
 	if debug {
-		flag |= log.Lshortfile
+		level = "debug"
 	}
-	log.SetFlags(flag)
-
+	output := os.Stderr
 	if runtime.GOOS == "windows" && !IDEdebugging {
-		f, err := os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
+		var err error
+		output, err = os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
 		if err != nil {
-			log.Println(err)
-			return
+			defer log.Error(log.Struct{"err", err}, "create logfile failed")
 		}
-		log.SetOutput(f)
 	}
-	// else {
-	// 	mio := io.MultiWriter(os.Stderr, f)
-	// 	log.SetOutput(mio)
-	// }
-	util.Debugln("os:", runtime.GOOS, "debug mode")
+	log.Init("text", level, "2006-01-02T15:04:05", debug, output)
+	log.Debug(log.Struct{"os", runtime.GOOS}, "debug mode")
 }

@@ -3,7 +3,7 @@ package errs
 import (
 	"errors"
 	"fmt"
-	"log"
+	"github.com/NullpointerW/anicat/log"
 	"runtime"
 )
 
@@ -63,7 +63,7 @@ func Custom(format string, a ...any) error {
 func PanicErr(err error) {
 	if err != nil {
 		if runtime.GOOS == "windows" {
-			log.Println("PANIC:", err)
+			log.Error(log.Struct{"err", err}, "PANIC: process crashed ")
 		}
 		panic(err)
 	}

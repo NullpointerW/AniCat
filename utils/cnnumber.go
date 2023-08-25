@@ -1,7 +1,7 @@
 package util
 
 import (
-	"log"
+	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strconv"
 	"unicode"

@@ -3,19 +3,16 @@ package subject
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-	"strconv"
-
 	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/download/rss"
 	TORR "github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/log"
 	util "github.com/NullpointerW/anicat/utils"
-
-	// "strconv"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -26,10 +23,10 @@ func Scan() {
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
 			if f.IsDir() {
-				log.Println("scan: found folder: " + home + string(os.PathSeparator) + f.Name())
+				log.Info(log.Struct{"path", home + string(os.PathSeparator) + f.Name()}, "scan: found folder")
 				fs, err := os.ReadDir(home + `/` + f.Name())
 				if err != nil {
-					log.Println(err)
+					log.Error(log.Struct{"err", err}, "sacn: open folder failed")
 					continue
 				}
 				for _, ff := range fs {
@@ -39,19 +36,19 @@ func Scan() {
 							var s Subject
 							err := json.Unmarshal(jsraw, &s)
 							if err != nil {
-								log.Println(err)
+								log.Error(log.Struct{"err", err}, "scan: unmarshal json failed")
 								continue
 							}
 							s.runtimeInit(true)
 						} else {
-							log.Println(err)
+							log.Error(log.Struct{"err", err}, "scan: open file failed")
 						}
 					}
 				}
 			}
 		}
 	} else {
-		log.Println(err)
+		log.Error(log.Struct{"err", err}, "sacn: open home folder failed")
 	}
 }
 
@@ -134,7 +131,7 @@ func (s *Subject) RmRes() error {
 		wrap.Handle(func() error {
 			err := rss.RmRss(s.RssPath())
 			if err != nil && strings.Contains(err.Error(), "409") {
-				log.Println(err)
+				log.Error(log.Struct{"err", err}, "rm rss subscription failed")
 				return nil
 			}
 			return err

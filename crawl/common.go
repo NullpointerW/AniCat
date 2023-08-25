@@ -1,8 +1,8 @@
 package crawl
 
 import (
+	"github.com/NullpointerW/anicat/log"
 	"io"
-	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -44,7 +44,7 @@ func Downloadfile(filepath string, remote io.ReadCloser) error {
 	defer remote.Close()
 	defer f.Close()
 	wn, err := io.Copy(f, remote)
-	log.Printf("cover file downloaded size: %d", wn)
+	log.Info(log.Struct{"size", wn}, "cover downloaded")
 	if err != nil {
 		return err
 	}

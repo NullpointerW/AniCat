@@ -3,19 +3,17 @@ package subject
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
-
 	CFG "github.com/NullpointerW/anicat/conf"
-	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-
 	DL "github.com/NullpointerW/anicat/download"
 	"github.com/NullpointerW/anicat/download/rss"
 	TORR "github.com/NullpointerW/anicat/download/torrent"
 	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/log"
 	P "github.com/NullpointerW/anicat/pusher"
 	"github.com/NullpointerW/anicat/pusher/email"
 	util "github.com/NullpointerW/anicat/utils"
+	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	"time"
 )
 
 // before gorountie handle it init inner channels and ctxfunc
@@ -38,7 +36,7 @@ func (s *Subject) runtimeInit(reload bool) {
 
 func (s *Subject) run(ctx context.Context, reload bool) {
 	if reload {
-		util.Debugf("subj reload sid:%d", s.SubjId)
+		log.Debug(log.Struct{"sid", s.SubjId}, "subject reload")
 		s.checkDL()
 	}
 	t := time.NewTicker(30 * time.Minute)
@@ -47,17 +45,17 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 		case torr := <-s.PushChan:
 			err := s.push(torr, email.Sender{})
 			if err != nil {
-				log.Println(err)
+				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
 			}
 		case <-ctx.Done():
-			util.Debugf("subj exited sid:%d", s.SubjId)
+			log.Debug(log.Struct{"sid", s.SubjId}, "runner exited")
 			exit(s)
 			return
 		case <-t.C:
-			util.Debugf("subj update mission started sid:%d", s.SubjId)
+			log.Debug(log.Struct{"sid", s.SubjId}, "subject update mission started")
 			err := s.update()
 			if err != nil {
-				log.Println(err)
+				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "update mission failed")
 			}
 		}
 	}
@@ -81,7 +79,7 @@ func (s *Subject) update() error {
 func exit(s *Subject) {
 	err := s.writeJson()
 	if err != nil {
-		log.Println(err)
+		log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed while exited")
 	}
 	close(s.Exited)
 	close(s.PushChan)
@@ -89,29 +87,30 @@ func exit(s *Subject) {
 
 func (s *Subject) checkDL() (err error) {
 	if s.ResourceTyp == Torrent {
-		util.Debugln("subj:", s.SubjId, "is torr typ,start check DL")
+		log.Debug(log.Struct{"sid", s.SubjId, "type", "torrent"}, "start check DL")
 		compl, err := TORR.DLcompl(s.TorrentHash)
 		if err != nil {
 			return err
 		} else if compl {
-			util.Debugln("subj:", s.SubjId, "DL fin terminate now")
+			log.Debug(log.Struct{"sid", s.SubjId, "type", "torrent"}, "DL fin terminate now")
 			s.terminate()
 			return err
 		}
 	} else if s.ResourceTyp == RSS && s.Finished {
-		util.Debugln("subj:", s.SubjId, "is rss typ,start check DL")
+		log.Debug(log.Struct{"sid", s.SubjId, "type", "rss"}, "start check DL")
 		if s.Typ == TV && s.EndTime != "" {
-			util.Debugln("subj:", s.SubjId, "is TV and epi fin ")
+			log.Debug(log.Struct{"sid", s.SubjId, "resType", "TV"}, "epi fin")
 			e, err := util.ParseTime(s.EndTime, util.YMDParseLayout)
-			util.Debugln("subj:", s.SubjId, "epi endtime is ", util.ParseTimeStr(e))
+			log.Debug(log.Struct{"sid", s.SubjId, "resType", "TV"}, "epi endtime is ", util.ParseTimeStr(e))
 			if err != nil {
 				return err
 			}
 			if time.Since(e) >= util.Day {
-				util.Debugln("subj:", s.SubjId, "The time elapsed since the end of the anime is more than 1 day. ")
+				log.Debug(log.Struct{"sid", s.SubjId, "resType", "TV"}, "The time elapsed since the end of the anime is more than 1 day. ")
 				goto checkSync
 			}
-			util.Debugln("subj:", s.SubjId, "The time elapsed DAY between the end of the anime and now is", time.Since(e).Hours()/24)
+			log.Debug(log.Struct{"sid", s.SubjId, "resType", "TV"}, "The time elapsed DAY between the end of the anime and nowtime is ",
+				time.Since(e).Hours()/24)
 		} else if s.Typ == MOVIE {
 			goto checkSync
 		}
@@ -136,22 +135,12 @@ func (s *Subject) RssDLSynced() (bool, error) {
 	}
 	tlen := len(arts)
 	if tlen == 0 {
-		log.Println("there is no arts matched , check the rss match rule!", "sid=", s.SubjId)
+		log.Warn(log.Struct{"sid", s.SubjId, "resType", "RSS"}, "there is no arts matched,check the rss match rule!")
 		return true, nil
 	}
-	util.Debugln("rss total len is", tlen, "sid is", s.SubjId)
-	// hs, err := TORR.GetViaPath(s.Path)
-	// if err != nil {
-	// 	return false, err
-	// }
-	// c := 0
-	// for _, h := range hs {
-	// 	if h.Progress == 1 {
-	// 		c++
-	// 	}
-	// }
+	log.Debug(log.Struct{"sid", s.SubjId, "rssTotalLen", tlen})
 	c := len(s.RssTorrents)
-	util.Debugf("subj%d total series=%d local series=%d,local cmpl series=%d ", s.SubjId, tlen, c, c)
+	log.Debug(log.Struct{"sid", s.SubjId, "series", tlen, "localSeries", c, "cmplSeries", c})
 	return c >= tlen, nil
 }
 
@@ -197,7 +186,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 
 	// perf: skip rename process
 	if _, e := s.RssTorrents[torr.Hash]; e {
-		util.Debugln("skip rename")
+		log.Debug(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash}, "skip rename")
 		return nil
 	}
 
@@ -215,7 +204,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
 				merr.Add(dumpliErr)
 				if CFG.Env.DropOnDumplicate && th != torr.Hash {
-					log.Println("delete ", torr.Name)
+					log.Warn(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash, "size", torr.Size}, "delete dumplicate file")
 					merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
 				}
 				return merr.Err()
@@ -226,9 +215,9 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			}
 			s.Pushed[se] = torr.Hash
 		} else {
-			log.Printf("%s is not a video file,may external subtitles", torr.Name)
+			log.Info(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash}, "not a video file,may external subtitles")
 			ok, rn, err := renameSubRssTorr(s, torr)
-			log.Println(err)
+			log.Error(log.Struct{"err", err}, "rename RssTorr with subtitles failed")
 			if !ok {
 				return nil
 			}
@@ -247,10 +236,9 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 
 		episNum := s.Episode
 		if episNum != 0 && len(s.Pushed) >= episNum {
-			log.Printf("subj%d[rss] is compl \n", s.SubjId)
+			log.Info(log.Struct{"sid", s.SubjId, "resType", "RSS"}, "compled,exited now")
 			s.terminate()
 		}
-
 		return mErr.Err()
 	} else { //Movie
 		if _, e := s.Pushed[torr.Hash]; e {
@@ -272,7 +260,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 }
 
 func (s *Subject) terminate() {
-	util.Debugf("subj%d terminate ", s.SubjId)
+	log.Debug(log.Struct{"sid", s.SubjId, "resType", s.ResourceTyp.String()}, "exited")
 	s.Terminate, s.Finished = true, true
 	s.writeJson()
 	s.Exit()

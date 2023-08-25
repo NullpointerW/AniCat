@@ -79,7 +79,6 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 
 	for _, t := range torrs {
 		p := util.FileSeparatorConv(t.SavePath)
-		util.Debugln("torr_save_path:", p)
 		if p == path {
 			hits = append(hits, t)
 		}

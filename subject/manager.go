@@ -1,8 +1,7 @@
 package subject
 
 import (
-	// "log"
-	"log"
+	"github.com/NullpointerW/anicat/log"
 	"sync"
 
 	"github.com/NullpointerW/anicat/errs"
@@ -125,7 +124,7 @@ func StartManagement() {
 			// rm *
 			// rmove all subjects
 			if i == 0 && p.Arg.(string) == "*" {
-				log.Println("rm: remove all subjects")
+				log.Warn(nil, "rm: remove all subjects")
 				merr := errs.MultiErr{}
 				for _, s := range Manager.List() {
 					if !s.Terminate {

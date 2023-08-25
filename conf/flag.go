@@ -3,8 +3,6 @@ package conf
 import (
 	"flag"
 	"testing"
-
-	util "github.com/NullpointerW/anicat/utils"
 )
 
 var (
@@ -25,12 +23,8 @@ func flaginit() {
 	flag.BoolVar(&Testing, "t", false, "testing mode")
 	testing.Init()
 	flag.Parse()
-	if Testing{
+	if Testing {
 		return
 	}
-	debug = debug || IDEdebugging
-	if debug {
-		util.DebugEnv()
-	}
-	loginit(debug)
+	loginit(debug || IDEdebugging)
 }

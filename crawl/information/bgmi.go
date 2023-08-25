@@ -3,15 +3,13 @@ package information
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
-	"strings"
-
 	CR "github.com/NullpointerW/anicat/crawl"
 	"github.com/NullpointerW/anicat/errs"
-	util "github.com/NullpointerW/anicat/utils"
+	"github.com/NullpointerW/anicat/log"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
+	"net/http"
+	"strings"
 )
 
 var endpoint = "search/subject/%s?type=2&start=%d&max_results=%d"
@@ -20,7 +18,7 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 	searchstr = CR.UrlEncode(searchstr)
 	ed := fmt.Sprintf(endpoint, searchstr, 0,
 		10)
-	log.Println("bgmi search api: request", CR.BgmiRoot+ed)
+	log.Info(log.NewUrlStruct(CR.BgmiRoot+ed), "request bgmTV search api")
 	req, err := http.NewRequest("GET", CR.BgmiRoot+ed, nil)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %w", errs.ErrBgmTVApiPrefix, err)
@@ -42,9 +40,9 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 	}
 	var tatget *CR.BgmiSubjIntro
 	for _, bsi := range bsis.List {
-		util.Debugln(bsi.NameCN)
+		log.Debug(log.Struct{"name", bsi.NameCN}, "traverse bgmTV  matching items")
 		if bsi.NameCN == searchstr {
-			log.Printf("%s: matched%#+v \n", errs.ErrBgmTVApiPrefix, bsi)
+			log.Infof(log.Struct{"matched", bsi}, "%s: matching item found", errs.ErrBgmTVApiPrefix)
 			tatget = &bsi
 			break
 		}
@@ -83,7 +81,6 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			return
 		}
 		ls := htmlquery.Find(doc, infoXpathExp)
-
 		if ls != nil {
 			for _, l := range ls {
 				t := htmlquery.FindOne(l, "./span")
@@ -108,17 +105,14 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			return
 		}
 	})
-
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("searching info from bgmiTV", r.URL)
+		log.Info(log.NewUrlStruct(r.URL), "searching info from bgmTV")
 	})
-
 	c.OnError(func(_ *colly.Response, e error) {
-		e = fmt.Errorf("search info failed: %w", e)
-		log.Println(e)
+		e = fmt.Errorf("%s: search info failed: %w", errs.ErrBgmTVApiPrefix, e)
 		err = e
+		log.Error(nil, err)
 	})
-
 	c.Visit(url)
 	return tips, err
 }
@@ -136,22 +130,18 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		if a != nil {
 			p = htmlquery.InnerText(a)
 		} else {
-			// fmt.Println("NOT FOUND")
 			err = errs.ErrCrawlNotFound
 			return
 		}
 	})
-
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("fetching info from", r.URL)
+		log.Info(log.NewUrlStruct(r.URL), "fetching info from bgmTV")
 	})
-
 	c.OnError(func(_ *colly.Response, e error) {
-		e = fmt.Errorf("fetch info failed: %w", e)
-		log.Println(e)
+		e = fmt.Errorf("fetch info from bgmTV failed: %w", e)
 		err = e
+		log.Error(nil, err)
 	})
-
 	c.Visit(BuildInfoSearching(CR.UrlEncode(searchstr)))
 	return p, err
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strconv"
 	"strings"

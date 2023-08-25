@@ -2,17 +2,15 @@ package server
 
 import (
 	"fmt"
-	"log"
-	"net"
-	"os"
-	"strconv"
-
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/log"
 	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/net/cmd"
 	"github.com/NullpointerW/anicat/net/cmd/view"
-	util "github.com/NullpointerW/anicat/utils"
+	"net"
+	"os"
+	"strconv"
 )
 
 func Listen() {
@@ -23,12 +21,12 @@ func Listen() {
 	adr := ":" + strconv.Itoa(p)
 	ls, err := net.Listen("tcp", adr)
 	if err != nil {
-		log.Fatal(err)
+		errs.PanicErr(err)
 	}
 	for {
 		c, err := ls.Accept()
 		if err != nil {
-			log.Print(err)
+			log.Error(log.Struct{"err", err}, "accept connection failed")
 			continue
 		}
 
@@ -53,7 +51,7 @@ func process(c *N.Conn) {
 			}
 			// old cli
 			fsMsg = false
-			util.Debugf("msg_len:%d cmd:%s \n", len(msg), msg)
+			log.Debug(log.Struct{"len", len(msg), "cmd", msg}, "recv command")
 			if len(msg) == 0 {
 				c.Write("PONG")
 				continue
@@ -80,7 +78,6 @@ func process(c *N.Conn) {
 			}
 			route(&rep, render)
 			if rep.Err != nil {
-				util.Debugln("ls::in err{}")
 				var s string
 				if rep.Err == errs.WarnRssRuleNotMatched || rep.Err == errs.WarnReservedCommand_lsg {
 					s = fmt.Sprintln(cmd.Yellow, rep.Err.Error(), cmd.Reset)
@@ -102,8 +99,8 @@ func process(c *N.Conn) {
 				c.Write("OK")
 			}
 		} else {
-			log.Printf("conn closed: %s", err)
 			c.TcpConn.Close()
+			log.Error(log.Struct{"err", err}, "connection closed")
 			break
 		}
 	}

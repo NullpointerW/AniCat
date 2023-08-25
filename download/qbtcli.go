@@ -2,7 +2,7 @@ package download
 
 import (
 	"fmt"
-	"log"
+	"github.com/NullpointerW/anicat/log"
 	"strconv"
 	"strings"
 	"time"
@@ -59,7 +59,7 @@ func setProxy(qbtCfg *qbt.Config) error {
 }
 
 func init() {
-	if CFG.Testing{
+	if CFG.Testing {
 		// skip
 		return
 	}
@@ -80,21 +80,20 @@ func init() {
 	rssEnable(&cfg)
 	err = setProxy(&cfg)
 	if err != nil {
-		log.Println(err)
+		log.Error(log.Struct{"err", err}, "set qbt proxy failed")
 	} else if CFG.Env.Qbt.Proxy.Type != "" {
-		log.Printf("qbt proxy addr:%s type:%s", CFG.Env.Qbt.Proxy.Addr, CFG.Env.Qbt.Proxy.Type)
+		log.Info(log.Struct{"addr", CFG.Env.Qbt.Proxy.Addr, "type", CFG.Env.Qbt.Proxy.Type}, "qbt proxy has been set")
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg))
 	ver, err := Qbt.GetVersion()
 	if err != nil {
-		ver = "Version:unkown"
+		ver = "unkown"
 	}
-	log.Println("qBittorrent connected", ver)
-	ver, err = Qbt.GetApiVersion()
+	apiVer, err := Qbt.GetApiVersion()
 	if err != nil {
-		ver = "Version:unkown"
+		apiVer = "unkown"
 	}
-	log.Println("api version:", ver)
+	log.Info(log.Struct{"version", ver, "api version", apiVer}, "qBittorrent connected")
 }
 
 func rssEnable(cfg *qbt.Config) {

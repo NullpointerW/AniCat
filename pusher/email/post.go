@@ -3,11 +3,9 @@ package email
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
-
 	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/log"
 	"github.com/NullpointerW/anicat/pusher"
-	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/gomail.v2"
 )
 
@@ -20,7 +18,7 @@ type Sender struct{}
 
 func (_ Sender) Push(p pusher.Payload) error {
 	if sender == nil {
-		util.Debugln("email push disable")
+		log.Debug(nil, "email push disable")
 		return nil
 	}
 	m := gomail.NewMessage()
@@ -44,7 +42,7 @@ func (_ Sender) Push(p pusher.Payload) error {
 
 func init() {
 	if CFG.Env.Pusher.Email.Host == "" {
-		log.Println("email push disable")
+		log.Info(nil, "email push disable")
 		return
 	}
 	sender = gomail.NewDialer(
@@ -57,7 +55,7 @@ func init() {
 	if CFG.Env.Pusher.Email.SkipSSL {
 		sender.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
-	log.Println("email dialer init completed")
+	log.Info(nil, "email dialer init completed")
 	CFG.Env.EmailPrint()
 	tmpInit()
 }
