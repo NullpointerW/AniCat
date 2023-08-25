@@ -30,7 +30,7 @@ func NewUrlStruct(a ...any) Struct {
 // Warn: must use Init if imported, otherwise trigger nil pointer panic
 func Init(handleType, level, timeLayout string, sourceFile bool, out io.Writer) {
 	init_.Do(func() {
-		logger = eslog.New(handleType, level, timeLayout, sourceFile, out)
+		logger = eslog.New(handleType, level, timeLayout, sourceFile, 1, out)
 	})
 }
 

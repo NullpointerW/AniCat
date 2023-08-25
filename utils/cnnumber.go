@@ -39,26 +39,26 @@ func ConvertZhCnNumbToa(cnn string) string {
 	} else if nl == 2 {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[1]]))
 		if err != nil {
-			log.Println(err)
+			log.Error(log.Struct{"err", err, "digits", nl}, "convert cn_number to int failed")
 			return "1"
 		}
 		return strconv.Itoa(10 + i)
 	} else if nl == 3 {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[0]]))
 		if err != nil {
-			log.Println(err)
+			log.Error(log.Struct{"err", err, "digits", nl}, "convert cn_number to int failed")
 			return "1"
 		}
 		i *= 10
 		e, err := strconv.Atoi(string(zh_cn_numb[runes[2]]))
 		if err != nil {
-			log.Println(err)
+			log.Error(log.Struct{"err", err, "digits", nl}, "convert cn_number to int failed")
 			return "1"
 		}
 		i += e
 		return strconv.Itoa(i)
 	} else {
-		log.Println("convert fail:cannot convert zh-cn numbers with more than 3 digits")
+		log.Error(log.Struct{"err", "cannot convert zh-cn numbers with more than 3 digits", "digits", nl}, "convert cn_number failed")
 		return "1"
 	}
 }

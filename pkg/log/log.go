@@ -12,7 +12,7 @@ import (
 var defaultLogger *EnhanceLogger
 
 func init() {
-	defaultLogger = New("text", "Info", time.RFC3339, false, os.Stderr)
+	defaultLogger = New("text", "Info", time.RFC3339, false, 0, os.Stderr)
 }
 
 type EnhanceLogger struct {
@@ -36,7 +36,7 @@ func slogLevel(l string) slog.Level {
 	}
 }
 
-func New(handleType, level, timeLayout string, shortSourceFile bool, out io.Writer) *EnhanceLogger {
+func New(handleType, level, timeLayout string, shortSourceFile bool, calldepth int, out io.Writer) *EnhanceLogger {
 	timeAttrFunc := timeFormat(timeLayout)
 	opt := &slog.HandlerOptions{
 		AddSource:   shortSourceFile,
@@ -51,7 +51,7 @@ func New(handleType, level, timeLayout string, shortSourceFile bool, out io.Writ
 		handler = slog.NewTextHandler(out, opt)
 	}
 	return &EnhanceLogger{
-		slog.New(handler),
+		slog.New(NewEnhanceHandler(handler, calldepth)),
 	}
 }
 

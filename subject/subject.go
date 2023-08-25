@@ -130,11 +130,11 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			var ok bool
 			csreg, err := regexp.Compile(reg)
 			if err != nil {
-				log.Println(fmt.Errorf("golbal filter contains regexp error: %w", err))
+				log.Error(log.Struct{"err", err}, "golbal filter contains regexp compile failed")
 				ok = true
 			} else {
 				ok = csreg.MatchString(s)
-				util.Debugln(csreg.String(), ":", ok)
+				log.Debug(log.Struct{"containRegexp", csreg.String(), "matchingString", s, "matched", ok})
 			}
 			containOks = append(containOks, ok)
 		}
@@ -153,11 +153,11 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			var ok bool
 			clsreg, err := regexp.Compile(reg)
 			if err != nil {
-				log.Println(fmt.Errorf("golbal filter exclusions regexp error: %w", err))
+				log.Error(log.Struct{"err", err}, "golbal filter exclusions regexp compile failed")
 				ok = true
 			} else {
 				ok = !clsreg.MatchString(s)
-				util.Debugln(clsreg.String(), ":", ok)
+				log.Debug(log.Struct{"exclusionRegexp", clsreg.String(), "matchingString", s, "matched", ok})
 			}
 			exclusionOks = append(exclusionOks, ok)
 		}
@@ -189,9 +189,6 @@ func (s *Subject) RssPath() string {
 
 func CreateSubject(n string, ext *Extra) (int, error) {
 	subject := new(Subject)
-
-	// for testing
-	util.Debugf("%#+v", *subject)
 
 	bgmurl, err := solveResource(n, subject, ext)
 	if err != nil {
@@ -240,7 +237,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		cp := subject.Path + "/" + CoverFN
 		err = CC.TouchbgmCoverImg(sid, cp)
 		if err != nil {
-			log.Println(err)
+			log.Error(log.Struct{"err", err}, "scrape cover from bgmTV failed")
 			err = CC.DOUBANCoverScraper.Scrape(cp, n)
 			if err != nil {
 				retry := 0
@@ -269,24 +266,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 
 	subject.runtimeInit(false)
 
-	// if subject.ResourceTyp == RSS {
-	// 	// DL.Wait(1500) // wait for qbt
-	// 	m, err := DL.DoFetch(func() (recvd bool, err error) {
-	// 		a, err := rss.GetMatchedArts(subject.RssPath())
-	// 		if err != nil {
-	// 			return false, err
-	// 		}
-	// 		return len(a) > 0, nil
-	// 	}, 3000)
-	// 	if err != nil {
-	// 		log.Println(fmt.Errorf("check rss matched item error:%w subjid:%d", err, subject.SubjId))
-	// 		return nil
-	// 	}
-	// 	if !m {
-	// 		return errs.WarnRssRuleNotMatched
-	// 	}
-	// }
-	log.Printf("create subj%d succeeded \n", sid)
+	log.Info(log.Struct{"subject", subject}, "create subject succeeded")
 	return sid, nil
 }
 
@@ -377,7 +357,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	opt := RC.Option{}
 	if ext != nil {
 		opt.Group = ext.RssOption.SubtitleGroup
-		util.Debugln("SubtitleGroup", opt.Group)
+		log.Debug(log.Struct{"subtitleGroup", opt.Group}, "specify subtitleGroup")
 		opt.Index = ext.TorrOption.Index
 	}
 	u, bgm, isrss, err := RC.Scrape(n, opt)
@@ -390,7 +370,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	} else {
 		subj.ResourceTyp = Torrent
 	}
-	util.Debugln("resource:", u, "bgmi url:", bgm, "is rss:", isrss)
+	log.Debug(log.Struct{"resource", u, "bgmi url", bgm, "is rss", isrss}, "solvedResource")
 	return bgm, nil
 }
 
@@ -401,13 +381,13 @@ func download(subj *Subject, ext *Extra) error {
 		return err
 	} else if (ext == nil || ext.NoArgs()) && subj.Finished {
 		it, err := rss.AddAndGetItems(subj.ResourceUrl, subj.RssPath())
-		util.Debugln("rss path ", subj.RssPath())
+		log.Debug(log.Struct{"sid", subj.SubjId, "rss path ", subj.RssPath()}, "add RssResource")
 		if err != nil {
 			return err
 		}
 		enaFl := CFG.Env.EnabledFilter()
 		for _, a := range it.Articles {
-			util.Debugln(a.Description)
+			log.Debug(log.Struct{"rssDesc", a.Description}, "traverse rss items")
 			desc := a.Description
 			for _, reg := range coll_regs {
 				re, err := regexp.Compile(reg)
@@ -420,11 +400,11 @@ func download(subj *Subject, ext *Extra) error {
 						contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
 						exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
 						if !FilterWithRegs(desc, contains, exclusions) {
-							log.Printf("golbal filter: %s filtered", desc)
+							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "golbal filter")
 							continue
 						}
 					}
-					log.Printf("%d:%s  matched collection %s \n", subj.SubjId, subj.Name, desc)
+					log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
 					err = rss.RmRss(subj.RssPath())
 					if err != nil {
 						return err
@@ -436,8 +416,7 @@ func download(subj *Subject, ext *Extra) error {
 				}
 			}
 		}
-		log.Printf("%d:%s not matched any collection \n", subj.SubjId, subj.Name)
-
+		log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "rss path", subj.RssPath()}, "not matched any collection")
 		err = torrent.AddCategroy(subj.QbtCateg())
 		if err != nil {
 			return err

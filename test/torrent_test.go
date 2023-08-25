@@ -2,11 +2,9 @@ package test
 
 import (
 	"fmt"
+	TORR "github.com/NullpointerW/anicat/download/torrent"
 	"strings"
 	"testing"
-
-	TORR "github.com/NullpointerW/anicat/download/torrent"
-	util "github.com/NullpointerW/anicat/utils"
 )
 
 func TestDL(t *testing.T) {
@@ -28,7 +26,6 @@ func TestDLcompl(t *testing.T) {
 }
 
 func TestGetViaPath(t *testing.T) {
-	util.DebugEnv()
 	ts, err := TORR.GetViaPath("D:\\mikan-subj\\381666@mikan")
 	if err != nil {
 		t.Error(err)
@@ -54,9 +51,9 @@ func TestAdd(t *testing.T) {
 	t.Log(hash)
 }
 
-func TestCateg(t *testing.T){
-	hs,err:=TORR.GetViaCateg("anicat@subj-274234")
-	if err!=nil{
+func TestCateg(t *testing.T) {
+	hs, err := TORR.GetViaCateg("anicat@subj-274234")
+	if err != nil {
 		t.Error(err)
 	}
 	t.Log(hs)
