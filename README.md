@@ -106,6 +106,25 @@ services:
 docker compose up -d
    ```
 
+* docker run 部署
+ ``` bash 
+docker run -d --name=qb -p ${qbt_webui_port}:8989 \
+ -e PUID=1000 -e PGID=1000 -e TZ=Asia/Shanghai -e WEBUIPORT=8989 \
+ -v ${qbt_config}:/config -v ${usr_bgmi_path}:/bangumi\
+ --restart unless-stopped \
+ --network anicat-net --network-alias qb \
+ superng6/qbittorrentee:latest ; \
+docker run -d --name=anicat --restart unless-stopped \
+ -v ${usr_bgmi_path}:/bangumi  -v ${anicat_cfg}:/opt/env.yaml \
+ -p ${anicat_port}:8080  --user 1000:1000 \
+ --network anicat-net --network-alias anicat \
+ wmooon/anicat:latest 
+   ```
+* 或者使用[shell脚本](docker/docker_run.sh) 
+``` bash 
+./docker_run.sh <qbt_webui_port> <qbt_config> <usr_bgmi_path> <anicat_port> <anicat_cfg>
+   ```
+
 ### windows
  * [下载qbittorrent](https://www.qbittorrent.org/download.php)（版本≥ v4.1）并安装
  * 开启qbittorrent的webui
