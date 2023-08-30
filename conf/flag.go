@@ -24,7 +24,7 @@ func flaginit() {
 	testing.Init()
 	flag.Parse()
 	if Testing {
-		return
+		IDEdebugging = true
 	}
 	loginit(debug || IDEdebugging)
 }
