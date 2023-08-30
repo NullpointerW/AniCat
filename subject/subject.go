@@ -238,7 +238,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		err = CC.TouchbgmCoverImg(sid, cp)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "scrape cover from bgmTV failed")
-			err = CC.DOUBANCoverScraper.Scrape(cp, n)
+			err = CC.DOUBANCoverScraper(cp, n)
 			if err != nil {
 				retry := 0
 				for err == errs.ErrCoverDownLoadZeroSize {
@@ -247,7 +247,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 						return 0, err
 					}
 					time.Sleep(500 * time.Millisecond)
-					err = CC.DOUBANCoverScraper.Scrape(cp, n)
+					err = CC.DOUBANCoverScraper(cp, n)
 				}
 				if err != nil {
 					return 0, err

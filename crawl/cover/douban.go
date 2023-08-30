@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var DOUBANCoverScraper = TouchCoverImg
+
 func TouchCoverImg(fpath, cover string) (err error) {
 	u, err := coverImgScrape(cover)
 	if err != nil {
