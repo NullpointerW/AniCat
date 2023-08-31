@@ -55,29 +55,29 @@ type Environment struct {
 }
 
 func (env *Environment) Print() {
-	logStruct := log.Struct{"port", env.Port, "subject path", env.SubjPath}
+	logStruct := log.Struct{"port", env.Port, "subjectPath", env.SubjPath}
 	if env.DropOnDumplicate {
-		logStruct.Append("drop dumplicate:", "yes")
+		logStruct.Append("drop-dumplicate:", "yes")
 	}
 	log.Info(logStruct, "basic setting")
 	logStruct.Clear()
 	if env.EnabledFilter() {
-		logStruct.Append("golbal filter", "enable", "contain words", env.RssFilter.Contain, "exclusion words", env.RssFilter.Exclusion)
+		logStruct.Append("golbal filter", "enable", "containWords", env.RssFilter.Contain, "exclusionWords", env.RssFilter.Exclusion)
 		log.Info(logStruct, "golbal filter setting")
 		logStruct.Clear()
 	}
 
 	if len(env.Crawl.Proxies) != 0 {
-		logStruct.Append("scraper proxies", env.Crawl.Proxies)
+		logStruct.Append("scraperProxies", env.Crawl.Proxies)
 		log.Info(logStruct, "crawling setting")
 		logStruct.Clear()
 	}
-	logStruct.Append("qbt weburl", env.Qbt.Url, "qbt api request timeout(ms)", env.Qbt.Timeout)
+	logStruct.Append("qbt-weburl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
 	log.Info(logStruct, "qbt setting")
 }
 
 func (env *Environment) EmailPrint() {
-	log.Info(log.Struct{"host", env.Pusher.Email.Host, "port:", env.Pusher.Email.Port, "username:", env.Pusher.Email.Username}, "SMTP setting")
+	log.Info(log.Struct{"host", env.Pusher.Email.Host, "port", env.Pusher.Email.Port, "username", env.Pusher.Email.Username}, "SMTP setting")
 }
 
 func (env *Environment) EnabledFilter() bool {

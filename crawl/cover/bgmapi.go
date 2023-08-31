@@ -18,7 +18,7 @@ func Bgmimage(subjid int, typ, filepath string) (err error) {
 	if err != nil {
 		return
 	}
-	return CR.Downloadfile(filepath, resp.Body)
+	return CR.DownloadFile(filepath, resp.Body)
 }
 
 // shorthand for Bgmimage(id,"large",filepath)

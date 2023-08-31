@@ -42,12 +42,12 @@ func TestTMDB(t *testing.T) {
 		t.Error(e)
 		t.FailNow()
 	}
-	pd,_:=util.ParseShort02Time(strings.ReplaceAll(d, " ", ""))
+	pd, _ := util.ParseShort02Time(strings.ReplaceAll(d, " ", ""))
 	fmt.Println(pd)
 }
 
 func TestBgmiSearchApi(t *testing.T) {
-	sid,err:=I.BgmiApiSearch("龙与虎")
+	sid, err := I.BgmiApiSearch("无职转生～到了异世界就拿出真本事～ 第2部分")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

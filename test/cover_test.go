@@ -8,6 +8,6 @@ import (
 )
 
 func TestTouchCoverImg(t *testing.T) {
-	err := C.DOUBANCoverScraper.Scrape("cover.jpg", "雪之少女")
+	err := C.DOUBANCoverScraper("cover.jpg", "雪之少女")
 	fmt.Println(err)
 }

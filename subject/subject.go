@@ -23,9 +23,9 @@ import (
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 
-// Subject as basic obj of each bgmi
-// programm will load it from OS file and manage thme
-// while some of fileds have updating it will be refresh to OS file
+// Subject as a basic object of each bangumi
+// program will load it from OS file and manage them
+// it will be refreshed to OS file after some of the fields have updating
 type Subject struct {
 	SubjId      int         `json:"subjId"`
 	FolderName  string      `json:"folderName"` // source from tmdb
@@ -42,23 +42,24 @@ type Subject struct {
 	EndTime     string      `json:"endTime"`
 	Alias       string      `json:"alias"`
 	Season      string      `json:"season"`
+	Part        string      `json:"part"` // eg: pt1、pt2
 	// used while `ResourceTyp` is `Torrent`
 	TorrentHash string `json:"torrentHash"`
-	// manager use ctxcancel func to Exit gorountine running the current subject.
-	// when delete a subject manager,should run the cancelfunc and if a gorountine is runing
+	// manager use ctx cancel func to Exit goroutine running the current subject.
+	// when delete a subject manager,should run the cancel func and if a goroutine is running
 	// for this subject it will Exit.
-	// Context is hold by subject-running gorountine
-	// while subject-running gorountine Exit actively func should be called
+	// Context is hold by subject-running goroutine
+	// while subject-running goroutine Exit actively func should be called
 	Exit context.CancelFunc `json:"-"`
-	// before detection-gorountine push to subject,Check if this channel is closed.
+	// before detection-goroutine push to subject,Check if this channel is closed.
 	// before exit Exited channel should  be closed
 	Exited chan struct{} `json:"-"`
-	// While detection-gorountine detected that the resource download of the subject is completed
-	// it will send downLoad message to subject-running gorountine
+	// While detection-goroutine detected that the resource download of the subject is completed
+	// it will send downLoad message to subject-running goroutine
 	// received and push to terminal
 	PushChan chan qbt.Torrent `json:"-"`
 	// The anime series of this project has already ended and all episodes have been downloaded.
-	// while init,if this flag is true then there is noneed to start a gorountine to run it
+	// while init,if this flag is true then there is no need to start a goroutine to run it
 	// exit actively flag should  be set to true
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed renamed episodes,avoid duplicate push.
@@ -370,7 +371,7 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	} else {
 		subj.ResourceTyp = Torrent
 	}
-	log.Debug(log.Struct{"resource", u, "bgmi url", bgm, "is rss", isrss}, "solvedResource")
+	log.Debug(log.Struct{"resource", u, "bgmtvUrl", bgm, "isRss", isrss}, "solvedResource")
 	return bgm, nil
 }
 

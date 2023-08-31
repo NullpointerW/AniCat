@@ -36,7 +36,7 @@ func UrlEncode(s string) (utoa string) {
 	return
 }
 
-func Downloadfile(filepath string, remote io.ReadCloser) error {
+func DownloadFile(filepath string, remote io.ReadCloser) error {
 	f, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return err

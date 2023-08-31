@@ -50,7 +50,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			isrss = true
 			bgmUrl = bgmurl
 		} else {
-			log.Info(log.Struct{"search name", searchstr}, "rss resource not found")
+			log.Info(log.Struct{"searchName", searchstr}, "rss resource not found")
 			if opt.Index <= 0 {
 				opt.Index = 1
 			}
@@ -64,7 +64,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			mglink := htmlquery.FindOne(doc, fmt.Sprintf(mglinkTemp, opt.Index))
 			if mglink != nil {
 				url = htmlquery.InnerText(mglink)
-				log.Info(log.Struct{"search name", searchstr, "index", opt.Index, "magnet", url}, "scraped resource")
+				log.Info(log.Struct{"searchName", searchstr, "index", opt.Index, "magnet", url}, "scraped resource")
 				isrss = false
 			} else {
 				err = fmt.Errorf("%w: %s", errs.ErrCrawlNotFound, searchstr)
@@ -72,7 +72,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.Struct{"url", r.URL}, "searching resource from mikan")
+		log.Info(log.Struct{"url", r.URL, "source", "mikan"}, "fetching resource")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("search failed from mikan: %w", e)
@@ -123,7 +123,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 					grpn = htmlquery.FindOne(d, `/div[@class='dropdown']/div[@class='dropdown-toggle material-dropdown__btn']/span[1]`)
 				}
 				if grpn == nil {
-					log.Debug(log.Struct{"node", d}, "not scrap group name")
+					log.Debug(log.Struct{"node", d}, "cannot scrap group name")
 					continue
 				} else {
 					actl := strings.ToLower(htmlquery.InnerText(grpn))
@@ -165,7 +165,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "found rss resource,fetching...")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rss resource")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("fetch rss resource from mikan failed: %w", e)
@@ -194,7 +194,7 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 				return
 			}
 		} else {
-			log.Info(log.Struct{"search name", searchstr, "type", "torrent"}, "command lsi")
+			log.Info(log.Struct{"searchName", searchstr, "type", "torrent"}, "command lsi")
 			switch t {
 			case Ls:
 				fnTemp := `/html/body[@class='main']/div[@id='sk-container']/
@@ -253,7 +253,7 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "searching list from mikan")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching resource list")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
@@ -329,7 +329,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "fetching rss groups from mikan")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rss groups")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {

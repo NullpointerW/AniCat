@@ -106,7 +106,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "searching info from bgmTV")
+		log.Info(log.NewUrlStruct(r.URL, "source", "bgmTV"), "fetching info")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		e = fmt.Errorf("%s: search info failed: %w", errs.ErrBgmTVApiPrefix, e)
@@ -135,7 +135,7 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "fetching info from bgmTV")
+		log.Info(log.NewUrlStruct(r.URL, "source", "bgmTV"), "fetching info")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		e = fmt.Errorf("fetch info from bgmTV failed: %w", e)

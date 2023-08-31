@@ -47,14 +47,14 @@ func TouchCoverImg(fpath, cover string) (err error) {
 			err = e
 			return
 		}
-		e = CR.Downloadfile(fpath, resp.Body)
+		e = CR.DownloadFile(fpath, resp.Body)
 		if e != nil {
 			err = e
 			return
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "scraping cover from douban")
+		log.Info(log.NewUrlStruct(r.URL, "source", "douban"), "scraping cover")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		e = fmt.Errorf("scrap cover from douban failed: %w", e)
@@ -75,15 +75,12 @@ func coverImgScrape(coverName string) (cUrl string, err error) {
 		cUrl = u.String() + `photos?type=R`
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL), "scraping cover album from douban")
+		log.Info(log.NewUrlStruct(r.URL, "source", "douban"), "scraping douban")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		e = fmt.Errorf("scrap douban cover album failed: %w", e)
 		err = e
 		log.Error(nil, err)
-	})
-	c.OnScraped(func(r *colly.Response) {
-		log.Info(log.NewUrlStruct(cUrl), "found douban cover album")
 	})
 	parseParam := CR.UrlEncode(coverName)
 	c.Visit(fmt.Sprintf(DouBancoverSearchUrl, parseParam))
