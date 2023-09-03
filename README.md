@@ -32,7 +32,7 @@ mkdir cfg && wget -P ./cfg/ https://raw.githubusercontent.com/NullpointerW/AniCa
 ```yaml
 port: 8080 # 监听端口 docker-compose部署无需更改
 path: /bangumi # 番剧下载路径 docker-compose部署无需更改
-drop-dumplicate: on # 若存在相同集数，则删除重复项（建议开启)
+drop-duplicate: on # 若存在相同集数，则删除重复项（建议开启)
 qbittorrent:
   url: http://qb:8989 # qbt-api url,在docker-compose部署时无需更改
   username: admin
@@ -60,7 +60,7 @@ push: # 配置推送服务，如无此需求则可省略
   # skipssl: yes # 跳过ssl,开启此项可能需要变更相应的smtp地址，具体情况询问邮箱运营商
   # template: tmp/template.html # 邮件模板地址，若省略则使用内置的模板
 ```
-  
+#### docker-compose 部署
  * 下载docker-compose yaml
 ``` bash 
 wget https://raw.githubusercontent.com/NullpointerW/AniCat/master/Docker/docker-compose.yml
@@ -106,7 +106,7 @@ services:
 docker compose up -d
    ```
 
-* docker run 部署
+#### docker run 部署
  ``` bash 
 docker network create anicat-net \
 docker run -d --name=qb -p ${qbt_webui_port}:8989 \
@@ -227,4 +227,4 @@ stat 376106
   *A2*: &nbsp;`add`命令的执行时间受多个方面的因素影响(GFW干扰  代理节点故障 本地网络阻塞 服务器负载过高 等诸多因素），快则2-3秒，慢则几十秒都是有可能的。
 
  ## 交流
- 目前该项目还处于测试阶段，欢迎各位使用并提交问题以及改进点和新功能，如使用中有任何问题，请提交issues或者邮件联系我，email:voidmanwzp@gmail.com
+ 目前该项目还处于测试阶段，欢迎各位使用并提交问题以及改进点和新功能，如使用中有任何问题，请提交issues或者邮件联系我，email: voidmanwzp@gmail.com
