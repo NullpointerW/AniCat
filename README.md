@@ -6,7 +6,8 @@
 
 通过命令行交互的一键追番工具
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/NullpointerW/anicat)](https://goreportcard.com/report/github.com/NullpointerW/anicat) [![Go Report Card](https://img.shields.io/badge/go-v1.20-blue)](https://tip.golang.org/doc/go1.20)
+[![Go Report Card](https://goreportcard.com/badge/github.com/NullpointerW/anicat)](https://goreportcard.com/report/github.com/NullpointerW/anicat) [![Go Report Card](https://img.shields.io/badge/go-v1.21-blue)](https://tip.golang.org/doc/go1.21) [![Go Report Card](https://img.shields.io/badge/release-v0.0.2b-green)](https://github.com/NullpointerW/AniCat/releases/tag/v0.0.2b
+)
 ## 功能
  * 傻瓜式: 无需配置任何网站的账号或者rss订阅，只需输入番剧名即可一键订阅
  * 支持下载后的剧集自动重命名，方便媒体软件进行刮削 e.g:
