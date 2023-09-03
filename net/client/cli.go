@@ -81,7 +81,7 @@ func main() {
 		c.Write([]byte(l + N.CRLF))
 		signal <- struct{}{}
 	}
-	if f{
+	if f {
 		signal <- struct{}{}
 	}
 	fmt.Println(cmd.Red, s.Err(), cmd.Reset)

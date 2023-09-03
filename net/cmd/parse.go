@@ -114,7 +114,7 @@ func Parse(cmds []string) (reply Command) {
 		} else { // lsi , lsg  //lsi -s
 			args := cmds[2:]
 			ext := strings.ToLower(args[len(args)-1])
-			// command is lsi ... -s,show search list 
+			// command is lsi ... -s,show search list
 			if ext == "-s" {
 				reply.Opt = LsItems_searchlist
 				args = args[:len(args)-1]

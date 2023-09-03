@@ -7,7 +7,7 @@ import (
 )
 
 func TestDebug(t *testing.T) {
-	log.Init("text", "debug", "2006年01月02日",true, os.Stderr)
+	log.Init("text", "debug", "2006年01月02日", true, os.Stderr)
 	log.Debug(log.Struct{"test", "debug"}, "hello", "world")
 	log.Debug(log.Struct{"test", "debug"}, "hello", " ", "world")
 	log.Debugf(log.Struct{"test", "debug"}, "hello %s", " world")

@@ -17,7 +17,6 @@ import (
 
 	CFG "github.com/NullpointerW/anicat/conf"
 
-
 	P "github.com/NullpointerW/anicat/pusher"
 	"github.com/NullpointerW/anicat/pusher/email"
 	// "gopkg.in/gomail.v2"
@@ -38,4 +37,3 @@ func TestEmailPush(t *testing.T) {
 		t.Error(err)
 	}
 }
-

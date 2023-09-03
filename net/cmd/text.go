@@ -25,7 +25,7 @@ const (
 		"lsi [name]                   show resource list\n         " +
 		"lsg [name]                   show subtitleGroup list (rss type)\n         " +
 		"subj [subjid]                show detailed information of subject\n         " +
-		"stat [subjid]                show downloading status with the subject\n         "+
+		"stat [subjid]                show downloading status with the subject\n         " +
 		"stop                         terminate program\n"
 	addCMDUsageHelp = "\n   Usage:\n         " +
 		"(anicat) add [name] [arguments]\n   " +

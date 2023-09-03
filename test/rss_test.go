@@ -20,8 +20,6 @@ func TestRss(t *testing.T) {
 }
 
 func TestRssItem(t *testing.T) {
-	it,_:=rss.GetItems("anicat@subj-115908")
+	it, _ := rss.GetItems("anicat@subj-115908")
 	fmt.Println(*it)
 }
-
-
