@@ -110,7 +110,7 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, rn))
 				continue
 			}
-			if !CFG.Env.DropOnDumplicate {
+			if !CFG.Env.DropOnDuplicate {
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
 			}
 			// feat 0.0.3b: support external subtitles
@@ -151,16 +151,16 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 			if th, e := s.Pushed[se]; e {
 				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rn)
 				merr.Add(dumpliErr)
-				if CFG.Env.DropOnDumplicate && th != torr.Hash {
+				if CFG.Env.DropOnDuplicate && th != torr.Hash {
 					log.Warn(log.Struct{"torrfn", torr.Name, "torrHash", torr.Hash, "size", torr.Size}, "delete dumplicate file")
 					merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
 					return false, rn, merr.Err()
-				} else if !CFG.Env.DropOnDumplicate {
+				} else if !CFG.Env.DropOnDuplicate {
 					merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
 				}
 				// if we find some same episode files during the traversal of the current hash files
-				// and enable `dropOnDumplicate`
-				// then leave it on the current path ,and delete folder onecely for all at the end
+				// and enable `dropOnDuplicate`
+				// then leave it on the current path ,and delete folder once for all at the end
 			} else {
 				err = DL.Qbt.RenameFile(torr.Hash, f.Name, rn)
 				if err != nil {

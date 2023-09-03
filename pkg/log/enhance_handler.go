@@ -17,7 +17,7 @@ func (eh *EnhanceHandler) Handle(ctx context.Context, r slog.Record) error {
 		pcs [1]uintptr
 		// skip enhanceLogger wrapped function =>depth+1
 		// skip [runtime.Callers, this function, this function's caller] in slog.log =>depth+3
-		// skip runtime.Callers in *EnhanceHandler.Hanle =>depth+1
+		// skip runtime.Callers in *EnhanceHandler.Handle =>depth+1
 		// so depth=5
 		depth = 5
 	)

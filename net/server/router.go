@@ -9,7 +9,6 @@ import (
 	"github.com/NullpointerW/anicat/net/cmd"
 	"github.com/NullpointerW/anicat/net/cmd/view"
 	"github.com/NullpointerW/anicat/subject"
-	// util "github.com/NullpointerW/anicat/utils"
 )
 
 func route(c *cmd.Command, r view.Render) {

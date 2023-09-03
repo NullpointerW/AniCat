@@ -203,7 +203,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 				merr := errs.MultiErr{}
 				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rename)
 				merr.Add(dumpliErr)
-				if CFG.Env.DropOnDumplicate && th != torr.Hash {
+				if CFG.Env.DropOnDuplicate && th != torr.Hash {
 					log.Warn(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash, "size", torr.Size}, "delete dumplicate file")
 					merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
 				}

@@ -16,10 +16,10 @@ var (
 var Env Environment
 
 type Environment struct {
-	Port             int    `yaml:"port"`
-	SubjPath         string `yaml:"path"`
-	DropOnDumplicate bool   `yaml:"drop-dumplicate"`
-	RssFilter        struct {
+	Port            int    `yaml:"port"`
+	SubjPath        string `yaml:"path"`
+	DropOnDuplicate bool   `yaml:"drop-duplicate"`
+	RssFilter       struct {
 		Contain   []string `yaml:"contain"`
 		Exclusion []string `yaml:"exclusion"`
 	} `yaml:"rss-filter"`
@@ -56,14 +56,14 @@ type Environment struct {
 
 func (env *Environment) Print() {
 	logStruct := log.Struct{"port", env.Port, "subjectPath", env.SubjPath}
-	if env.DropOnDumplicate {
-		logStruct.Append("drop-dumplicate:", "yes")
+	if env.DropOnDuplicate {
+		logStruct.Append("drop-DropOnDuplicate", "yes")
 	}
 	log.Info(logStruct, "basic setting")
 	logStruct.Clear()
 	if env.EnabledFilter() {
-		logStruct.Append("golbal filter", "enable", "containWords", env.RssFilter.Contain, "exclusionWords", env.RssFilter.Exclusion)
-		log.Info(logStruct, "golbal filter setting")
+		logStruct.Append("globalFilter", "enable", "containWords", env.RssFilter.Contain, "exclusionWords", env.RssFilter.Exclusion)
+		log.Info(logStruct, "global filter setting")
 		logStruct.Clear()
 	}
 
@@ -72,7 +72,7 @@ func (env *Environment) Print() {
 		log.Info(logStruct, "crawling setting")
 		logStruct.Clear()
 	}
-	logStruct.Append("qbt-weburl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
+	logStruct.Append("qbt-webUrl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
 	log.Info(logStruct, "qbt setting")
 }
 

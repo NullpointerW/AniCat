@@ -63,7 +63,7 @@ func Custom(format string, a ...any) error {
 func PanicErr(err error) {
 	if err != nil {
 		if runtime.GOOS == "windows" {
-			log.Error(log.Struct{"err", err}, "PANIC: process crashed ")
+			log.Error(log.Struct{"err", err}, "PANIC! process crashed ")
 		}
 		panic(err)
 	}

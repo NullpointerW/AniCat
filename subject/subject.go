@@ -131,7 +131,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			var ok bool
 			csreg, err := regexp.Compile(reg)
 			if err != nil {
-				log.Error(log.Struct{"err", err}, "golbal filter contains regexp compile failed")
+				log.Error(log.Struct{"err", err}, "global filter contains regexp compile failed")
 				ok = true
 			} else {
 				ok = csreg.MatchString(s)
@@ -154,7 +154,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			var ok bool
 			clsreg, err := regexp.Compile(reg)
 			if err != nil {
-				log.Error(log.Struct{"err", err}, "golbal filter exclusions regexp compile failed")
+				log.Error(log.Struct{"err", err}, "global filter exclusions regexp compile failed")
 				ok = true
 			} else {
 				ok = !clsreg.MatchString(s)
