@@ -203,6 +203,7 @@ stat 376106
  通过infuse、Plex、Jellyfin 打开番剧下载目录进行自动刮削并观看:\
  <img src="doc/infuse-list.jpg" width="500">
  <img src="doc/infuse-detail.jpg" width="500">
+
  注: 有多个季的番剧将会在同一文件夹下，（文件夹命名规则和TMDB一致）例如：\
  <img src="doc/mseason.jpg" width="500">
 <!-- ![infuse-list](doc/infuse-list.jpg)
