@@ -16,17 +16,18 @@ import (
 	"strings"
 )
 
-var HOME string = CFG.Env.SubjPath
+var HOME = CFG.Env.SubjPath
 
 func Scan() {
 	home := trimPath(HOME)
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
 			if f.IsDir() {
-				log.Info(log.Struct{"path", home + string(os.PathSeparator) + f.Name()}, "scan: found folder")
+				log.Info(log.Struct{"path", util.FileSeparatorConv(home + string(os.PathSeparator) + f.Name())},
+					"scan: found folder")
 				fs, err := os.ReadDir(home + `/` + f.Name())
 				if err != nil {
-					log.Error(log.Struct{"err", err}, "sacn: open folder failed")
+					log.Error(log.Struct{"err", err}, "scan: open folder failed")
 					continue
 				}
 				for _, ff := range fs {

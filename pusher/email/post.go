@@ -41,6 +41,9 @@ func (_ Sender) Push(p pusher.Payload) error {
 }
 
 func init() {
+	if CFG.SrvCTL {
+		return
+	}
 	if CFG.Env.Pusher.Email.Host == "" {
 		log.Info(nil, "email push disable")
 		return

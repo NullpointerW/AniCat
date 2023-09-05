@@ -7,13 +7,9 @@ import (
 )
 
 func main() {
-	Run := func() {
-		subject.Scan()
-		go subject.StartManagement()
-		go detection.Detect()
-		go netsrv.Listen()
-		//select {}
-	}
-	p := program{Run: Run}
-	p.service()
+	subject.Scan()
+	go subject.StartManagement()
+	go detection.Detect()
+	go netsrv.Listen()
+	select {}
 }

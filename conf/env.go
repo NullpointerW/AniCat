@@ -11,6 +11,7 @@ import (
 var (
 	Ver    = "x.x.x"
 	projlk = "https://github.com/NullpointerW/AniCat"
+	SrvCTL = len(os.Args) > 1 && (os.Args[1] == "install" || os.Args[1] == "uninstall" || os.Args[1] == "start")
 )
 
 var Env Environment
@@ -57,12 +58,13 @@ type Environment struct {
 func (env *Environment) Print() {
 	logStruct := log.Struct{"port", env.Port, "subjectPath", env.SubjPath}
 	if env.DropOnDuplicate {
-		logStruct.Append("drop-DropOnDuplicate", "yes")
+		logStruct.Append("drop-onDuplicate", "yes")
 	}
 	log.Info(logStruct, "basic setting")
 	logStruct.Clear()
 	if env.EnabledFilter() {
-		logStruct.Append("globalFilter", "enable", "containWords", env.RssFilter.Contain, "exclusionWords", env.RssFilter.Exclusion)
+		logStruct.Append("globalFilter", "enable", "containWords", env.RssFilter.Contain, "exclusionWords",
+			env.RssFilter.Exclusion)
 		log.Info(logStruct, "global filter setting")
 		logStruct.Clear()
 	}
@@ -85,6 +87,9 @@ func (env *Environment) EnabledFilter() bool {
 }
 
 func init() {
+	if SrvCTL {
+		return
+	}
 	flaginit()
 	if Testing {
 		// skip

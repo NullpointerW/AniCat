@@ -59,7 +59,7 @@ func setProxy(qbtCfg *qbt.Config) error {
 }
 
 func init() {
-	if CFG.Testing {
+	if CFG.Testing || CFG.SrvCTL {
 		// skip
 		return
 	}
