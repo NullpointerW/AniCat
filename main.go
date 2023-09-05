@@ -7,12 +7,13 @@ import (
 )
 
 func main() {
-	subject.Scan()
-	go subject.StartManagement()
-	go detection.Detect()
-	go netsrv.Listen()
-	// sigCh := make(chan os.Signal, 1)
-	// signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	// <-sigCh
-	select {}
+	Run := func() {
+		subject.Scan()
+		go subject.StartManagement()
+		go detection.Detect()
+		go netsrv.Listen()
+		//select {}
+	}
+	p := program{Run: Run}
+	p.service()
 }

@@ -48,7 +48,7 @@ func Scan() {
 			}
 		}
 	} else {
-		log.Error(log.Struct{"err", err}, "sacn: open home folder failed")
+		log.Error(log.Struct{"err", err}, "scan: open home folder failed")
 	}
 }
 

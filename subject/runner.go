@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// before gorountie handle it init inner channels and ctxfunc
+// before goroutine handle it init inner channels and ctx func
 func (s *Subject) runtimeInit(reload bool) {
 	if s.Terminate {
 		Manager.Add(s)
@@ -127,7 +127,7 @@ checkSync:
 	return
 }
 
-// call only when the subject epis is fin
+// RssDLSynced call only when the subject epis is fin
 func (s *Subject) RssDLSynced() (bool, error) {
 	arts, err := rss.GetMatchedArts(s.RssPath())
 	if err != nil {
@@ -262,6 +262,9 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 func (s *Subject) terminate() {
 	log.Debug(log.Struct{"sid", s.SubjId, "resType", s.ResourceTyp.String()}, "exited")
 	s.Terminate, s.Finished = true, true
-	s.writeJson()
+	err := s.writeJson()
+	if err != nil {
+		log.Info(log.Struct{"err", err}, "writeJson failed")
+	}
 	s.Exit()
 }

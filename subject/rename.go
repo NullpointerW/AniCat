@@ -76,15 +76,6 @@ func renameTV(s *Subject, fn string) (string, error) {
 	return rename, nil
 }
 
-// func RenameMovie(s *Subject, torr qbt.Torrent) string {
-// 	sep := "."
-// 	sp := strings.Split(torr.Name, sep)
-// 	extension := sp[len(sp)-1]
-// 	extension = sep + extension
-// 	basename := s.Name
-// 	return basename + " " + extension
-// }
-
 func renameTorr(s *Subject, torr qbt.Torrent) error {
 	epis := make(map[string]struct{})
 	fs, err := DL.Qbt.Files(torr.Hash)

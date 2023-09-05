@@ -2,7 +2,10 @@ module github.com/NullpointerW/anicat
 
 go 1.20
 
-require github.com/gocolly/colly v1.2.0
+require (
+	github.com/gocolly/colly v1.2.0
+	github.com/kardianos/service v1.2.2
+)
 
 require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
