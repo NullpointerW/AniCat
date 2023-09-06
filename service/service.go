@@ -9,7 +9,6 @@ import (
 	util "github.com/NullpointerW/anicat/utils"
 	"github.com/kardianos/service"
 	"os"
-	"path/filepath"
 )
 
 func main() {
@@ -41,15 +40,12 @@ func (p *program) Stop(s service.Service) error {
 }
 
 func (p *program) service() {
-	executePath, err := os.Executable()
-	if err != nil {
-		fmt.Println("get executePath failed:", err)
-	}
-	executePath, err = filepath.EvalSymlinks(filepath.Dir(executePath))
-	if err != nil {
-		fmt.Println("get executePath failed:", err)
-	}
+	executePath, err := util.GetExecutePath()
 	executePath += "/env.yaml"
+	if err != nil {
+		fmt.Println(err)
+		executePath = "." + executePath
+	}
 	executePath = util.FileSeparatorConv(executePath)
 	svcConfig := &service.Config{
 		Name:        "AniCat",

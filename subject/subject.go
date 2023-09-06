@@ -267,7 +267,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 
 	subject.runtimeInit(false)
 
-	log.Info(log.Struct{"subject", subject}, "create subject succeeded")
+	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
 	return sid, nil
 }
 

@@ -1,8 +1,10 @@
 package conf
 
 import (
+	"fmt"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
+	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/yaml.v3"
 	"os"
 	"runtime"
@@ -113,7 +115,14 @@ func loginit(debug bool) {
 	output := os.Stderr
 	if runtime.GOOS == "windows" && !IDEdebugging {
 		var err error
-		output, err = os.OpenFile("./output.log", os.O_TRUNC|os.O_CREATE, 0777)
+		executePath, err := util.GetExecutePath()
+		executePath += "/output.log"
+		if err != nil {
+			fmt.Println(err)
+			executePath = "." + executePath
+		}
+		executePath = util.FileSeparatorConv(executePath)
+		output, err = os.OpenFile(executePath, os.O_TRUNC|os.O_CREATE, 0777)
 		if err != nil {
 			defer log.Error(log.Struct{"err", err}, "create logfile failed")
 		}

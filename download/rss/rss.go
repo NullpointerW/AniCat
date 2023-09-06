@@ -36,7 +36,7 @@ func SetAutoDLRule(rssurl, categ, dlpath, rsspath string,
 
 }
 
-// called only for finshed items with rss type for now
+// AddAndGetItems called only for finished items with rss type for now
 func AddAndGetItems(url, path string) (*qbt.Item, error) {
 	err := DL.Qbt.AddFeed(url, path)
 	if err != nil {

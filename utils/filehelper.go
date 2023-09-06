@@ -1,6 +1,8 @@
 package util
 
 import (
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -43,9 +45,9 @@ func FileSeparatorConv(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
 }
 
-// trim the rename file ext and name
+// TrimExtensionAndGetEpi trim the rename file ext and name
 // eg：
-// example S01E02 => S01E02
+// example xxx S01E02 => S01E02
 func TrimExtensionAndGetEpi(fn string) string {
 	sep := "."
 	sp := strings.Split(fn, sep)
@@ -57,4 +59,16 @@ func TrimExtensionAndGetEpi(fn string) string {
 func IsRegexp(str string) bool {
 	_, err := regexp.Compile(str)
 	return err == nil
+}
+
+func GetExecutePath() (string, error) {
+	executePath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	executePath, err = filepath.EvalSymlinks(filepath.Dir(executePath))
+	if err != nil {
+		return "", err
+	}
+	return executePath, nil
 }
