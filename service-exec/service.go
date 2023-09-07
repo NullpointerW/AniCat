@@ -50,12 +50,12 @@ func (p *program) service() {
 	svcConfig := &service.Config{
 		Name:        "AniCat",
 		DisplayName: "AniCat",
-		Description: "auto download service",
+		Description: "auto download service-exec",
 		Arguments:   []string{"-e", executePath},
 	}
 	s, err := service.New(p, svcConfig)
 	if err != nil {
-		log.Error(log.Struct{"err", err}, "create service failed")
+		log.Error(log.Struct{"err", err}, "create service-exec failed")
 		os.Exit(1)
 	}
 	if len(os.Args) > 1 {
@@ -66,7 +66,7 @@ func (p *program) service() {
 				fmt.Println("error:", err)
 				return
 			}
-			fmt.Println("service install succeeded")
+			fmt.Println("service-exec install succeeded")
 			return
 		case os.Args[1] == "uninstall":
 			err := s.Uninstall()
@@ -74,7 +74,7 @@ func (p *program) service() {
 				fmt.Println("error:", err)
 				return
 			}
-			fmt.Println("service uninstall succeeded")
+			fmt.Println("service-exec uninstall succeeded")
 			return
 		case os.Args[1] == "start":
 			err := s.Start()
@@ -82,7 +82,7 @@ func (p *program) service() {
 				fmt.Println("error:", err)
 				return
 			}
-			fmt.Println("service start succeeded")
+			fmt.Println("service-exec start succeeded")
 			return
 		default:
 			goto exec
@@ -90,6 +90,5 @@ func (p *program) service() {
 	}
 exec:
 	err = s.Run()
-	log.Error(log.Struct{"err", err}, "service terminal")
-
+	log.Error(log.Struct{"err", err}, "service-exec terminal")
 }
