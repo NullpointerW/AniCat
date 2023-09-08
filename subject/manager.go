@@ -7,9 +7,17 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 )
 
+type createType int
+
+const (
+	CreateViaStr createType = iota
+	CreateViaFeed
+)
+
 type SubjC struct {
 	N string
 	Extra
+	CreateTyp createType
 }
 
 type Pip struct {
@@ -31,7 +39,8 @@ func (p *Pip) Error() error {
 }
 
 var (
-	Create, Delete chan *Pip
+	Delete chan *Pip
+	Create chan *Pip
 )
 
 func init() {
@@ -110,7 +119,15 @@ func StartManagement() {
 		select {
 		case p := <-Create:
 			sc := p.Arg.(SubjC)
-			sid, err := CreateSubject(sc.N, &sc.Extra)
+			var (
+				sid int
+				err error
+			)
+			if sc.CreateTyp == CreateViaStr {
+				sid, err = CreateSubject(sc.N, &sc.Extra)
+			} else { // CreateViaFeed
+				sid, err = CreateSubjectViaFeed(sc.N, sc.Extra.RssOption.Name, &sc.Extra)
+			}
 			if err != nil {
 				p.err = err
 			} else {

@@ -14,21 +14,11 @@ import (
 func route(c *cmd.Command, r view.Render) {
 	switch c.Opt {
 	case cmd.Add:
-		sc := subject.SubjC{}
-		if c.Flag.Using {
-			sc.RssOption.UseRegex = c.Flag.UseRegex
-			sc.RssOption.MustContain = c.Flag.MustContain
-			sc.RssOption.MustNotContain = c.Flag.MustNotContain
-			sc.RssOption.SubtitleGroup = c.Flag.SubtitleGroup
-			sc.TorrOption.Index = c.Flag.Index
-		}
-		sc.N = c.N
-		p := subject.NewPip(sc)
-		subject.Create <- p
-		c.Err = p.Error()
-		if c.Err == nil {
-			c.N = strconv.Itoa(p.Arg.(int))
-		}
+		sc := transferSubjC(c, false)
+		createSubject(c, sc)
+	case cmd.AddFeed:
+		sc := transferSubjC(c, true)
+		createSubject(c, sc)
 	case cmd.Del:
 		i, err := strconv.Atoi(c.N)
 		if err != nil && c.N != "*" {
@@ -103,5 +93,30 @@ func route(c *cmd.Command, r view.Render) {
 			}
 		}
 		c.N = "exited."
+	}
+}
+func transferSubjC(src *cmd.Command, feed bool) (dst subject.SubjC) {
+	if src.Flag.Using {
+		dst.RssOption.UseRegex = src.Flag.UseRegex
+		dst.RssOption.MustContain = src.Flag.MustContain
+		dst.RssOption.MustNotContain = src.Flag.MustNotContain
+		dst.RssOption.SubtitleGroup = src.Flag.SubtitleGroup
+		dst.TorrOption.Index = src.Flag.Index
+		dst.RssOption.Name = src.Flag.Name
+	}
+	dst.N = src.N
+	dst.CreateTyp = subject.CreateViaStr
+	if feed {
+		dst.CreateTyp = subject.CreateViaFeed
+	}
+	return dst
+}
+
+func createSubject(c *cmd.Command, sc subject.SubjC) {
+	p := subject.NewPip(sc)
+	subject.Create <- p
+	c.Err = p.Error()
+	if c.Err == nil {
+		c.N = strconv.Itoa(p.Arg.(int))
 	}
 }

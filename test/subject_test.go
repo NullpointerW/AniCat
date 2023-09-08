@@ -48,6 +48,13 @@ func TestCreateSubj(t *testing.T) {
 	errs.NoError(t, err)
 }
 
+func TestCreateSubjViaFeed(t *testing.T) {
+	feed := "https://mikanani.me/RSS/Bangumi?bangumiId=2549&subgroupid=552"
+	sid, err := subject.CreateSubjectViaFeed(feed, "", nil)
+	errs.NoError(t, err)
+	fmt.Println(sid)
+}
+
 func TestXxx(t *testing.T) {
 	typ := reflect.TypeOf(subject.Extra{}.RssOption)
 	fmt.Println("Type:", typ)

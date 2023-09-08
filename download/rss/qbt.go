@@ -54,7 +54,7 @@ func AddAndGetItems(url, path string) (*qbt.Item, error) {
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("%w:get all rss items fail,rss path:%s", errs.ErrQbtDataNotFound, path)
+		return nil, fmt.Errorf("%w: get all rss items fail,rss path=%s", errs.ErrQbtDataNotFound, path)
 	}
 	return it, nil
 }

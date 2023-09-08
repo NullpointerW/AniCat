@@ -152,11 +152,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 				}
 			}
 		}
-		bgmXpathExp := `/html/body[@class='main']/div[@id='sk-container']/
-		div[@class='pull-left leftbar-container']/
-		p[@class='bangumi-info'][last()]/
-		a/@href`
-		a := htmlquery.FindOne(doc, bgmXpathExp)
+		a := htmlquery.FindOne(doc, BgmXpathExp)
 		if a == nil {
 			err = errs.ErrBgmUrlNotFoundOnMikan
 			return
@@ -172,6 +168,33 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 		log.Error(nil, err)
 	})
 	c.Visit(resourcesBaseUrl + endpoint)
+	return
+}
+
+func FetchBgmTVUrl(page string) (url string, err error) {
+	c := CR.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
+		if e != nil {
+			err = e
+			return
+		}
+		a := htmlquery.FindOne(doc, BgmXpathExp)
+		if a == nil {
+			err = errs.ErrBgmUrlNotFoundOnMikan
+			return
+		} else {
+			url = htmlquery.InnerText(a)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching bgmTV url")
+	})
+	c.OnError(func(_ *colly.Response, e error) {
+		err = fmt.Errorf("fetch bgmTV url from mikan failed: %w", e)
+		log.Error(nil, err)
+	})
+	err = c.Visit(page)
 	return
 }
 

@@ -15,8 +15,8 @@ var (
 
 	ErrBgmTVApiPrefix = errors.New("bgmTV api")
 
-	ErrTorrnetNotFound           = errors.New("there are no torrent files on qbt")
-	ErrTorrnetOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
+	ErrTorrentNotFound           = errors.New("there are no torrent files on qbt")
+	ErrTorrentOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
 	ErrQbtDataNotFound           = errors.New("no data found from the api request (should be found)")
 	ErrSubjectAlreadyExisted     = errors.New("subject already existed")
 	ErrSubjectNotFound           = errors.New("subject not found")
@@ -32,6 +32,8 @@ var (
 	ErrCannotCaptureEpisNum = errors.New("can not capture episode num from text")
 
 	ErrItemAlreadyPushed = errors.New("item was already pushed")
+
+	ErrNoLinkFoundOnRssFeed = errors.New("can not found link on feed")
 )
 
 type MultiErr struct {

@@ -30,7 +30,7 @@ func Add(url, path, tag string) (string, error) {
 		return "", err
 	}
 	if !ok {
-		return "", fmt.Errorf("%w:get added torr hash fail,torr tag:%s", errs.ErrQbtDataNotFound, tag)
+		return "", fmt.Errorf("%w: get added torr hash fail,torr tag=%s", errs.ErrQbtDataNotFound, tag)
 	}
 
 	return torrs[0].Hash, nil
@@ -45,7 +45,7 @@ func Get(h string) (torr qbt.Torrent, err error) {
 		return torr, err
 	}
 	if len(torrs) == 0 {
-		return torr, fmt.Errorf("%w:torr hash:%s", errs.ErrTorrnetNotFound, h)
+		return torr, fmt.Errorf("%w:torr hash:%s", errs.ErrTorrentNotFound, h)
 	}
 	torr = torrs[0]
 	return
@@ -60,7 +60,7 @@ func GetViaCateg(category string) (hits []qbt.Torrent, err error) {
 		return hits, err
 	}
 	if len(hits) == 0 {
-		return hits, errs.ErrTorrnetNotFound
+		return hits, errs.ErrTorrentNotFound
 	}
 	return
 }
@@ -74,7 +74,7 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 		return hits, err
 	}
 	if len(torrs) == 0 {
-		return hits, errs.ErrTorrnetNotFound
+		return hits, errs.ErrTorrentNotFound
 	}
 
 	for _, t := range torrs {
@@ -84,7 +84,7 @@ func GetViaPath(path string) (hits []qbt.Torrent, err error) {
 		}
 	}
 	if len(hits) == 0 {
-		return hits, fmt.Errorf("%w,No torrs found on savepath:%s", errs.ErrTorrnetOnSavePathNotFound, path)
+		return hits, fmt.Errorf("%w,No torrs found on savepath:%s", errs.ErrTorrentOnSavePathNotFound, path)
 	}
 	return
 }
@@ -100,7 +100,7 @@ func DLcompl(h string) (bool, error) {
 func DelViaCateg(categ string) error {
 	// util.Debugln("abs_path:", p)
 	torrs, err := GetViaCateg(categ)
-	if err != nil && err != errs.ErrTorrnetNotFound {
+	if err != nil && err != errs.ErrTorrentNotFound {
 		return err
 	}
 	var hs []string

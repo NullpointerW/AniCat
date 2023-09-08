@@ -28,8 +28,8 @@ func Detect() {
 						log.Error(log.Struct{"err", err}, "detection: get torrent failed")
 						continue
 					}
-					log.Debug(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
-						"detected completed download")
+					//log.Debug(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
+					//	"detected completed download")
 					if istorr, isrss := strings.Contains(torr.Tags, subject.QbtTag_prefix),
 						strings.Contains(torr.Category, subject.QbtTag_prefix); istorr || isrss {
 						var s string

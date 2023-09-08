@@ -20,6 +20,7 @@ type Command struct {
 		MustNotContain string `long:"mn"   required:"false"`
 		UseRegex       bool   `long:"rg"   required:"false"`
 		Index          int    `short:"i" long:"index" required:"false"`
+		Name           string `short:"n" long:"name" required:"false"`
 	}
 	Err error
 }
@@ -33,9 +34,9 @@ const (
 	LsItems_searchlist //lsi -s
 	LsGroup            // reserved command
 	Help
-
-	Status // TODO
+	Status
 	Stop
+	AddFeed
 )
 
 func optionMode(o string) (Option, bool) {
@@ -88,11 +89,24 @@ func Parse(cmds []string) (reply Command) {
 			reply.Err = fmt.Errorf("%w:%s", errs.ErrMissingCommandArgument, `Use "(anicat) help " for more information about a command.`)
 			return
 		}
+
 		if opt == Del || (opt == Add && len(cmds) == 3) || opt == Status {
 			reply.N = cmds[2]
 			return
 		}
 		if len(cmds) > 3 && opt == Add {
+			// feat v0.03b:add --feed <url>
+			if cmds[2] == "--feed" {
+				feedUrl := cmds[3]
+				reply.N = feedUrl
+				reply.Opt = AddFeed
+				if len(cmds) > 4 {
+					_, reply.Err = flags.ParseArgs(&reply.Flag, cmds[4:])
+				}
+				reply.Flag.Using = true
+				return
+			}
+
 			ext := cmds[3:]
 			e := 3
 			for _, n := range ext {

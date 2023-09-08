@@ -77,6 +77,7 @@ type Extra struct {
 		MustContain    string
 		MustNotContain string
 		UseRegex       bool
+		Name           string
 	}
 }
 
@@ -190,14 +191,12 @@ func (s *Subject) RssPath() string {
 
 func CreateSubject(n string, ext *Extra) (int, error) {
 	subject := new(Subject)
-
 	bgmurl, err := solveResource(n, subject, ext)
 	if err != nil {
 		return 0, err
 	}
 
 	var tips map[string]string
-
 	if bgmurl != "" {
 		tips, err = IC.DoScrape(bgmurl)
 	} else {
@@ -229,32 +228,10 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	curr, err := strconv.Atoi(subject.Season)
+
+	err = subject.scrapeCover(lastS)
 	if err != nil {
 		return 0, err
-	}
-
-	if curr > lastS {
-		cp := subject.Path + "/" + CoverFN
-		err = CC.TouchbgmCoverImg(sid, cp)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "scrape cover from bgmTV failed")
-			err = CC.DOUBANCoverScraper(cp, n)
-			if err != nil {
-				retry := 0
-				for err == errs.ErrCoverDownLoadZeroSize {
-					retry++
-					if retry >= 3 {
-						return 0, err
-					}
-					time.Sleep(500 * time.Millisecond)
-					err = CC.DOUBANCoverScraper(cp, n)
-				}
-				if err != nil {
-					return 0, err
-				}
-			}
-		}
 	}
 
 	err = download(subject, ext)
@@ -267,6 +244,78 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 
 	subject.runtimeInit(false)
 
+	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
+	return sid, nil
+}
+
+// CreateSubjectViaFeed use a specified rss-feed url as the resource to create a subject,
+// if arg `name` is not empty,then will use specified name to fetch info,
+// otherwise parse the feed for link or title to fetch it.
+// eg:
+//
+//		`add --feed <url>`
+//	 we fetch bgmTV link first,if it doesn't exist,then get title
+//
+//		`add --feed <url> --name <specified-name>`
+//	 use specified name only
+func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
+	subject := &Subject{ResourceTyp: RSS, ResourceUrl: feed}
+	fp := rss.Parser{Feed: feed}
+	var (
+		err  error
+		tips map[string]string
+	)
+	if name != "" {
+		tips, err = IC.Scrape(name)
+	} else {
+		var (
+			bgmurl string
+			title  string
+		)
+		if title, bgmurl, err = fp.GetTitleAndLink(); err != nil {
+			return 0, err
+		} else if bgmurl == "" {
+			log.Warn(log.Struct{"feed", feed, "err", err}, errs.ErrNoLinkFoundOnRssFeed)
+			tips, err = IC.Scrape(title)
+		} else {
+			tips, err = IC.DoScrape(bgmurl)
+		}
+	}
+	if err != nil {
+		return 0, err
+	}
+	sid, err := strconv.Atoi(tips[IC.SubjId])
+	if err != nil {
+		return 0, err
+	}
+	if Manager.Get(sid) != nil {
+		return 0, fmt.Errorf("%w: sid=%d", errs.ErrSubjectAlreadyExisted, sid)
+	}
+	subject.SubjId = sid
+	err = subject.Loadfileds(tips)
+	if err != nil {
+		return 0, err
+	}
+	GetSeason(subject)
+	subject.trimName()
+	err = initFolder(subject)
+	if err != nil {
+		return 0, err
+	}
+	lastS, err := FindLastSeason(subject.Path)
+	if err != nil {
+		return 0, fmt.Errorf("getLastSeason failed: %w", err)
+	}
+	err = subject.scrapeCover(lastS)
+	if err != nil {
+		return 0, err
+	}
+	err = download(subject, ext)
+	if err != nil {
+		return 0, err
+	}
+	subject.writeJson()
+	subject.runtimeInit(false)
 	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
 	return sid, nil
 }
@@ -515,4 +564,35 @@ func (s *Subject) GetPart() {
 
 func (s *Subject) GetSeasonAndPart() string {
 	return s.Season + s.Part
+}
+
+func (s *Subject) scrapeCover(lastS int) error {
+	curr, err := strconv.Atoi(s.Season)
+	if err != nil {
+		return fmt.Errorf("getCurrSeason failed: %w", err)
+	}
+
+	if curr > lastS {
+		cp := s.Path + "/" + CoverFN
+		err = CC.TouchbgmCoverImg(s.SubjId, cp)
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "scrape cover from bgmTV failed")
+			err = CC.DOUBANCoverScraper(cp, s.Name)
+			if err != nil {
+				retry := 0
+				for err == errs.ErrCoverDownLoadZeroSize {
+					retry++
+					if retry >= 3 {
+						return err
+					}
+					time.Sleep(500 * time.Millisecond)
+					err = CC.DOUBANCoverScraper(cp, s.Name)
+				}
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
