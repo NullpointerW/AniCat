@@ -47,7 +47,7 @@ func FileSeparatorConv(path string) string {
 
 // TrimExtensionAndGetEpi trim the rename file ext and name
 // eg：
-// example xxx S01E02 => S01E02
+// example xxxS01E02 => S01E02
 func TrimExtensionAndGetEpi(fn string) string {
 	sep := "."
 	sp := strings.Split(fn, sep)

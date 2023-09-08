@@ -21,7 +21,7 @@ func Bgmimage(subjid int, typ, filepath string) (err error) {
 	return CR.DownloadFile(filepath, resp.Body)
 }
 
-// shorthand for Bgmimage(id,"large",filepath)
+// TouchbgmCoverImg shorthand for Bgmimage(id,"large",filepath)
 func TouchbgmCoverImg(id int, filepath string) error {
 	return Bgmimage(id, Large, filepath)
 }

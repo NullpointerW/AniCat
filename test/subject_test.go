@@ -138,3 +138,22 @@ func TestSubsReg(t *testing.T) {
 	ok = CHSReg.MatchString("[Lilith-Raws] Okashi na Tensei - 06 [Baha][WebDL 1080p AVC AAC][]繁体中文.ast")
 	fmt.Println(ok)
 }
+
+func TestPartReg(t *testing.T) {
+	str := "这是第一季的节目 part 3"
+	re := regexp.MustCompile(`(?i)Part\s*(\d)`)
+	match := re.FindStringSubmatch(str)
+	if len(match) > 1 {
+		season := match[1]
+		fmt.Printf("匹配到的part：%s\n", season)
+	} else {
+		fmt.Println("未匹配到part")
+	}
+}
+
+func TestGetPart(t *testing.T) {
+	subj := subject.Subject{}
+	subj.Name = "无职转生～到了异世界就拿出真本事～后半部分"
+	subj.GetPart()
+	fmt.Println(subj.Part)
+}

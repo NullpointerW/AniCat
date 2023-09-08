@@ -53,7 +53,7 @@ func Scan() {
 	}
 }
 
-// Initialize the content library in OS file for the `subject` in the memory.
+// initFolder Initialize the content library in OS file for the `subject` in the memory.
 // Path can be used to monitor the download status of resources
 // apply to RSS and Torrent type.
 // If initialization is successful, write the path to Subject.Path.
@@ -106,7 +106,7 @@ func rmFolder(s *Subject) error {
 func (s *Subject) writeJson() (err error) {
 	b, _ := json.Marshal(*s)
 	fldrp := s.Path
-	jsfn := fmt.Sprintf(jsonfileName, s.Season)
+	jsfn := fmt.Sprintf(jsonfileName, s.GetSeasonAndPart())
 	err = os.WriteFile(fldrp+"/"+jsfn, b, 0777)
 	return err
 }

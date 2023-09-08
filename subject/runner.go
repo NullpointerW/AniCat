@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// before goroutine handle it init inner channels and ctx func
+// runtimeInit before goroutine handle it init inner channels and ctx func
 func (s *Subject) runtimeInit(reload bool) {
 	if s.Terminate {
 		Manager.Add(s)
@@ -127,7 +127,7 @@ checkSync:
 	return
 }
 
-// RssDLSynced call only when the subject epis is fin
+// RssDLSynced called only when the subject epis is fin
 func (s *Subject) RssDLSynced() (bool, error) {
 	arts, err := rss.GetMatchedArts(s.RssPath())
 	if err != nil {

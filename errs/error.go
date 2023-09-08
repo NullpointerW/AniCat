@@ -42,7 +42,6 @@ func (me *MultiErr) Add(e error) {
 	if e != nil {
 		me.errs = append(me.errs, e)
 	}
-
 }
 
 func (me *MultiErr) Err() error {
@@ -63,14 +62,14 @@ func Custom(format string, a ...any) error {
 func PanicErr(err error) {
 	if err != nil {
 		if runtime.GOOS == "windows" {
-			log.Error(log.Struct{"err", err}, "PANIC! process crashed ")
+			log.Error(log.Struct{"err", err}, "PANIC! process crashed")
 		}
 		panic(err)
 	}
 }
 
 func RequireNonErr(err error) bool {
-	return err != nil
+	return err == nil
 }
 
 func ErrTransfer(src error, dst *error) {
@@ -92,6 +91,6 @@ func (wp *ErrWrapper) Error() error {
 	return wp.e
 }
 
-func (wp *ErrWrapper) Rset() {
+func (wp *ErrWrapper) Reset() {
 	wp.e = nil
 }

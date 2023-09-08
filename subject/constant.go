@@ -55,12 +55,12 @@ const (
 var sregs = []string{reg0, reg1}
 
 const (
-	reg0v_epi  = `\[(\d{2})[vV]` // [02v1] // \[(\d+)\w*\]
-	reg1_epi   = `\[(\d+)\]`     // [02]
-	reg2_epi   = `- ?(\d+)`      // - 02
-	reg3_epi   = `\[(\d+)[集话]\]` // [02集]
-	reg4_epi   = `第(\d+)[话集]`    // 第02集
-	regSpecial = `#\s*(\d+)`     // #02
+	reg0v_epi  = `\[(\d{2})[vV]`  // [02v1] // \[(\d+)\w*\]
+	reg1_epi   = `\[(\d+)\]`      // [02]
+	reg2_epi   = `- ?(\d+)`       // - 02
+	reg3_epi   = `\[(\d+)[集话話]\]` // [02集]
+	reg4_epi   = `第(\d+)[话話集]`    // 第02集
+	regSpecial = `#\s*(\d+)`      // #02
 )
 
 const (
@@ -68,9 +68,19 @@ const (
 	reg1_coll = `\d+-\d+`
 )
 
+const (
+	reg0_part = `第(\d)クール`
+	reg1_part = `第(\d)部分`
+	reg2_part = `(?i)Part\s*(\d)`
+
+	reg_part2 = `後半|后半`
+)
+
 var coll_regs = []string{reg0_coll, reg1_coll}
 
 var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi, reg3_epi, reg4_epi}
+
+var part_regs = []string{reg0_part, reg1_part, reg2_part}
 
 const (
 	CHSSubStationReg = "(?i)简体|簡體|简中|簡中|chs"

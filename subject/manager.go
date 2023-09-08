@@ -122,7 +122,7 @@ func StartManagement() {
 			i, _ := p.Arg.(int)
 			errWrap := errs.ErrWrapper{}
 			// rm *
-			// rmove all subjects
+			// remove all subjects
 			if i == 0 && p.Arg.(string) == "*" {
 				log.Warn(nil, "rm: remove all subjects")
 				merr := errs.MultiErr{}

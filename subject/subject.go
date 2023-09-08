@@ -129,13 +129,13 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 		containOks := make([]bool, 0, len(contains))
 		for _, reg := range contains {
 			var ok bool
-			csreg, err := regexp.Compile(reg)
+			csre, err := regexp.Compile(reg)
 			if err != nil {
 				log.Error(log.Struct{"err", err}, "global filter contains regexp compile failed")
 				ok = true
 			} else {
-				ok = csreg.MatchString(s)
-				log.Debug(log.Struct{"containRegexp", csreg.String(), "matchingString", s, "matched", ok})
+				ok = csre.MatchString(s)
+				log.Debug(log.Struct{"containRegexp", csre.String(), "matchingString", s, "matched", ok})
 			}
 			containOks = append(containOks, ok)
 		}
@@ -152,13 +152,13 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 		exclusionOks := make([]bool, 0, len(exclusions))
 		for _, reg := range exclusions {
 			var ok bool
-			clsreg, err := regexp.Compile(reg)
+			clsre, err := regexp.Compile(reg)
 			if err != nil {
 				log.Error(log.Struct{"err", err}, "global filter exclusions regexp compile failed")
 				ok = true
 			} else {
-				ok = !clsreg.MatchString(s)
-				log.Debug(log.Struct{"exclusionRegexp", clsreg.String(), "matchingString", s, "matched", ok})
+				ok = !clsre.MatchString(s)
+				log.Debug(log.Struct{"exclusionRegexp", clsre.String(), "matchingString", s, "matched", ok})
 			}
 			exclusionOks = append(exclusionOks, ok)
 		}
@@ -173,7 +173,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 	return containOk && exclusionOk
 }
 
-// The tag used when adding a torrent with qbt
+// QbtTag The tag used when adding a torrent with qbt
 // can be used to monitor the download status of resources
 // related to this subject file.
 func (s *Subject) QbtTag() string {
@@ -274,6 +274,9 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 func (subj *Subject) Loadfileds(tips map[string]string) error {
 	subj.Name = tips[IC.SubjName]
 	subj.OriginName = tips[IC.SubjOriginName]
+	if subj.Name == "" {
+		subj.Name = subj.OriginName
+	}
 	if _, e := tips[IC.SubjStartTime]; e {
 		subj.Typ = TV
 	} else {
@@ -456,12 +459,12 @@ func download(subj *Subject, ext *Extra) error {
 
 func GetSeason(s *Subject) {
 	var ns []string
-	ns = append(ns, s.Name)
+	ns = append(ns, s.Name, s.OriginName)
 	as := strings.Split(s.Alias, "|")
 	ns = append(ns, as...)
 	for _, n := range ns {
-		regexper := regexp.MustCompile(zhreg)
-		match := regexper.FindStringSubmatch(n)
+		re := regexp.MustCompile(zhreg)
+		match := re.FindStringSubmatch(n)
 		if len(match) > 1 {
 			m := match[1]
 			if iszh := util.CheckZhCn(m); iszh {
@@ -471,8 +474,8 @@ func GetSeason(s *Subject) {
 			return
 		}
 		for _, rg := range sregs {
-			regexper := regexp.MustCompile(rg)
-			match := regexper.FindStringSubmatch(n)
+			re := regexp.MustCompile(rg)
+			match := re.FindStringSubmatch(n)
 			if len(match) > 1 {
 				s.Season = fmt.Sprintf("%02s", match[1])
 				return
@@ -484,4 +487,32 @@ func GetSeason(s *Subject) {
 
 func (s *Subject) trimName() {
 	s.Name = strings.ReplaceAll(util.FileSeparatorConv(s.Name), "/", " ")
+}
+
+func (s *Subject) GetPart() {
+	var ns []string
+	ns = append(ns, s.Name, s.OriginName)
+	as := strings.Split(s.Alias, "|")
+	ns = append(ns, as...)
+	for _, n := range ns {
+		for _, reg := range part_regs {
+			re := regexp.MustCompile(reg)
+			match := re.FindStringSubmatch(n)
+			if len(match) > 1 {
+				m := match[1]
+				s.Part = fmt.Sprintf("pt%s", m)
+				return
+			}
+		}
+		re, _ := regexp.Compile(reg_part2)
+		matched := re.MatchString(n)
+		if matched {
+			s.Part = "pt2"
+			return
+		}
+	}
+}
+
+func (s *Subject) GetSeasonAndPart() string {
+	return s.Season + s.Part
 }

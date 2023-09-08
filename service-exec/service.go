@@ -12,13 +12,13 @@ import (
 )
 
 func main() {
-	Run := func() {
+	run := func() {
 		subject.Scan()
 		go subject.StartManagement()
 		go detection.Detect()
 		go netsrv.Listen()
 	}
-	p := program{Run: Run}
+	p := program{Run: run}
 	p.service()
 }
 

@@ -346,7 +346,7 @@ func BuildSearching(s string) string {
 	return resourcesBaseUrl + ResourceAPIs["search"] + s
 }
 
-// avoid nil pointer panic
+// InnerTextSafety avoid nil pointer panic
 func InnerTextSafety(n *html.Node) string {
 	if n == nil {
 		return ""
