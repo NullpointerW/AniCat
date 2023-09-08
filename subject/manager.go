@@ -140,7 +140,7 @@ func StartManagement() {
 						Manager.Remove(s.SubjId)
 					}
 					merr.Add(errWrap.Error())
-					errWrap.Rset()
+					errWrap.Reset()
 				}
 				p.err = merr.Err()
 				p.wg.Done()
