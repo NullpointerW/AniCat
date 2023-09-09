@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	TORR "github.com/NullpointerW/anicat/download/torrent"
+	TORR "github.com/NullpointerW/anicat/downloader/torrent"
 	"strings"
 	"testing"
 )

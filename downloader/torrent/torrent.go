@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	CFG "github.com/NullpointerW/anicat/conf"
-	DL "github.com/NullpointerW/anicat/download"
+	DL "github.com/NullpointerW/anicat/downloader"
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"

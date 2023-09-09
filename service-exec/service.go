@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NullpointerW/anicat/download/detection"
+	"github.com/NullpointerW/anicat/downloader/detector"
 	"github.com/NullpointerW/anicat/log"
 	netsrv "github.com/NullpointerW/anicat/net/server"
 	"github.com/NullpointerW/anicat/subject"
@@ -15,7 +15,7 @@ func main() {
 	run := func() {
 		subject.Scan()
 		go subject.StartManagement()
-		go detection.Detect()
+		go detector.Detect()
 		go netsrv.Listen()
 	}
 	p := program{Run: run}
@@ -50,7 +50,7 @@ func (p *program) service() {
 	svcConfig := &service.Config{
 		Name:        "AniCat",
 		DisplayName: "AniCat",
-		Description: "auto download service-exec",
+		Description: "auto downloader service-exec",
 		Arguments:   []string{"-e", executePath},
 	}
 	s, err := service.New(p, svcConfig)

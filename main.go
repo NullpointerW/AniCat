@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NullpointerW/anicat/download/detection"
+	"github.com/NullpointerW/anicat/downloader/detector"
 	netsrv "github.com/NullpointerW/anicat/net/server"
 	"github.com/NullpointerW/anicat/subject"
 )
@@ -9,7 +9,7 @@ import (
 func main() {
 	subject.Scan()
 	go subject.StartManagement()
-	go detection.Detect()
+	go detector.Detect()
 	go netsrv.Listen()
 	select {}
 }

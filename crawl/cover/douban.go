@@ -40,8 +40,8 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		a := htmlquery.FindOne(doc, exp)
 		m := htmlquery.InnerText(a)
 		dl := strings.ReplaceAll(m, `/m/`, `/l/`)
-		log.Info(log.NewUrlStruct(dl), "douban cover download url found")
-		//download
+		log.Info(log.NewUrlStruct(dl), "douban cover downloader url found")
+		//downloader
 		resp, e := http.Get(dl)
 		if e != nil {
 			err = e

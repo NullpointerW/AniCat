@@ -1,9 +1,9 @@
-package detection
+package detector
 
 import (
 	"fmt"
-	DL "github.com/NullpointerW/anicat/download"
-	"github.com/NullpointerW/anicat/download/torrent"
+	DL "github.com/NullpointerW/anicat/downloader"
+	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
 	"github.com/NullpointerW/anicat/subject"
@@ -25,11 +25,11 @@ func Detect() {
 					)
 					torr, err := torrent.Get(h)
 					if err != nil {
-						log.Error(log.Struct{"err", err}, "detection: get torrent failed")
+						log.Error(log.Struct{"err", err}, "detector: get torrent failed")
 						continue
 					}
 					//log.Debug(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
-					//	"detected completed download")
+					//	"detected completed downloader")
 					if istorr, isrss := strings.Contains(torr.Tags, subject.QbtTag_prefix),
 						strings.Contains(torr.Category, subject.QbtTag_prefix); istorr || isrss {
 						var s string
@@ -40,18 +40,18 @@ func Detect() {
 						}
 						sid, err = strconv.Atoi(s)
 						if err != nil {
-							log.Error(log.Struct{"err", err}, "detection: can not convert subject id")
+							log.Error(log.Struct{"err", err}, "detector: can not convert subject id")
 							continue
 						}
 						err = send(sid, torr)
 						if err != nil {
-							log.Error(log.Struct{"err", err}, "detection: send download event failed")
+							log.Error(log.Struct{"err", err}, "detector: send downloader event failed")
 						}
 					}
 				}
 			}
 		} else {
-			log.Error(log.Struct{"err", err}, "detection: get qbt sync data failed")
+			log.Error(log.Struct{"err", err}, "detector: get qbt sync data failed")
 		}
 		time.Sleep(20 * time.Second)
 	}
@@ -66,7 +66,7 @@ func send(sid int, torr qbt.Torrent) error {
 		return nil
 	}
 	log.Info(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
-		"pushing completed download event")
+		"pushing completed downloader event")
 	select {
 	case <-s.Exited:
 	default:

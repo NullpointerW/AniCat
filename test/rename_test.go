@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	// "github.com/NullpointerW/anicat/download/detection"
+	// "github.com/NullpointerW/anicat/downloader/detector"
 	"github.com/NullpointerW/anicat/subject"
 )
 

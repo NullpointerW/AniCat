@@ -14,10 +14,10 @@ import (
 	IC "github.com/NullpointerW/anicat/crawl/information"
 	RC "github.com/NullpointerW/anicat/crawl/resource"
 
-	// DL "github.com/NullpointerW/anicat/download"
+	// DL "github.com/NullpointerW/anicat/downloader"
 	CFG "github.com/NullpointerW/anicat/conf"
-	"github.com/NullpointerW/anicat/download/rss"
-	"github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/downloader/rss"
+	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
@@ -30,7 +30,7 @@ type Subject struct {
 	SubjId      int         `json:"subjId"`
 	FolderName  string      `json:"folderName"` // source from tmdb
 	Name        string      `json:"name"`
-	OriginName  string      `json:"orginName"`
+	OriginName  string      `json:"originName"`
 	Path        string      `json:"path"`
 	Finished    bool        `json:"finished"`
 	Episode     int         `json:"episode"`
@@ -51,10 +51,10 @@ type Subject struct {
 	// Context is hold by subject-running goroutine
 	// while subject-running goroutine Exit actively func should be called
 	Exit context.CancelFunc `json:"-"`
-	// before detection-goroutine push to subject,Check if this channel is closed.
+	// before detector-goroutine push to subject,Check if this channel is closed.
 	// before exit Exited channel should  be closed
 	Exited chan struct{} `json:"-"`
-	// While detection-goroutine detected that the resource download of the subject is completed
+	// While detector-goroutine detected that the resource downloader of the subject is completed
 	// it will send downLoad message to subject-running goroutine
 	// received and push to terminal
 	PushChan chan qbt.Torrent `json:"-"`
@@ -175,7 +175,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 }
 
 // QbtTag The tag used when adding a torrent with qbt
-// can be used to monitor the download status of resources
+// can be used to monitor the downloader status of resources
 // related to this subject file.
 func (s *Subject) QbtTag() string {
 	return fmt.Sprintf(QbtTag, s.SubjId)

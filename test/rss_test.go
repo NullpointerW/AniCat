@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/NullpointerW/anicat/download/rss"
+	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/subject"
 )
 

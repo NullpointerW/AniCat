@@ -11,7 +11,7 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 
-	DL "github.com/NullpointerW/anicat/download"
+	DL "github.com/NullpointerW/anicat/downloader"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 

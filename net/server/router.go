@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
-	"github.com/NullpointerW/anicat/download/torrent"
+	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/net/cmd"
 	"github.com/NullpointerW/anicat/net/cmd/view"

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	CFG "github.com/NullpointerW/anicat/conf"
-	DL "github.com/NullpointerW/anicat/download"
-	"github.com/NullpointerW/anicat/download/rss"
-	TORR "github.com/NullpointerW/anicat/download/torrent"
+	DL "github.com/NullpointerW/anicat/downloader"
+	"github.com/NullpointerW/anicat/downloader/rss"
+	TORR "github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
 	util "github.com/NullpointerW/anicat/utils"
@@ -54,7 +54,7 @@ func Scan() {
 }
 
 // initFolder Initialize the content library in OS file for the `subject` in the memory.
-// Path can be used to monitor the download status of resources
+// Path can be used to monitor the downloader status of resources
 // apply to RSS and Torrent type.
 // If initialization is successful, write the path to Subject.Path.
 func initFolder(subject *Subject) (err error) {

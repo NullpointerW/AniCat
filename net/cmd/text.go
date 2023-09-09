@@ -1,7 +1,5 @@
 package cmd
 
-import ()
-
 var (
 	GreenBg  = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
 	RedBg    = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
@@ -30,8 +28,8 @@ const (
 	addCMDUsageHelp = "\n   Usage:\n         " +
 		"(anicat) add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +
-		"--mn                          the substring that the torrent name must not contain (rss auto download rule)\n         " +
-		"--mc                          the substring that the torrent name must contain (rss auto download rule)\n         " +
+		"--mn                          the substring that the torrent name must not contain (rss auto downloader rule)\n         " +
+		"--mc                          the substring that the torrent name must contain (rss auto downloader rule)\n         " +
 		"--rg                          enable regex mode in \"-mc\" and \"-mn\"\n         " +
 		"-g,--group                    specified  subtitleGroup (rss type)\n         " +
 		"-i,--index                    specified  index from torrents list (torr type)\n"
@@ -42,8 +40,8 @@ func TestingString() (text string) {
 	text = "\n   Usage:\n         " +
 		"(anicat) add [name] [arguments]\n   " +
 		"The arguments are:\n\n         " +
-		"-mn                          the substring that the torrent name must not contain (rss download rule)\n         " +
-		"-mc                          the substring that the torrent name must contain (rss download rule)\n         " +
+		"-mn                          the substring that the torrent name must not contain (rss downloader rule)\n         " +
+		"-mc                          the substring that the torrent name must contain (rss downloader rule)\n         " +
 		"-rg                          enable regex mode in \"-mc\" and \"-mn\"\n         " +
 		"-g,--group                   specified  subtitleGroup (rss type)\n         " +
 		"-i,--index                   specified  index from torrents list (torr type)\n"

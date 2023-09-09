@@ -9,7 +9,7 @@ import (
 
 var (
 	ErrCrawlNotFound            = errors.New("crawl not found")
-	ErrCoverDownLoadZeroSize    = errors.New("cover file download zero size after multiple attempts")
+	ErrCoverDownLoadZeroSize    = errors.New("cover file downloader zero size after multiple attempts")
 	ErrUnknownResCrawlLsType    = errors.New("unknown resource ls crawl type")
 	ErrLsGroupUnavailableOnTorr = errors.New("command `ls group` is unavailableOnTorrent type")
 
@@ -22,7 +22,7 @@ var (
 	ErrSubjectNotFound           = errors.New("subject not found")
 	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on anicat")
 	ErrUndefinedCrawlListType    = errors.New("undefined crawl list type")
-	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-download rule!")
+	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-downloader rule!")
 	// command error
 	ErrUnknownCommand           = errors.New("unknown command")
 	ErrMissingCommandArgument   = errors.New("missing command argument")
