@@ -49,7 +49,7 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 		agent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 		r.Headers.Set("User-Agent", agent)
 		r.Headers.Set("Accept-Language", "zh-CN,zh;q=0.9")
-		log.Info(log.NewUrlStruct(r.URL, "source", "TMDB"), "fetching folder info")
+		log.Info(log.NewUrlStruct(r.URL, "source", "TMDB"), "fetching folderInfo")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {

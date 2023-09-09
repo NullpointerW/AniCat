@@ -40,7 +40,7 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 	}
 	var tatget *CR.BgmiSubjIntro
 	for _, bsi := range bsis.List {
-		log.Debug(log.Struct{"name", bsi.NameCN}, "traverse bgmTV  matching items")
+		log.Debug(log.Struct{"name", bsi.NameCN}, "traverse bgmTV matchingItems")
 		if bsi.NameCN == searchstr {
 			log.Infof(log.Struct{"matched", bsi}, "%s: matching item found", errs.ErrBgmTVApiPrefix)
 			tatget = &bsi

@@ -40,18 +40,18 @@ func Detect() {
 						}
 						sid, err = strconv.Atoi(s)
 						if err != nil {
-							log.Error(log.Struct{"err", err}, "detector: can not convert subject id")
+							log.Error(log.Struct{"err", err}, "detector: can not convert subjectId")
 							continue
 						}
 						err = send(sid, torr)
 						if err != nil {
-							log.Error(log.Struct{"err", err}, "detector: send downloader event failed")
+							log.Error(log.Struct{"err", err}, "detector: send downloadEvent failed")
 						}
 					}
 				}
 			}
 		} else {
-			log.Error(log.Struct{"err", err}, "detector: get qbt sync data failed")
+			log.Error(log.Struct{"err", err}, "detector: get qbtSyncData failed")
 		}
 		time.Sleep(20 * time.Second)
 	}
@@ -66,7 +66,7 @@ func send(sid int, torr qbt.Torrent) error {
 		return nil
 	}
 	log.Info(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
-		"pushing completed downloader event")
+		"pushing completed downloadEvent")
 	select {
 	case <-s.Exited:
 	default:

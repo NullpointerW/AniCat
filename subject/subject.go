@@ -132,7 +132,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			var ok bool
 			csre, err := regexp.Compile(reg)
 			if err != nil {
-				log.Error(log.Struct{"err", err}, "global filter contains regexp compile failed")
+				log.Error(log.Struct{"err", err}, "globalFilter: contains regexp compile failed")
 				ok = true
 			} else {
 				ok = csre.MatchString(s)
@@ -155,7 +155,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			var ok bool
 			clsre, err := regexp.Compile(reg)
 			if err != nil {
-				log.Error(log.Struct{"err", err}, "global filter exclusions regexp compile failed")
+				log.Error(log.Struct{"err", err}, "globalFilter: exclusions regexp compile failed")
 				ok = true
 			} else {
 				ok = !clsre.MatchString(s)
@@ -440,7 +440,7 @@ func download(subj *Subject, ext *Extra) error {
 		}
 		enaFl := CFG.Env.EnabledFilter()
 		for _, a := range it.Articles {
-			log.Debug(log.Struct{"rssDesc", a.Description}, "traverse rss items")
+			log.Debug(log.Struct{"rssDesc", a.Description}, "traverse rssItems")
 			desc := a.Description
 			for _, reg := range coll_regs {
 				re, err := regexp.Compile(reg)
@@ -453,7 +453,7 @@ func download(subj *Subject, ext *Extra) error {
 						contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
 						exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
 						if !FilterWithRegs(desc, contains, exclusions) {
-							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "golbal filter")
+							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filter")
 							continue
 						}
 					}
@@ -576,7 +576,7 @@ func (s *Subject) scrapeCover(lastS int) error {
 		cp := s.Path + "/" + CoverFN
 		err = CC.TouchbgmCoverImg(s.SubjId, cp)
 		if err != nil {
-			log.Error(log.Struct{"err", err}, "scrape cover from bgmTV failed")
+			log.Error(log.Struct{"err", err}, "scrapeCover from bgmTV failed")
 			err = CC.DOUBANCoverScraper(cp, s.Name)
 			if err != nil {
 				retry := 0

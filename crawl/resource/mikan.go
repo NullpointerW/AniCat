@@ -50,7 +50,7 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			isrss = true
 			bgmUrl = bgmurl
 		} else {
-			log.Info(log.Struct{"searchName", searchstr}, "rss resource not found")
+			log.Info(log.Struct{"searchName", searchstr}, "rssResource not found")
 			if opt.Index <= 0 {
 				opt.Index = 1
 			}
@@ -123,7 +123,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 					grpn = htmlquery.FindOne(d, `/div[@class='dropdown']/div[@class='dropdown-toggle material-dropdown__btn']/span[1]`)
 				}
 				if grpn == nil {
-					log.Debug(log.Struct{"node", d}, "cannot scrap group name")
+					log.Debug(log.Struct{"node", d}, "cannot scrap groupName")
 					continue
 				} else {
 					actl := strings.ToLower(htmlquery.InnerText(grpn))
@@ -161,7 +161,7 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rss resource")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rssResource")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("fetch rss resource from mikan failed: %w", e)
@@ -188,7 +188,7 @@ func FetchBgmTVUrl(page string) (url string, err error) {
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching bgmTV url")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching bgmtvUrl")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("fetch bgmTV url from mikan failed: %w", e)
@@ -276,7 +276,7 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching resource list")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching resourceList")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
@@ -352,7 +352,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rss groups")
+		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rssGroups")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {

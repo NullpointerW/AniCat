@@ -28,7 +28,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		r.Headers.Set("Sec-Ch-Ua", `"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"`)
 		r.Headers.Set("Sec-Ch-Ua-Platform", `"Android"`)
 		r.Headers.Set("Sec-Ch-Ua-Mobile", "?1")
-		log.Debug(log.Struct{"headers", r.Headers}, "douban cover request headers")
+		log.Debug(log.Struct{"headers", r.Headers}, "doubanCover requestHeaders")
 	})
 	c.OnResponse(func(r *colly.Response) {
 		exp := DouBancoverXpathExp
@@ -40,7 +40,7 @@ func TouchCoverImg(fpath, cover string) (err error) {
 		a := htmlquery.FindOne(doc, exp)
 		m := htmlquery.InnerText(a)
 		dl := strings.ReplaceAll(m, `/m/`, `/l/`)
-		log.Info(log.NewUrlStruct(dl), "douban cover downloader url found")
+		log.Info(log.NewUrlStruct(dl), "doubanCoverDownloader: url found")
 		//downloader
 		resp, e := http.Get(dl)
 		if e != nil {

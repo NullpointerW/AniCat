@@ -62,7 +62,7 @@ func (env *Environment) Print() {
 	if env.DropOnDuplicate {
 		logStruct.Append("drop-onDuplicate", "yes")
 	}
-	log.Info(logStruct, "basic setting")
+	log.Info(logStruct, "basicSetting")
 	logStruct.Clear()
 	if env.EnabledFilter() {
 		logStruct.Append("globalFilter", "enable", "containWords", env.RssFilter.Contain, "exclusionWords",

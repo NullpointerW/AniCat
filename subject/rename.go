@@ -143,7 +143,7 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rn)
 				merr.Add(dumpliErr)
 				if CFG.Env.DropOnDuplicate && th != torr.Hash {
-					log.Warn(log.Struct{"torrfn", torr.Name, "torrHash", torr.Hash, "size", torr.Size}, "delete dumplicate file")
+					log.Warn(log.Struct{"torrfn", torr.Name, "torrHash", torr.Hash, "size", torr.Size}, "delete duplicateFile")
 					merr.Add(DL.Qbt.DelTorrentsFs(torr.Hash))
 					return false, rn, merr.Err()
 				} else if !CFG.Env.DropOnDuplicate {
@@ -179,7 +179,7 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 			extSep := strings.Split(fn, ".")
 			ext := extSep[len(extSep)-1]
 			subrn = strings.Join(seps, "") + "-" + sublang + "." + ext
-			log.Info(log.Struct{"from", fullFn, "to", subrn}, "rename subtitle file")
+			log.Info(log.Struct{"from", fullFn, "to", subrn}, "rename subtitleFile")
 		}
 		// remove subtitleFile to outside
 		merr.Add(DL.Qbt.RenameFile(torr.Hash, fullFn, subrn))

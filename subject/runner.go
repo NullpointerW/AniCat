@@ -215,7 +215,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			}
 			s.Pushed[se] = torr.Hash
 		} else {
-			log.Info(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash}, "not a video file,may external subtitles")
+			log.Info(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash}, "not a videoFile,may external subtitles")
 			ok, rn, err := renameSubRssTorr(s, torr)
 			log.Error(log.Struct{"err", err}, "rename RssTorr with subtitles failed")
 			if !ok {
@@ -236,7 +236,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 
 		episNum := s.Episode
 		if episNum != 0 && len(s.Pushed) >= episNum {
-			log.Info(log.Struct{"sid", s.SubjId, "resType", "RSS"}, "compled,exited now")
+			log.Info(log.Struct{"sid", s.SubjId, "resType", "RSS"}, "compiled,exited now")
 			s.terminate()
 		}
 		return mErr.Err()
@@ -264,7 +264,7 @@ func (s *Subject) terminate() {
 	s.Terminate, s.Finished = true, true
 	err := s.writeJson()
 	if err != nil {
-		log.Info(log.Struct{"err", err}, "writeJson failed")
+		log.Info(log.Struct{"err", err}, "write json failed")
 	}
 	s.Exit()
 }

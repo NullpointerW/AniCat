@@ -132,7 +132,7 @@ func (s *Subject) RmRes() error {
 		wrap.Handle(func() error {
 			err := rss.RmRss(s.RssPath())
 			if err != nil && strings.Contains(err.Error(), "409") {
-				log.Error(log.Struct{"err", err}, "rm rss subscription failed")
+				log.Error(log.Struct{"err", err}, "rm rssSubscription failed")
 				return nil
 			}
 			return err
