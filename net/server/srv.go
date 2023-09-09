@@ -90,7 +90,7 @@ func process(c *N.Conn) {
 			}
 			if rep.Opt == cmd.Ls || rep.Opt == cmd.LsItems ||
 				rep.Opt == cmd.LsItems_searchlist || rep.Opt == cmd.LsGroup ||
-				rep.Opt == cmd.Status || rep.Opt == cmd.Stop || rep.Opt == cmd.Add {
+				rep.Opt == cmd.Status || rep.Opt == cmd.Stop || rep.Opt == cmd.Add || rep.Opt == cmd.AddFeed {
 				c.Write(rep.N)
 				if rep.Opt == cmd.Stop {
 					os.Exit(0)

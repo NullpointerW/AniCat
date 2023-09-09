@@ -219,6 +219,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		return 0, err
 	}
 	GetSeason(subject)
+	subject.GetPart()
 	subject.trimName()
 	err = initFolder(subject)
 	if err != nil {
@@ -297,6 +298,7 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 		return 0, err
 	}
 	GetSeason(subject)
+	subject.GetPart()
 	subject.trimName()
 	err = initFolder(subject)
 	if err != nil {
