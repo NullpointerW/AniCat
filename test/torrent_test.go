@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	DL "github.com/NullpointerW/anicat/downloader"
 	TORR "github.com/NullpointerW/anicat/downloader/torrent"
 	"strings"
 	"testing"
@@ -57,4 +58,13 @@ func TestCateg(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(hs)
+}
+
+func TestLs(t *testing.T) {
+	list, err := DL.Qbt.TorrentList(nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%#+v", list)
 }

@@ -3,6 +3,7 @@ package view
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -26,18 +27,27 @@ func (_ AsciiRender) RssGroup(rgs []CR.RssGroup) string {
 	var row [][]string
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"group", "name", "size", "updateTime"})
+	table.SetHeader([]string{"group", "name", "size", "update time"})
 	for _, rg := range rgs {
 		for _, i := range rg.Items {
 			r := []string{rg.Name, i.Name, i.Size, i.UpdateTime}
 			row = append(row, r)
 		}
 	}
-	table.SetAutoMergeCells(true)
 	table.SetRowLine(true)
 	table.AppendBulk(row)
+	table.SetAutoMergeCells(true)
+	table.SetRowSeparator(" ")
 	table.SetAutoWrapText(false)
-	table.SetColWidth(60)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("\t") // pad with tabs
+	table.SetNoWhiteSpace(true)
 	table.Render()
 	return "\n" + tableString.String()
 }
@@ -45,19 +55,23 @@ func (_ AsciiRender) RssGroup(rgs []CR.RssGroup) string {
 func (_ AsciiRender) TorrList(its []CR.Item) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"index", "name", "size", "updateTime"})
+	table.SetHeader([]string{"index", "name", "size", "update time"})
 	for i, it := range its {
 		table.Append([]string{strconv.Itoa(i + 1), it.Name, it.Size, it.UpdateTime})
 	}
-	table.SetBorder(false)
-	table.SetColumnSeparator("")
-	table.SetCenterSeparator("")
-	table.SetColumnAlignment([]int{tablewriter.ALIGN_CENTER, tablewriter.ALIGN_CENTER, tablewriter.ALIGN_CENTER, tablewriter.ALIGN_CENTER})
-	// auto column width
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(false)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
+	//table.SetAutoMergeCellsByColumnIndex([]int{0})
 	table.SetRowLine(true)
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("-")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("\t") // pad with tabs
+	table.SetNoWhiteSpace(true)
 	table.Render()
 	return "\n" + tableString.String()
 }
@@ -82,11 +96,17 @@ func (_ AsciiRender) Ls(ls []subject.Subject) string {
 		}
 		table.Append([]string{sid, s.Typ.String(), s.Name, epi, fin, compl})
 	}
-	table.SetAutoMergeCells(false)
-	table.SetRowLine(true)
 	table.SetAutoWrapText(false)
-	table.SetColWidth(60)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
 	table.SetBorder(false)
+	table.SetTablePadding("\t") // pad with tabs
+	table.SetNoWhiteSpace(true)
 	table.Render()
 	return "\n" + tableString.String()
 }
@@ -95,42 +115,35 @@ func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string 
 	var row [][]string
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"name", "type", "resource", "file", "process", "size", "finshed", "path", "totalSize(all compl)"})
-	table.SetAutoFormatHeaders(false)
-	var (
-		fin    string = "N"
-		typ    string = subject.TV.String()
-		resTyp string = subject.RSS.String()
-	)
-	if subj.Finished {
-		fin = "Y"
-	}
-	if subj.Typ == subject.MOVIE {
-		typ = subject.MOVIE.String()
-	}
-	if subj.ResourceTyp == subject.Torrent {
-		resTyp = subject.Torrent.String()
 
-	}
 	var totalSize int
 	for _, t := range torrs {
 		fileProgress := fmt.Sprintf("%.0f", t.Progress*100) + "%"
 		totalSize += t.Size
 		fileSize := strconv.Itoa(t.Size/1024/1024) + "MB"
-		row = append(row, []string{subj.Name, typ, resTyp, t.Name, fileProgress, fileSize, fin, subj.Path})
+
+		row = append(row, []string{filepath.Base(t.ContentPath), fileSize, fileProgress})
 	}
 	ttsize := strconv.Itoa(totalSize/1024/1024/1024) + "GB"
-	for i, r := range row {
-		row[i] = append(r, ttsize)
-	}
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
-	table.SetBorder(false)
-	table.AppendBulk(row)
+
+	header := "PATH: " + subj.Path + "\n" + "TOTAL SIZE: " + ttsize + "\n"
+	table.SetHeader([]string{"file", "size", "process"})
+	table.SetAutoFormatHeaders(true)
+	table.SetAutoMergeCells(false)
 	table.SetAutoWrapText(false)
-	table.SetColWidth(60)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("\t") // pad with tabs
+	table.SetNoWhiteSpace(true)
+	table.AppendBulk(row)
 	table.Render()
-	return "\n" + tableString.String()
+	return "\n" + header + tableString.String()
 }
 
 type JsonRender struct {
