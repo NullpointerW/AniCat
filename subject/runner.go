@@ -83,6 +83,7 @@ func exit(s *Subject) {
 	}
 	close(s.Exited)
 	close(s.PushChan)
+	Manager.Sync()
 }
 
 func (s *Subject) checkDL() (err error) {
@@ -233,7 +234,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		})
 		mErr.Add(err)
 		mErr.Add(s.writeJson())
-
+		// FIXME if rss contains sp ,may be exit early
 		episNum := s.Episode
 		if episNum != 0 && len(s.Pushed) >= episNum {
 			log.Info(log.Struct{"sid", s.SubjId, "resType", "RSS"}, "compiled,exited now")

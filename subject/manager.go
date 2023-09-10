@@ -72,6 +72,11 @@ type SubjectManager struct {
 // 	return sid
 // }
 
+func (m *SubjectManager) Sync() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.copy = nil
+}
 func (m *SubjectManager) Add(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -88,7 +93,7 @@ func (m *SubjectManager) Remove(sid int) {
 	m.copy = nil
 }
 
-func (m SubjectManager) Get(sid int) *Subject {
+func (m *SubjectManager) Get(sid int) *Subject {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.sto[sid]

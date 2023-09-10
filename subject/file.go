@@ -93,7 +93,7 @@ func RmFolder(s *Subject) error {
 		}
 	}
 	if c > 1 {
-		return os.Remove(s.Path + "/" + fmt.Sprintf("meta-data#%s.json", s.Season))
+		return os.Remove(s.Path + "/" + fmt.Sprintf("meta-data#%s.json", s.GetSeasonAndPart()))
 	} else {
 		return rmFolder(s)
 	}
@@ -163,6 +163,7 @@ func FindLastSeason(p string) (int, error) {
 		if isf && util.IsJsonFile(f.Name()) && strings.Contains(f.Name(), "meta-data#") {
 			s := strings.Split(f.Name(), ".")[0]
 			s = strings.ReplaceAll(s, "meta-data#", "")
+			s = s[0:2] // todo get part extra
 			cmp, err := strconv.Atoi(s)
 			if err != nil {
 				return -1, err

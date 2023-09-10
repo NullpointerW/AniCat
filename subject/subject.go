@@ -52,7 +52,7 @@ type Subject struct {
 	// while subject-running goroutine Exit actively func should be called
 	Exit context.CancelFunc `json:"-"`
 	// before detector-goroutine push to subject,Check if this channel is closed.
-	// before exit Exited channel should  be closed
+	// before exit Exited channel should be closed
 	Exited chan struct{} `json:"-"`
 	// While detector-goroutine detected that the resource downloader of the subject is completed
 	// it will send downLoad message to subject-running goroutine
@@ -60,10 +60,10 @@ type Subject struct {
 	PushChan chan qbt.Torrent `json:"-"`
 	// The anime series of this project has already ended and all episodes have been downloaded.
 	// while init,if this flag is true then there is no need to start a goroutine to run it
-	// exit actively flag should  be set to true
+	// exit actively flag should be set to true
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed renamed episodes,avoid duplicate push.
-	// content will like be `S01E01,S01E05...`
+	// content will like be `xxx S01E01,xxx S01E05...`
 	Pushed      map[string]string   `json:"pushed"`
 	RssTorrents map[string]struct{} `json:"rssTorrents"`
 }
@@ -401,6 +401,10 @@ func (s *Subject) FetchInfo() error {
 	wrap := errs.ErrWrapper{}
 	wrap.Handle(func() error {
 		return s.Loadfileds(tips)
+	})
+	wrap.Handle(func() error {
+		Manager.Sync()
+		return nil
 	})
 	wrap.Handle(func() error {
 		return s.writeJson()

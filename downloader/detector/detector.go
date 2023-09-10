@@ -54,6 +54,7 @@ func Detect() {
 			log.Error(log.Struct{"err", err}, "detector: get qbtSyncData failed")
 		}
 		time.Sleep(20 * time.Second)
+		//time.Sleep(10 * time.Second)
 	}
 }
 
@@ -65,7 +66,7 @@ func send(sid int, torr qbt.Torrent) error {
 	if s.Terminate {
 		return nil
 	}
-	log.Info(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
+	log.Debug(log.Struct{"torrfn", torr.Name, "savepath", torr.SavePath, "tag", torr.Tags, "categ", torr.Category},
 		"pushing completed downloadEvent")
 	select {
 	case <-s.Exited:
