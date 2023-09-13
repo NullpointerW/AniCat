@@ -26,7 +26,7 @@ linux-cli:
 	GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -o $(BUILDIR_CLI)/$(NAME)-$@-amd64 $(CLI_FILE)
 
 docker-build:
-	docker build --build-arg VER=$(VERSION) -t wmooon/anicat -f Docker/Dockerfile .
+	docker build --build-arg VER=$(VERSION) -t wmooon/anicat -f docker/Dockerfile .
 
 docker-push:
 	docker push  wmooon/anicat
