@@ -445,33 +445,38 @@ func download(subj *Subject, ext *Extra) error {
 			return err
 		}
 		enaFl := CFG.Env.EnabledFilter()
+	rssTraverse:
 		for _, a := range it.Articles {
 			log.Debug(log.Struct{"rssDesc", a.Description}, "traverse rssItems")
 			desc := a.Description
+			if subj.isCollection(desc) {
+				if enaFl {
+					contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
+					exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
+					if !FilterWithRegs(desc, contains, exclusions) {
+						log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filter")
+						continue
+					}
+				}
+				log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
+				return subj.rssToTorr(a.TorrentURL)
+			}
 			for _, reg := range coll_regs {
 				re, err := regexp.Compile(reg)
 				if err != nil {
 					return err
 				}
-
 				if re.MatchString(desc) {
 					if enaFl {
 						contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
 						exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
 						if !FilterWithRegs(desc, contains, exclusions) {
 							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filter")
-							continue
+							continue rssTraverse
 						}
 					}
 					log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
-					err = rss.RmRss(subj.RssPath())
-					if err != nil {
-						return err
-					}
-					subj.ResourceTyp = Torrent
-					h, err := torrent.Add(a.TorrentURL, subj.Path, subj.QbtTag())
-					subj.TorrentHash = h
-					return err
+					return subj.rssToTorr(a.TorrentURL)
 				}
 			}
 		}
@@ -601,4 +606,26 @@ func (s *Subject) scrapeCover(lastS int) error {
 		}
 	}
 	return nil
+}
+
+func (s *Subject) isCollection(desc string) bool {
+	re := regexp.MustCompile(reg2_coll)
+	m := re.FindStringSubmatch(desc)
+	if len(m) > 1 {
+		m := m[1]
+		i, _ := strconv.Atoi(m)
+		return i >= s.Episode
+	}
+	return false
+}
+
+func (s *Subject) rssToTorr(torrUrl string) (err error) {
+	err = rss.RmRss(s.RssPath())
+	if err != nil {
+		return err
+	}
+	s.ResourceTyp = Torrent
+	h, err := torrent.Add(torrUrl, s.Path, s.QbtTag())
+	s.TorrentHash = h
+	return err
 }

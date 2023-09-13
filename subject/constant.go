@@ -65,7 +65,8 @@ const (
 
 const (
 	reg0_coll = `\[[^\]]*\d+(\.\d+)\s*[Gg][Bb][^\]]*\]`
-	reg1_coll = `\d+-\d+`
+	_         = `\d+-\d+`
+	reg2_coll = `\d+-(\d+)`
 )
 
 const (
@@ -76,7 +77,7 @@ const (
 	reg_part2 = `後半|后半`
 )
 
-var coll_regs = []string{reg0_coll, reg1_coll}
+var coll_regs = []string{reg0_coll}
 
 var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi, reg3_epi, reg4_epi}
 

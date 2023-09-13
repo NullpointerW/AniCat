@@ -6,7 +6,6 @@ import (
 	"os"
 	"reflect"
 	"regexp"
-
 	// "strings"
 
 	// "strings"
@@ -94,6 +93,16 @@ func TestExtra(t *testing.T) {
 			fmt.Println(test, "不符合要求")
 		}
 	}
+}
+
+func TestColl(t *testing.T) {
+	re := regexp.MustCompile(`\d+-(\d+)`)
+	submatch := re.FindStringSubmatch("【恶魔岛字幕组】★4月新番【吹响！上低音号_Hibike! Euphonium】[01-13][GB_BIG5][720P][MKV][全][ 4.7 GB]")
+	if len(submatch) > 1 {
+		m := submatch[1]
+		fmt.Println(m)
+	}
+	//strconv.Atoi()
 }
 
 func TestFoundLastS(t *testing.T) {

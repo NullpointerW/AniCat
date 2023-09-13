@@ -17,7 +17,6 @@ import (
 
 func CaptureEpisNum(text string) (string, error) {
 	for _, reg := range epi_regs {
-		// fmt.Println(reg)
 		regexper := regexp.MustCompile(reg)
 		match := regexper.FindStringSubmatch(text)
 		if len(match) > 1 {
