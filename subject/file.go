@@ -191,8 +191,9 @@ func JellyfinMetaDataHelper(dp, name string, exited chan struct{}) {
 				err = InitTvNfo(path, name)
 				if err != nil {
 					log.Errorf(log.Struct{"err", err}, "JellyfinMetaDataHelper: modify %s failed", path)
+				} else {
+					log.Info(nil, "JellyfinMetaData is ok")
 				}
-				log.Info(nil, "JellyfinMetaData is ok")
 				return
 			}
 		}
