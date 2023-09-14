@@ -173,3 +173,7 @@ func TestGetPart(t *testing.T) {
 	subj.GetPart()
 	fmt.Println(subj.Part)
 }
+
+func TestTVshowNfo(t *testing.T) {
+	subject.InitTvNfo("D:\\tvshow.nfo", "my-test")
+}

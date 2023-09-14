@@ -18,6 +18,7 @@ import (
 
 // runtimeInit before goroutine handle it init inner channels and ctx func
 func (s *Subject) runtimeInit(reload bool) {
+	s.Exited = make(chan struct{})
 	if s.Terminate {
 		Manager.Add(s)
 		return
@@ -26,12 +27,12 @@ func (s *Subject) runtimeInit(reload bool) {
 	ctx, exit := context.WithCancel(c)
 	s.Exit = exit
 	s.PushChan = make(chan qbt.Torrent, 1024)
-	s.Exited = make(chan struct{})
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
 	}
 	Manager.Add(s)
 	go s.run(ctx, reload)
+	go JellyfinMetaDataHelper(s.Path, s.FolderName, s.Exited)
 }
 
 func (s *Subject) run(ctx context.Context, reload bool) {

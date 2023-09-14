@@ -2,6 +2,7 @@ package subject
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/downloader"
@@ -10,8 +11,10 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
 	util "github.com/NullpointerW/anicat/utils"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -174,4 +177,58 @@ func FindLastSeason(p string) (int, error) {
 		}
 	}
 	return max, nil
+}
+
+func JellyfinMetaDataHelper(dp, name string, exited chan struct{}) {
+	path := dp + "/" + "tvshow.nfo"
+	for {
+		select {
+		case <-exited:
+			return
+		default:
+			_, err := os.Stat(dp + "/" + "tvshow.nfo")
+			if !os.IsNotExist(err) {
+				err = InitTvNfo(path, name)
+				if err != nil {
+					log.Errorf(log.Struct{"err", err}, "JellyfinMetaDataHelper: modify %s failed", path)
+				}
+				log.Info(nil, "JellyfinMetaData is ok")
+				return
+			}
+		}
+	}
+}
+
+func InitTvNfo(p, t string) error {
+	xmlFile, err := os.OpenFile(p, os.O_RDWR, 0777)
+	if err != nil {
+		return err
+	}
+	defer xmlFile.Close()
+	byteValue, _ := io.ReadAll(xmlFile)
+	xmldata := string(byteValue)
+	const doc = `<title>%s</title>`
+	exp := fmt.Sprintf(doc, "(.*?)")
+	re := regexp.MustCompile(exp)
+	match := re.FindStringSubmatch(xmldata)
+	newTitle, oldTitle := fmt.Sprintf(doc, t), ""
+	if len(match) > 1 {
+		if match[1] == t {
+			return nil
+		}
+		oldTitle = fmt.Sprintf(doc, match[1])
+	} else {
+		return errors.New("modify tvshow.nfo: cannot found <title></title>")
+	}
+	newXmlData := strings.ReplaceAll(xmldata, oldTitle, newTitle)
+	err = xmlFile.Truncate(0)
+	if err != nil {
+		return err
+	}
+	_, err = xmlFile.Seek(0, 0)
+	if err != nil {
+		return err
+	}
+	_, err = xmlFile.WriteString(newXmlData)
+	return err
 }
