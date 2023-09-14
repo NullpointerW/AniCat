@@ -16,5 +16,5 @@ WORKDIR /opt
 COPY --from=builder /build/anicat  /opt/anicat
 
 EXPOSE 8080
-
+RUN chmod +x ./anicat
 CMD ["/bin/sh", "-c", "./anicat -d=$DEBUG"]
