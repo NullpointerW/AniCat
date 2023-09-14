@@ -17,6 +17,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var HOME = CFG.Env.SubjPath
@@ -179,6 +180,8 @@ func FindLastSeason(p string) (int, error) {
 	return max, nil
 }
 
+var errXmlDocNotMatch = errors.New("modify tvshow.nfo: cannot found <title></title>")
+
 func JellyfinMetaDataHelper(dp, name string, exited chan struct{}) {
 	path := dp + "/" + "tvshow.nfo"
 	for {
@@ -191,11 +194,16 @@ func JellyfinMetaDataHelper(dp, name string, exited chan struct{}) {
 				err = InitTvNfo(path, name)
 				if err != nil {
 					log.Errorf(log.Struct{"err", err}, "JellyfinMetaDataHelper: modify %s failed", path)
+					if err == errXmlDocNotMatch {
+						goto sleep
+					}
 				} else {
 					log.Info(nil, "JellyfinMetaData is ok")
 				}
 				return
 			}
+		sleep:
+			time.Sleep(20 * time.Second)
 		}
 	}
 }
@@ -219,7 +227,7 @@ func InitTvNfo(p, t string) error {
 		}
 		oldTitle = fmt.Sprintf(doc, match[1])
 	} else {
-		return errors.New("modify tvshow.nfo: cannot found <title></title>")
+		return errXmlDocNotMatch
 	}
 	newXmlData := strings.ReplaceAll(xmldata, oldTitle, newTitle)
 	err = xmlFile.Truncate(0)
