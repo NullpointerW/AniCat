@@ -136,6 +136,19 @@ docker run -d --name=anicat --restart unless-stopped \
  -d 开启debug模式
  -e 设置配置文件路径,默认为./env.yaml
   ```
+### 服务方式运行
+* 安装服务
+ ``` shell
+ PS D:\anicatv0.0.3b> .\anicat-windows-service-amd64.exe install
+  ```
+* 卸载服务
+ ``` shell
+ PS D:\anicatv0.0.3b> .\anicat-windows-service-amd64.exe uninstall
+  ```
+* 启动服务
+ ``` shell
+ PS D:\anicatv0.0.3b> .\anicat-windows-service-amd64.exe start
+  ```
  ## 客户端
 * [下载客户端`anicat-{platform}-cli`](https://github.com/NullpointerW/AniCat/releases)
 * 运行
@@ -161,6 +174,11 @@ add 孤独摇滚 -g 千夏字幕组 --rg --mc 简体 --mn \s?0[1-5]|1[0-1]
  --mn       排除
  ```
 选择`千夏字幕组`,排除`1-5`，`10-11`集，语言为`简体中文`
+ ### rss feed 订阅
+ ```bash
+add --feed https://mikanani.me/RSS/Bangumi?bangumiId=2549&subgroupid=552 --name xxx
+ 通过rss url进行订阅，如未指定名称则尝试从rss中解析
+ ```
  ### 退订
  使用`rm`命令退订番剧
  ``` bash
@@ -193,6 +211,16 @@ ls
   ``` bash
 stat 376106
  ```
+ ### 全局过滤词
+ 在env.yaml中配置全局过滤词:
+```yaml
+rss-filter:
+  contain: #包含
+    - chs,简体中文,简中,简 #同一组的过滤词用','分割,它们之间为或关系
+    - 1080p,1080x1920,1080 #不同组之间的关系为与，必须匹配到两组中的任意过滤词
+  exclusion: #排除
+    - 外挂,外掛
+```
  ### 邮件提醒
  如果要使用提醒功能，请配置stmp服务器信息\
  内置模板的如下：\
