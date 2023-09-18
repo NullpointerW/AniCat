@@ -1,6 +1,7 @@
 NAME=anicat
 BUILDIR=build
 BUILDIR_CLI=build/cli
+SRV_FILE=service-exec/service.go
 VERSION := $(patsubst v%,%,$(shell git describe --tags || echo "x.x.x"))
 GOBUILD=CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$(VERSION)"'
 CLI_FILE=net/client/cli.go
@@ -17,6 +18,10 @@ windows:
 
 windows-cli:
 	GOARCH=amd64 GOOS=windows CGO_ENABLED=0 go build -o $(BUILDIR_CLI)/$(NAME)-$@-amd64.exe $(CLI_FILE)
+
+windows-service:
+	GOARCH=amd64 GOOS=windows CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$(VERSION)" ' -o $(BUILDIR)/$(NAME)-$@-amd64.exe $(SRV_FILE)
+	zip -j $(BUILDIR)/$(NAME)-$@-amd64.zip $(BUILDIR)/$(NAME)-$@-amd64.exe
 
 linux:
 	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(BUILDIR)/$(NAME)-$@-amd64
