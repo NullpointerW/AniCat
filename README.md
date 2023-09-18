@@ -137,6 +137,7 @@ docker run -d --name=anicat --restart unless-stopped \
  -e 设置配置文件路径,默认为./env.yaml
   ```
 ### 服务方式运行
+[下载anicat-service](https://github.com/NullpointerW/AniCat/releases/download/v0.0.3b/anicat-service-windows-service-amd64.exe)
 * 安装服务
  ``` shell
  PS D:\anicatv0.0.3b> .\anicat-windows-service-amd64.exe install
