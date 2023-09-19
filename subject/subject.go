@@ -340,7 +340,17 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 			n := time.Now()
 			eti, err := util.ParseTime(et, util.YMDParseLayout)
 			if err != nil {
-				return err
+				reg := regexp.MustCompile(reg0_bgmTvTime)
+				submatch := reg.FindStringSubmatch(et)
+				if submatch != nil {
+					et = submatch[0]
+					eti, err = util.ParseTime(et, util.YMDParseLayout)
+					if err != nil {
+						return err
+					}
+				} else {
+					return err
+				}
 			}
 			subj.EndTime = et
 			subj.Finished = n.After(eti) || n.Equal(eti)

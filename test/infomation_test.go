@@ -25,7 +25,7 @@ func TestInfoScraping(t *testing.T) {
 	}
 }
 func TestBgmTVInfoScrape(t *testing.T) {
-	tip, err := I.BgmTVInfoScrape(274234)
+	tip, err := I.BgmTVInfoScrape(333979)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()

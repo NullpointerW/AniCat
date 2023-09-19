@@ -177,3 +177,12 @@ func TestGetPart(t *testing.T) {
 func TestTVshowNfo(t *testing.T) {
 	subject.InitTvNfo("D:\\tvshow.nfo", "my-test")
 }
+
+func TestBgmTime(t *testing.T) {
+	compile := regexp.MustCompile(`\d{4}年\d{1,2}月\d{1,2}日`)
+	submatch := compile.FindStringSubmatch(`x/w/??`)
+	fmt.Println(len(submatch))
+	fmt.Println(submatch)
+	fmt.Println(submatch == nil)
+
+}

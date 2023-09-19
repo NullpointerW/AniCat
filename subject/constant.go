@@ -73,8 +73,11 @@ const (
 	reg0_part = `第(\d)クール`
 	reg1_part = `第(\d)部分`
 	reg2_part = `(?i)Part\s*(\d)`
-
 	reg_part2 = `後半|后半`
+)
+
+const (
+	reg0_bgmTvTime = `\d{4}年\d{1,2}月\d{1,2}日`
 )
 
 var coll_regs = []string{reg0_coll}
