@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
+	eslog "github.com/NullpointerW/anicat/pkg/log"
 	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -17,6 +18,7 @@ var (
 )
 
 var Env Environment
+var BgmiLogger *eslog.EnhanceLogger
 
 type Environment struct {
 	Port            int    `yaml:"port"`
@@ -55,6 +57,7 @@ type Environment struct {
 			SkipSSL      bool   `yaml:"skipssl"`
 		} `yaml:"email"`
 	} `yaml:"push"`
+	BgmiLog bool `yaml:"bangumi-log"`
 }
 
 func (env *Environment) Print() {
@@ -105,6 +108,22 @@ func init() {
 	}
 	log.Info(log.Struct{"ver", Ver, "github", projlk}, "AniCat")
 	Env.Print()
+	if Env.BgmiLog {
+		executePath, err := util.GetExecutePath()
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "open bgmi-log failed")
+			Env.BgmiLog = false
+			return
+		}
+		executePath += "/bangumi.log"
+		output, err := os.OpenFile(executePath, os.O_APPEND|os.O_CREATE, 0777)
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "open bgmi-log failed")
+			Env.BgmiLog = false
+			return
+		}
+		BgmiLogger = eslog.New("text", "info", "2006-01-02T15:04:05", false, 0, output)
+	}
 }
 
 func loginit(debug bool) {
@@ -129,4 +148,5 @@ func loginit(debug bool) {
 	}
 	log.Init("text", level, "2006-01-02T15:04:05", debug, output)
 	log.Debug(log.Struct{"os", runtime.GOOS}, "debug mode")
+
 }

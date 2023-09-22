@@ -9,6 +9,7 @@ import (
 	TORR "github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
+	eslog "github.com/NullpointerW/anicat/pkg/log"
 	P "github.com/NullpointerW/anicat/pusher"
 	"github.com/NullpointerW/anicat/pusher/email"
 	util "github.com/NullpointerW/anicat/utils"
@@ -198,6 +199,9 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 		if checkSingleVideo(torr) {
 			rename, err := renameTV(s, torr.Name)
 			if err != nil {
+				if CFG.Env.BgmiLog {
+					CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId}, "episode update(unnamed): %s", torr.Name)
+				}
 				return err
 			}
 			se = util.TrimExtensionAndGetEpi(rename)
@@ -216,6 +220,9 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 				return err
 			}
 			s.Pushed[se] = torr.Hash
+			if CFG.Env.BgmiLog {
+				CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId}, "episode update: %s", rename)
+			}
 		} else {
 			log.Info(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash}, "not a videoFile,may external subtitles")
 			ok, rn, err := renameSubRssTorr(s, torr)
