@@ -200,7 +200,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			rename, err := renameTV(s, torr.Name)
 			if err != nil {
 				if CFG.Env.BgmiLog {
-					CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId}, "episode update(unnamed): %s", torr.Name)
+					CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId, "name", s.Name}, "episode update(unnamed): %s", torr.Name)
 				}
 				return err
 			}
@@ -221,7 +221,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 			}
 			s.Pushed[se] = torr.Hash
 			if CFG.Env.BgmiLog {
-				CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId}, "episode update: %s", rename)
+				CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId, "name", s.Name}, "episode update: %s", rename)
 			}
 		} else {
 			log.Info(log.Struct{"sid", s.SubjId, "torrfn", torr.Name, "torrHash", torr.Hash}, "not a videoFile,may external subtitles")

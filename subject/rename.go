@@ -3,6 +3,7 @@ package subject
 import (
 	"fmt"
 	"github.com/NullpointerW/anicat/log"
+	eslog "github.com/NullpointerW/anicat/pkg/log"
 	"os"
 	"regexp"
 	"strings"
@@ -92,6 +93,7 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 				merr.Add(err)
 				// even rename failed ,Remove from the subfolder
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn)) // mabye drop?
+				CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId, "name", s.Name}, "episode update(unnamed): %s", torr.Name)
 				continue
 			}
 			se := util.TrimExtensionAndGetEpi(rn)
@@ -102,6 +104,10 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 			}
 			if !CFG.Env.DropOnDuplicate {
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
+			}
+
+			if CFG.Env.BgmiLog {
+				CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId, "name", s.Name}, "episode update: %s", rn)
 			}
 			// feat 0.0.3b: support external subtitles
 		} else if fn := f.Name; util.IsSubtitleFile(fn) {
