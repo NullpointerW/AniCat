@@ -60,6 +60,7 @@ push: # 配置推送服务，如无此需求则可省略
     password: xxx
   # skipssl: yes # 跳过ssl,开启此项可能需要变更相应的smtp地址，具体情况询问邮箱运营商
   # template: tmp/template.html # 邮件模板地址，若省略则使用内置的模板
+bangumi-log: on #开启番剧更新日志，将在根目录创建日志，记录剧集的更新信息
 ```
 #### docker-compose 部署
  * 下载docker-compose yaml
