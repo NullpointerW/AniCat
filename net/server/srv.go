@@ -17,7 +17,7 @@ import (
 func Listen() {
 	p := CFG.Env.Port
 	if p == 0 {
-		p = 8080
+		p = 12314
 	}
 	adr := ":" + strconv.Itoa(p)
 	ls, err := net.Listen("tcp", adr)
