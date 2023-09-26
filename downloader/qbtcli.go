@@ -3,6 +3,7 @@ package downloader
 import (
 	"fmt"
 	"github.com/NullpointerW/anicat/log"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -72,10 +73,15 @@ func init() {
 	} else {
 		cli, err = qbt.NewCli(CFG.Env.Qbt.Url, CFG.Env.Qbt.Username, CFG.Env.Qbt.Password)
 	}
-	errs.PanicErr(err)
+	errCallbackFunc := func() {
+		if runtime.GOOS == "windows" {
+			log.Error(log.Struct{"err", err}, "PANIC! process crashed")
+		}
+	}
+	errs.PanicErr(err, errCallbackFunc)
 	Qbt = cli
 	cfg, err := Qbt.GetPreferences()
-	errs.PanicErr(err)
+	errs.PanicErr(err, errCallbackFunc)
 
 	rssEnable(&cfg)
 	err = setProxy(&cfg)
@@ -84,7 +90,7 @@ func init() {
 	} else if CFG.Env.Qbt.Proxy.Type != "" {
 		log.Info(log.Struct{"addr", CFG.Env.Qbt.Proxy.Addr, "type", CFG.Env.Qbt.Proxy.Type}, "qbt proxy has been set")
 	}
-	errs.PanicErr(Qbt.SetPreferences(cfg))
+	errs.PanicErr(Qbt.SetPreferences(cfg), errCallbackFunc)
 	ver, err := Qbt.GetVersion()
 	if err != nil {
 		ver = "unkown"

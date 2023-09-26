@@ -101,8 +101,13 @@ func init() {
 		return
 	}
 	b, err := os.ReadFile(EnvPath)
-	errs.PanicErr(err)
-	errs.PanicErr(yaml.Unmarshal(b, &Env))
+	errCallbackFunc := func() {
+		if runtime.GOOS == "windows" {
+			log.Error(log.Struct{"err", err}, "PANIC! process crashed")
+		}
+	}
+	errs.PanicErr(err, errCallbackFunc)
+	errs.PanicErr(yaml.Unmarshal(b, &Env), errCallbackFunc)
 	if Env.Qbt.Timeout <= 0 {
 		Env.Qbt.Timeout = 3000
 	}

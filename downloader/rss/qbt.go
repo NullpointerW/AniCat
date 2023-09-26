@@ -60,7 +60,7 @@ func AddAndGetItems(url, path string) (*qbt.Item, error) {
 }
 
 func GetMatchedArts(rssPath string) (arts []string, err error) {
-	m, err := DL.Qbt.LsArtMatchRlue(RuleNamePrefix + rssPath)
+	m, err := DL.Qbt.LsArtMatchRule(RuleNamePrefix + rssPath)
 	if err != nil {
 		return nil, err
 	}

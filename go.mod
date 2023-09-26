@@ -14,7 +14,6 @@ require (
 	github.com/mmcdole/goxpp v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
@@ -25,7 +24,7 @@ require (
 )
 
 require (
-	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.15
+	github.com/NullpointerW/go-qbittorrent-apiv2 v0.0.16
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/antchfx/htmlquery v1.3.0

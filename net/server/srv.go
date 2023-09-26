@@ -10,6 +10,7 @@ import (
 	"github.com/NullpointerW/anicat/net/cmd/view"
 	"net"
 	"os"
+	"runtime"
 	"strconv"
 )
 
@@ -20,8 +21,13 @@ func Listen() {
 	}
 	adr := ":" + strconv.Itoa(p)
 	ls, err := net.Listen("tcp", adr)
+	errCallbackFunc := func() {
+		if runtime.GOOS == "windows" {
+			log.Error(log.Struct{"err", err}, "PANIC! process crashed")
+		}
+	}
 	if err != nil {
-		errs.PanicErr(err)
+		errs.PanicErr(err, errCallbackFunc)
 	}
 	for {
 		c, err := ls.Accept()

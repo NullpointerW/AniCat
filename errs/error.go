@@ -3,8 +3,6 @@ package errs
 import (
 	"errors"
 	"fmt"
-	"github.com/NullpointerW/anicat/log"
-	"runtime"
 )
 
 var (
@@ -22,7 +20,7 @@ var (
 	ErrSubjectNotFound           = errors.New("subject not found")
 	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on anicat")
 	ErrUndefinedCrawlListType    = errors.New("undefined crawl list type")
-	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-downloader rule!")
+	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-downloader rule")
 	// command error
 	ErrUnknownCommand           = errors.New("unknown command")
 	ErrMissingCommandArgument   = errors.New("missing command argument")
@@ -61,11 +59,9 @@ func Custom(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
 }
 
-func PanicErr(err error) {
+func PanicErr(err error, ef func()) {
 	if err != nil {
-		if runtime.GOOS == "windows" {
-			log.Error(log.Struct{"err", err}, "PANIC! process crashed")
-		}
+		ef()
 		panic(err)
 	}
 }
