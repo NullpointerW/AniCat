@@ -13,8 +13,6 @@ type Add_ struct {
 	MustNotContain string `json:"mustNotContain"`
 	UseRegexp      bool   `json:"useRegexp"`
 	Group          string `json:"group"`
-	Feed           string `json:"feed"`
-	FeedName       string `json:"feedName"`
 	Index          string `json:"index"`
 }
 

@@ -44,6 +44,8 @@ func optionMode(o string) (Option, bool) {
 	switch o {
 	case "add":
 		return Add, true
+	case "addFeed":
+		return AddFeed, true
 	case "rm":
 		return Del, true
 	case "ls":
