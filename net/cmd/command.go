@@ -2,20 +2,33 @@ package cmd
 
 import "encoding/json"
 
+type cTyp int
+
+const (
+	Add cTyp = iota
+	AddFeed
+	Remove
+	Ls
+	LsItems
+	Status
+	Stop
+)
+
 type Cmd struct {
-	Cmd string          `json:"cmd"`
+	Cmd cTyp            `json:"cmd"`
 	Arg string          `json:"arg"`
 	Raw json.RawMessage `json:"raw"`
 }
 
-type Add_ struct {
+type AddFlag struct {
 	MustContain    string `json:"mustContain"`
 	MustNotContain string `json:"mustNotContain"`
 	UseRegexp      bool   `json:"useRegexp"`
 	Group          string `json:"group"`
-	Index          string `json:"index"`
+	Index          int    `json:"index"`
+	FeedInfoName   string `json:"feedInfoName"`
 }
 
-type Lsi_ struct {
+type LsiFlag struct {
 	SearchList bool `json:"searchList"`
 }

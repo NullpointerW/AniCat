@@ -26,23 +26,23 @@ type Command struct {
 }
 type Option int
 
-const (
-	Add Option = iota
-	Del
-	Ls
-	LsItems
-	LsItems_searchlist //lsi -s
-	LsGroup            // reserved command
-	Help
-	Status
-	Stop
-	AddFeed
-)
+//const (
+//	Add Option = iota
+//	Del
+//	Ls
+//	LsItems
+//	LsItems_searchlist //lsi -s
+//	LsGroup            // reserved command
+//	Help
+//	Status
+//	Stop
+//	AddFeed
+//)
 
 func optionMode(o string) (Option, bool) {
 	o = strings.ToLower(o)
 	switch o {
-	case "add":
+	case Add:
 		return Add, true
 	case "addFeed":
 		return AddFeed, true

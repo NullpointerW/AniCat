@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/errs"
@@ -43,46 +44,20 @@ func Listen() {
 }
 
 func process(c *N.Conn) {
-	c.Write("PONG")
 	var (
-		fsMsg              = true
-		render view.Render = view.AsciiRender{}
+		render  view.Render = view.AsciiRender{}
+		command cmd.Cmd
 	)
 	for {
 		if msg, err := c.Read(); err == nil {
-			if fsMsg && msg == "NEW_CLI" {
-				c.Write("RECV_CLI_VER")
-				render = view.JsonRender{}
-				continue
-			}
-			// old cli
-			fsMsg = false
 			log.Debug(log.Struct{"len", len(msg), "cmd", msg}, "recv command")
-			if len(msg) == 0 {
-				c.Write("PONG")
-				continue
+			err := json.Unmarshal([]byte(msg), &command)
+			if err != nil {
+				log.Errorf(log.Struct{"error", err.Error()}, "net: json Unmarshal failed")
+				c.Write(err.Error())
+				return
 			}
-			cmds := cmd.ParseArgs(msg)
-			if len(cmds) == 0 {
-				c.Write("PONG")
-				continue
-			}
-			rep := cmd.Parse(cmds)
-			if rep.Err != nil {
-				s := ""
-				if rep.Err == errs.ErrAddCommandMissingHelping {
-					s = rep.N
-				} else {
-					s = fmt.Sprintln(cmd.Red, rep.Err.Error(), cmd.Reset)
-				}
-				c.Write(s)
-				continue
-			}
-			if rep.Opt == cmd.Help {
-				c.Write(rep.N)
-				continue
-			}
-			route(&rep, render)
+			route(command, render)
 			if rep.Err != nil {
 				var s string
 				if rep.Err == errs.WarnRssRuleNotMatched || rep.Err == errs.WarnReservedCommand_lsg {

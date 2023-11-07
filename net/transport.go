@@ -46,19 +46,19 @@ func (c *Conn) Write(s string) error {
 	return err
 }
 
-func (c *Conn) Read() (string, error) {
+func (c *Conn) Read() ([]byte, error) {
 	c.once.Do(func() {
 		c.s = bufio.NewScanner(c.TcpConn)
 		c.s.Split(ScanCRLF)
 	})
 	if c.s.Scan() {
-		return c.s.Text(), nil
+		return c.s.Bytes(), nil
 	}
 	err := c.s.Err()
 	if err == nil {
-		return "", io.EOF
+		return nil, io.EOF
 	}
-	return "", err
+	return nil, err
 }
 
 func DropCR(data []byte) []byte {

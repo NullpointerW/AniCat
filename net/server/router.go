@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"strconv"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
@@ -11,15 +13,20 @@ import (
 	"github.com/NullpointerW/anicat/subject"
 )
 
-func route(c *cmd.Command, r view.Render) {
-	switch c.Opt {
+func route(c cmd.Cmd, r view.Render) (resp string, err error) {
+	switch c.Cmd {
 	case cmd.Add:
-		sc := transferSubjC(c, false)
-		createSubject(c, sc)
+		flag := new(cmd.AddFlag)
+		err := json.Unmarshal(c.Raw, &flag)
+		if err != nil {
+			return "", err
+		}
+		sc := transferSubjC(c.Arg, bytes.Equal(c.Raw, []byte("null")), *flag, false)
+		createSubject(sc)
 	case cmd.AddFeed:
 		sc := transferSubjC(c, true)
 		createSubject(c, sc)
-	case cmd.Del:
+	case cmd.Remove:
 		i, err := strconv.Atoi(c.N)
 		if err != nil && c.N != "*" {
 			c.Err = err
@@ -95,16 +102,16 @@ func route(c *cmd.Command, r view.Render) {
 		c.N = "exited."
 	}
 }
-func transferSubjC(src *cmd.Command, feed bool) (dst subject.SubjC) {
-	if src.Flag.Using {
-		dst.RssOption.UseRegex = src.Flag.UseRegex
-		dst.RssOption.MustContain = src.Flag.MustContain
-		dst.RssOption.MustNotContain = src.Flag.MustNotContain
-		dst.RssOption.SubtitleGroup = src.Flag.SubtitleGroup
-		dst.TorrOption.Index = src.Flag.Index
-		dst.RssOption.Name = src.Flag.Name
+func transferSubjC(arg string, usingFlag bool, src cmd.AddFlag, feed bool) (dst subject.SubjC) {
+	if usingFlag {
+		dst.RssOption.UseRegex = src.UseRegexp
+		dst.RssOption.MustContain = src.MustContain
+		dst.RssOption.MustNotContain = src.MustNotContain
+		dst.RssOption.SubtitleGroup = src.Group
+		dst.TorrOption.Index = src.Index
+		dst.RssOption.Name = src.FeedInfoName
 	}
-	dst.N = src.N
+	dst.N = arg
 	dst.CreateTyp = subject.CreateViaStr
 	if feed {
 		dst.CreateTyp = subject.CreateViaFeed
@@ -112,11 +119,12 @@ func transferSubjC(src *cmd.Command, feed bool) (dst subject.SubjC) {
 	return dst
 }
 
-func createSubject(c *cmd.Command, sc subject.SubjC) {
+func createSubject(sc subject.SubjC) (resp string, err error) {
 	p := subject.NewPip(sc)
 	subject.Create <- p
-	c.Err = p.Error()
-	if c.Err == nil {
-		c.N = strconv.Itoa(p.Arg.(int))
+	err = p.Error()
+	if err == nil {
+		resp = strconv.Itoa(p.Arg.(int))
 	}
+	return
 }
