@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
-	N "github.com/NullpointerW/anicat/net"
 	"github.com/NullpointerW/anicat/subject"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	"github.com/olekukonko/tablewriter"
@@ -146,16 +145,37 @@ func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string 
 	return "\n" + header + tableString.String()
 }
 
+type TorrItem struct {
+	Name       string `json:"name"`
+	Size       string `json:"size"`
+	UpdateTime string `json:"uptime"`
+}
+
+type Subj struct {
+	Sid     int    `json:"sid"`
+	Typ     string `json:"type"`
+	Name    string `json:"name"`
+	Episode string `json:"epi"`
+	Status  string `json:"status"`
+	Compl   string `json:"compl"`
+}
+
+type Stat struct {
+	File     string `json:"file"`
+	Size     string `json:"size"`
+	Progress string `json:"progress"`
+}
+
 type JsonRender struct {
 	AsciiRender
 }
 
 func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
-	var rgsMap map[string][]N.TorrItem = make(map[string][]N.TorrItem)
+	var rgsMap map[string][]TorrItem = make(map[string][]TorrItem)
 	for _, r := range rgs {
-		var nits []N.TorrItem
+		var nits []TorrItem
 		for _, it := range r.Items {
-			nit := N.TorrItem{}
+			nit := TorrItem{}
 			nit.Name = it.Name
 			nit.Size = it.Size
 			nit.UpdateTime = it.UpdateTime
@@ -167,9 +187,9 @@ func (_ JsonRender) RssGroup(rgs []CR.RssGroup) string {
 	return string(b)
 }
 func (_ JsonRender) TorrList(its []CR.Item) string {
-	var torrls []N.TorrItem
+	var torrls []TorrItem
 	for _, t := range its {
-		torr := N.TorrItem{}
+		torr := TorrItem{}
 		torr.Name = t.Name
 		torr.Size = t.Size
 		torr.UpdateTime = t.UpdateTime
@@ -179,9 +199,9 @@ func (_ JsonRender) TorrList(its []CR.Item) string {
 	return string(b)
 }
 func (_ JsonRender) Ls(ls []subject.Subject) string {
-	var sbjs []N.Subj
+	var sbjs []Subj
 	for _, s := range ls {
-		sbj := N.Subj{}
+		sbj := Subj{}
 		sbj.Sid = s.SubjId
 		sbj.Name = s.Name
 		sbj.Typ = s.Typ.String()

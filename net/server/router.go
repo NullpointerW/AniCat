@@ -16,38 +16,40 @@ import (
 func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 	switch c.Cmd {
 	case cmd.Add:
-		flag := new(cmd.AddFlag)
-		err := json.Unmarshal(c.Raw, &flag)
-		if err != nil {
-			return "", err
-		}
-		sc := transferSubjC(c.Arg, bytes.Equal(c.Raw, []byte("null")), *flag, false)
-		createSubject(sc)
+		return addSubjProcess(c, false)
 	case cmd.AddFeed:
-		sc := transferSubjC(c, true)
-		createSubject(c, sc)
+		return addSubjProcess(c, true)
 	case cmd.Remove:
-		i, err := strconv.Atoi(c.N)
-		if err != nil && c.N != "*" {
-			c.Err = err
+		i, er := strconv.Atoi(c.Arg)
+		if er != nil && c.Arg != "*" {
+			err = er
 			return
 		}
 		var pip *subject.Pip
-		if c.N == "*" {
+		if c.Arg == "*" {
 			pip = subject.NewPip("*")
 		} else {
 			pip = subject.NewPip(i)
 		}
 		subject.Delete <- pip
-		c.Err = pip.Error()
+		return "ok", pip.Error()
 	case cmd.Ls:
 		ls := subject.Manager.List()
-		c.N = r.Ls(ls)
-	case cmd.LsItems, cmd.LsItems_searchlist:
-		isLsi_l := c.Opt == cmd.LsItems_searchlist
-		l, err := CR.ListScrape(c.N, CR.Ls, isLsi_l)
+		resp = r.Ls(ls)
+		return
+	case cmd.LsItems:
+		flag := new(cmd.LsiFlag)
+		err = json.Unmarshal(c.Raw, &flag)
 		if err != nil {
-			c.Err = err
+			return "", err
+		}
+		search := false
+		if !bytes.Equal(c.Raw, []byte("null")) {
+			search = flag.SearchList
+		}
+		l, er := CR.ListScrape(c.Arg, CR.Ls, search)
+		if er != nil {
+			err = er
 			return
 		}
 		ls := ""
@@ -58,40 +60,38 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 		} else if ItemSlice {
 			ls = r.TorrList(its)
 		} else {
-			c.Err = errs.ErrUndefinedCrawlListType
+			err = errs.ErrUndefinedCrawlListType
 		}
-		c.N = ls
-	case cmd.LsGroup:
-		c.Err = errs.WarnReservedCommand_lsg
-
+		resp = ls
+		return
 	case cmd.Status:
-		i, err := strconv.Atoi(c.N)
-		if err != nil {
-			c.Err = err
+		i, er := strconv.Atoi(c.Arg)
+		if er != nil {
+			err = er
 			return
 		}
 		subj := subject.Manager.Get(i)
-
 		if subj == nil {
-			c.Err = errs.ErrSubjectNotFound
+			err = errs.ErrSubjectNotFound
 			return
 		}
 
 		if subj.ResourceTyp == subject.Torrent {
-			h, err := torrent.Get(subj.TorrentHash)
-			if err != nil {
-				c.Err = err
+			h, er := torrent.Get(subj.TorrentHash)
+			if er != nil {
+				err = er
 				return
 			}
-			c.N = r.Status(subj, h)
+			resp = r.Status(subj, h)
 		} else {
-			hs, err := torrent.GetViaCateg(subj.QbtCateg())
-			if err != nil {
-				c.Err = err
+			hs, er := torrent.GetViaCateg(subj.QbtCateg())
+			if er != nil {
+				err = er
 				return
 			}
-			c.N = r.Status(subj, hs...)
+			resp = r.Status(subj, hs...)
 		}
+		return
 
 	case cmd.Stop:
 		for _, s := range subject.Manager.List() {
@@ -99,8 +99,22 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 				s.Exit()
 			}
 		}
-		c.N = "exited."
+		resp = "exited."
+		return
+	default:
+		return
 	}
+}
+
+func addSubjProcess(c cmd.Cmd, isFeed bool) (resp string, err error) {
+	flag := new(cmd.AddFlag)
+	err = json.Unmarshal(c.Raw, &flag)
+	if err != nil {
+		return "", err
+	}
+	sc := transferSubjC(c.Arg, bytes.Equal(c.Raw, []byte("null")), *flag, isFeed)
+	resp, err = createSubject(sc)
+	return
 }
 func transferSubjC(arg string, usingFlag bool, src cmd.AddFlag, feed bool) (dst subject.SubjC) {
 	if usingFlag {
