@@ -34,7 +34,7 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 		subject.Delete <- pip
 		return "ok", pip.Error()
 	case cmd.Ls:
-		ls := subject.Manager.List()
+		ls := subject.Mgr.List()
 		resp = r.Ls(ls)
 		return
 	case cmd.LsItems:
@@ -70,7 +70,7 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 			err = er
 			return
 		}
-		subj := subject.Manager.Get(i)
+		subj := subject.Mgr.Get(i)
 		if subj == nil {
 			err = errs.ErrSubjectNotFound
 			return
@@ -92,13 +92,13 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 			resp = r.Status(subj, hs...)
 		}
 		return
-
 	case cmd.Stop:
-		for _, s := range subject.Manager.List() {
+		for _, s := range subject.Mgr.List() {
 			if !s.Terminate {
 				s.Exit()
 			}
 		}
+		subject.Mgr.Exit()
 		resp = "exited."
 		return
 	default:

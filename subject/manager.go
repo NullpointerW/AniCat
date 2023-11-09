@@ -48,58 +48,45 @@ func init() {
 	Delete = make(chan *Pip, 1024)
 }
 
-var Manager = SubjectManager{
+var Mgr = Manager{
 	mu:  new(sync.Mutex),
 	sto: make(map[int]*Subject),
-	// sp_sid: make(map[string]int),
 }
 
-type SubjectManager struct {
+type Manager struct {
 	mu  *sync.Mutex
 	sto map[int]*Subject
-	// sp_sid map[string]int
 	// a snapshot copy from the last list()-calling make caller fast get list
 	copy []Subject
+	wg   sync.WaitGroup
 }
 
-// func (m *SubjectManager) GetSidViaSp(sp string) int {
-// 	m.mu.Lock()
-// 	defer m.mu.Unlock()
-// 	sid, e := m.sp_sid[sp]
-// 	if !e {
-// 		return -1
-// 	}
-// 	return sid
-// }
-
-func (m *SubjectManager) Sync() {
+func (m *Manager) Sync() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.copy = nil
 }
-func (m *SubjectManager) Add(s *Subject) {
+func (m *Manager) Add(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.sto[s.SubjId] = s
-	// m.sp_sid[s.Path] = s.SubjId
 	m.copy = nil
 }
 
-func (m *SubjectManager) Remove(sid int) {
+func (m *Manager) Remove(sid int) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	delete(m.sto, sid)
-	// delete(m.sp_sid, s.Path)
 	m.copy = nil
 }
 
-func (m *SubjectManager) Get(sid int) *Subject {
+func (m *Manager) Get(sid int) *Subject {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.sto[sid]
 }
 
-func (m *SubjectManager) List() (ls []Subject) {
+func (m *Manager) List() (ls []Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.copy != nil {
@@ -112,11 +99,15 @@ func (m *SubjectManager) List() (ls []Subject) {
 	return ls
 }
 
-func (m *SubjectManager) Clear() {
+func (m *Manager) clear() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	// alloc a new map
 	m.sto = make(map[int]*Subject)
+}
+
+func (m *Manager) Exit() {
+	m.wg.Wait()
 }
 
 func StartManagement() {
@@ -148,7 +139,7 @@ func StartManagement() {
 			if i == 0 && p.Arg.(string) == "*" {
 				log.Warn(nil, "rm: remove all subjects")
 				merr := errs.MultiErr{}
-				for _, s := range Manager.List() {
+				for _, s := range Mgr.List() {
 					if !s.Terminate {
 						s.Exit()
 					}
@@ -159,7 +150,7 @@ func StartManagement() {
 						return RmFolder(&s)
 					})
 					if errWrap.Error() == nil {
-						Manager.Remove(s.SubjId)
+						Mgr.Remove(s.SubjId)
 					}
 					merr.Add(errWrap.Error())
 					errWrap.Reset()
@@ -168,7 +159,7 @@ func StartManagement() {
 				p.wg.Done()
 				continue
 			}
-			s := Manager.Get(i)
+			s := Mgr.Get(i)
 			if s != nil {
 				if !s.Terminate {
 					s.Exit()
@@ -180,7 +171,7 @@ func StartManagement() {
 					return RmFolder(s)
 				})
 				if errWrap.Error() == nil {
-					Manager.Remove(s.SubjId)
+					Mgr.Remove(s.SubjId)
 				}
 				p.err = errWrap.Error()
 			}

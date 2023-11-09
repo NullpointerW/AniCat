@@ -210,7 +210,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	if Manager.Get(sid) != nil {
+	if Mgr.Get(sid) != nil {
 		return 0, fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
@@ -289,7 +289,7 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	if Manager.Get(sid) != nil {
+	if Mgr.Get(sid) != nil {
 		return 0, fmt.Errorf("%w: sid=%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
@@ -413,7 +413,7 @@ func (s *Subject) FetchInfo() error {
 		return s.Loadfileds(tips)
 	})
 	wrap.Handle(func() error {
-		Manager.Sync()
+		Mgr.Sync()
 		return nil
 	})
 	wrap.Handle(func() error {

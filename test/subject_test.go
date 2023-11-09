@@ -22,9 +22,9 @@ func TestOS(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	subject.Manager.Add(&subject.Subject{})
-	subject.Manager.Add(&subject.Subject{})
-	subject.Manager.Add(&subject.Subject{})
+	subject.Mgr.Add(&subject.Subject{})
+	subject.Mgr.Add(&subject.Subject{})
+	subject.Mgr.Add(&subject.Subject{})
 }
 
 func TestJsonSubj(t *testing.T) {

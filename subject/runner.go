@@ -21,7 +21,7 @@ import (
 func (s *Subject) runtimeInit(reload bool) {
 	s.Exited = make(chan struct{})
 	if s.Terminate {
-		Manager.Add(s)
+		Mgr.Add(s)
 		return
 	}
 	c := context.Background()
@@ -31,12 +31,14 @@ func (s *Subject) runtimeInit(reload bool) {
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
 	}
-	Manager.Add(s)
+	Mgr.Add(s)
 	go s.run(ctx, reload)
 	go JellyfinMetaDataHelper(s.Path, s.FolderName, s.Exited)
 }
 
 func (s *Subject) run(ctx context.Context, reload bool) {
+	Mgr.wg.Add(1)
+	defer Mgr.wg.Done()
 	if reload {
 		log.Debug(log.Struct{"sid", s.SubjId}, "subject reload")
 		s.checkDL()
@@ -85,7 +87,7 @@ func exit(s *Subject) {
 	}
 	close(s.Exited)
 	close(s.PushChan)
-	Manager.Sync()
+	Mgr.Sync()
 }
 
 func (s *Subject) checkDL() (err error) {

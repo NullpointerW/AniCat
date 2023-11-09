@@ -59,7 +59,7 @@ func Detect() {
 }
 
 func send(sid int, torr qbt.Torrent) error {
-	s := subject.Manager.Get(sid)
+	s := subject.Mgr.Get(sid)
 	if s == nil {
 		return fmt.Errorf("%w:sid:%d", errs.ErrSubjectNotFound, sid)
 	}

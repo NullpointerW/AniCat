@@ -18,6 +18,7 @@ type Conn struct {
 	TcpConn net.Conn
 	s       *bufio.Scanner
 	once    sync.Once
+	Max     int
 }
 
 func (c *Conn) Write(s string) error {
@@ -28,6 +29,9 @@ func (c *Conn) Write(s string) error {
 func (c *Conn) Read() ([]byte, error) {
 	c.once.Do(func() {
 		c.s = bufio.NewScanner(c.TcpConn)
+		if c.Max > 0 {
+			c.s.Buffer(make([]byte, 0, c.Max), c.Max)
+		}
 		c.s.Split(ScanCRLF)
 	})
 	if c.s.Scan() {

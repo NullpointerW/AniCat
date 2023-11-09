@@ -9,6 +9,7 @@ import (
 	"github.com/NullpointerW/anicat/net/cmd"
 	"github.com/NullpointerW/anicat/net/cmd/view"
 	"net"
+	"os"
 	"runtime"
 	"strconv"
 )
@@ -54,6 +55,9 @@ func process(c *N.Conn) {
 			log.Errorf(log.Struct{"error", err.Error()}, "net: json Unmarshal failed")
 			_ = c.Write(err.Error())
 			return
+		}
+		if command.Cmd == cmd.Stop {
+			defer os.Exit(0)
 		}
 		resp, err := route(command, render)
 		if err != nil {
