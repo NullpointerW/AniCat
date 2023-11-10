@@ -112,7 +112,7 @@ func addSubjProcess(c cmd.Cmd, isFeed bool) (resp string, err error) {
 	if err != nil {
 		return "", err
 	}
-	sc := transferSubjC(c.Arg, bytes.Equal(c.Raw, []byte("null")), *flag, isFeed)
+	sc := transferSubjC(c.Arg, !bytes.Equal(c.Raw, []byte("null")), *flag, isFeed)
 	resp, err = createSubject(sc)
 	return
 }

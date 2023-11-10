@@ -49,12 +49,11 @@ func init() {
 }
 
 var Mgr = Manager{
-	mu:  new(sync.Mutex),
 	sto: make(map[int]*Subject),
 }
 
 type Manager struct {
-	mu  *sync.Mutex
+	mu  sync.Mutex
 	sto map[int]*Subject
 	// a snapshot copy from the last list()-calling make caller fast get list
 	copy []Subject
