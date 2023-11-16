@@ -676,7 +676,6 @@ func (s *Subject) scrapeCover(lastS int) error {
 func (s *Subject) isCollection(desc string) bool {
 	re := regexp.MustCompile(reg2_coll)
 	m := re.FindStringSubmatch(desc)
-	fmt.Println("test", desc)
 	if len(m) > 1 {
 		m := m[1]
 		i, _ := strconv.Atoi(m)
