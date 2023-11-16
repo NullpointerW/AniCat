@@ -174,6 +174,32 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 	return containOk && exclusionOk
 }
 
+func FilterWithCustomReg(s string, e Extra) bool {
+	clsOk, exlOk := true, true
+	if cls := e.RssOption.MustContain; cls != "" {
+		clsReg, err := regexp.Compile(cls)
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
+		} else {
+			clsOk = clsReg.MatchString(s)
+		}
+	}
+	if exl := e.RssOption.MustNotContain; exl != "" {
+		exlReg, err := regexp.Compile(exl)
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
+		} else {
+			exlOk = !exlReg.MatchString(s)
+		}
+	}
+	return clsOk && exlOk
+}
+
+func FilterWithCustom(s string, e Extra) bool {
+	cls, ext := strings.Fields(e.RssOption.MustContain), strings.Fields(e.RssOption.MustNotContain)
+	return FilterWithRegs(s, cls, ext)
+}
+
 // QbtTag The tag used when adding a torrent with qbt
 // can be used to monitor the downloader status of resources
 // related to this subject file.
@@ -448,13 +474,13 @@ func download(subj *Subject, ext *Extra) error {
 		h, err := torrent.Add(subj.ResourceUrl, subj.Path, subj.QbtTag())
 		subj.TorrentHash = h
 		return err
-	} else if (ext == nil || ext.NoArgs()) && subj.Finished {
+	} else if subj.Finished {
 		it, err := rss.AddAndGetItems(subj.ResourceUrl, subj.RssPath())
 		log.Debug(log.Struct{"sid", subj.SubjId, "rss path ", subj.RssPath()}, "add RssResource")
 		if err != nil {
 			return err
 		}
-		enaFl := CFG.Env.EnabledFilter()
+		enaFl := CFG.Env.EnabledFilter() && (ext == nil || ext.NoArgs())
 	rssTraverse:
 		for _, a := range it.Articles {
 			log.Debug(log.Struct{"rssDesc", a.Description}, "traverse rssItems")
@@ -464,8 +490,20 @@ func download(subj *Subject, ext *Extra) error {
 					contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
 					exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
 					if !FilterWithRegs(desc, contains, exclusions) {
-						log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filter")
+						log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filtered")
 						continue
+					}
+				} else if !(ext == nil || ext.NoArgs()) {
+					if ext.RssOption.UseRegex {
+						if !FilterWithCustomReg(desc, *ext) {
+							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
+							continue
+						}
+					} else {
+						if !FilterWithCustom(desc, *ext) {
+							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
+							continue
+						}
 					}
 				}
 				log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
@@ -484,6 +522,18 @@ func download(subj *Subject, ext *Extra) error {
 							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filter")
 							continue rssTraverse
 						}
+					} else if !(ext == nil || ext.NoArgs()) {
+						if ext.RssOption.UseRegex {
+							if !FilterWithCustomReg(desc, *ext) {
+								log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
+								continue
+							}
+						} else {
+							if !FilterWithCustom(desc, *ext) {
+								log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
+								continue
+							}
+						}
 					}
 					log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
 					return subj.rssToTorr(a.TorrentURL)
@@ -495,8 +545,13 @@ func download(subj *Subject, ext *Extra) error {
 		if err != nil {
 			return err
 		}
-		err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
-			enaFl, BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
+		if !(ext == nil || ext.NoArgs()) {
+			err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
+				ext.RssOption.UseRegex, ext.RssOption.MustContain, ext.RssOption.MustNotContain)
+		} else {
+			err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
+				enaFl, BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
+		}
 		return err
 	} else {
 		err := torrent.AddCategroy(subj.QbtCateg())
@@ -621,6 +676,7 @@ func (s *Subject) scrapeCover(lastS int) error {
 func (s *Subject) isCollection(desc string) bool {
 	re := regexp.MustCompile(reg2_coll)
 	m := re.FindStringSubmatch(desc)
+	fmt.Println("test", desc)
 	if len(m) > 1 {
 		m := m[1]
 		i, _ := strconv.Atoi(m)
