@@ -21,16 +21,9 @@ var (
 	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on anicat")
 	ErrUndefinedCrawlListType    = errors.New("undefined crawl list type")
 	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-downloader rule")
-	// command error
-	ErrUnknownCommand           = errors.New("unknown command")
-	ErrMissingCommandArgument   = errors.New("missing command argument")
-	ErrAddCommandMissingHelping = errors.New("")
-	WarnReservedCommand_lsg     = errors.New("the command 'lsg' is currently unavailable. use 'lsi' to  view the list of subtitle groups ")
 
 	ErrCannotCaptureEpisNum = errors.New("can not capture episode num from text")
-
-	ErrItemAlreadyPushed = errors.New("item was already pushed")
-
+	ErrItemAlreadyPushed    = errors.New("item was already pushed")
 	ErrNoLinkFoundOnRssFeed = errors.New("can not found link on feed")
 )
 

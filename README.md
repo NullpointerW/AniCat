@@ -164,27 +164,27 @@ docker run -d --name=anicat --restart unless-stopped \
  ### 订阅
  使用`add`命令订阅番剧,成功后返回sid
  ``` bash
-add LV1魔王与独居废勇者
+anicat add LV1魔王与独居废勇者
  ```
  ![add-gif](doc/add.gif)\
  可选择字幕组和通过正则筛选剧集
  ```bash
-add 孤独摇滚 -g 千夏字幕组 --rg --mc 简体 --mn \s?0[1-5]|1[0-1]
+anicat add 孤独摇滚 -g 千夏字幕组 -r -c 简体 -e \s?0[1-5]|1[0-1]
  -g,--group 选择字幕组
- --rg       使用正则
- --mc       包含
- --mn       排除
+ -r       使用正则
+ -c       包含
+ -e       排除
  ```
 选择`千夏字幕组`,排除`1-5`，`10-11`集，语言为`简体中文`
  ### rss feed 订阅
  ```bash
-add --feed https://mikanani.me/RSS/Bangumi?bangumiId=2549&subgroupid=552 --name xxx
+anicat add feed https://mikanani.me/RSS/Bangumi?bangumiId=2549&subgroupid=552 --name xxx
  通过rss url进行订阅，如未指定名称则尝试从rss中解析
  ```
  ### 退订
  使用`rm`命令退订番剧
  ``` bash
-rm 376106 
+anicat rm 376106 
  通过番剧的sid来删除
  sid与它在bgmiTV上的subjectID一致
  可通过`ls`命令查看sid
@@ -192,7 +192,7 @@ rm 376106
  ### 浏览资源列表
 使用`lsi`命令浏览该番剧的资源列表
  ``` bash
-lsi 孤独摇滚
+anicat lsi 孤独摇滚
  ```
  ![lsi-gif](doc/lsi.gif)
 #### 老番资源列表
