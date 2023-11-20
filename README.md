@@ -35,7 +35,7 @@ port: 12314 # 监听端口 docker-compose部署无需更改
 path: /bangumi # 番剧下载路径 docker-compose部署无需更改
 drop-duplicate: on # 若存在相同集数，则删除重复项（建议开启)
 qbittorrent:
-  url: http://qb:8989 # qbt-api url,在docker-compose部署时无需更改
+  url: http://qb:8080 # qbt-api url,在docker-compose部署时无需更改
   username: admin
   password: adminadmin
 # localed: yes # 如果qbt开启了本地登录选项，则可不用填写用户,名和密码，docker-compose部署则可忽视此项
@@ -76,7 +76,7 @@ services:
     image: wmooon/anicat:latest
     container_name: anicat
     ports:
-      - 8080:8080 # anicat监听端口
+      - 12314:12314 # anicat监听端口
   # environment:
     # - DEBUG=true # 开启debug模式
     depends_on:
@@ -91,7 +91,7 @@ services:
     image: superng6/qbittorrentee:latest
     container_name: qb
     ports:
-      - 8989:8989 # webui 端口
+      - 8080:8080 # webui 端口
     environment:
       - PUID=1000
       - PGID=1000
