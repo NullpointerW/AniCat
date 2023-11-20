@@ -152,14 +152,12 @@ docker run -d --name=anicat --restart unless-stopped \
  PS D:\anicatv0.0.3b> .\anicat-windows-service-amd64.exe start
   ```
  ## 客户端
-* [下载客户端`anicat-{platform}-cli`](https://github.com/NullpointerW/AniCat/releases)
+* [下载客户端`anicat-{platform}-cli`](https://github.com/NullpointerW/AniCat-cli/releases)
 * 运行
 ``` bash
- ./anicat-linux-cli-amd64 -h anicat-host.com -p 1006
- -h 主机名
- -p 端口号
+C:\Users\Mayn>anicat ls
  ```
-   默认连接地址为localhost:8080
+
 ## 命令/使用
  ### 订阅
  使用`add`命令订阅番剧,成功后返回sid
@@ -199,19 +197,19 @@ anicat lsi 孤独摇滚
  如果要浏览的番剧资源没有rss组，或者在2013年之前（Mikan Project的rss资源组从2013年开始收录），则`lsi`将会展示种子搜索列表\
  在使用`add`添加该番剧时可用`-i`,`--index`参数指定下载资源的列表索引
 ``` bash
-lsi 龙与虎
+anicat lsi 龙与虎
  ```
  ![lsi-gif](doc/lsi-torrlist.gif)
  在lsi 命令末尾添加-s参数,可优先展示搜索列表，列如`lsi 孤独摇滚 -s`
  ### 查看已订阅列表
  使用`ls`查看所有已订阅番剧的具体信息
  ``` bash
-ls
+anicat ls
  ```
  ### 查看文件的下载状态
  使用`stat`通过sid查看该番剧的下载状态
   ``` bash
-stat 376106
+anicat stat 376106
  ```
  ### 全局过滤词
  在env.yaml中配置全局过滤词:
