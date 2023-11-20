@@ -31,7 +31,7 @@ mkdir cfg && wget -P ./cfg/ https://raw.githubusercontent.com/NullpointerW/AniCa
    <span id="cfg_jmp"></span>  
  * 修改配置文件
 ```yaml
-port: 8080 # 监听端口 docker-compose部署无需更改
+port: 12314 # 监听端口 docker-compose部署无需更改
 path: /bangumi # 番剧下载路径 docker-compose部署无需更改
 drop-duplicate: on # 若存在相同集数，则删除重复项（建议开启)
 qbittorrent:
