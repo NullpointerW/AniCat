@@ -47,7 +47,7 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 	for {
 		select {
 		case torr := <-s.PushChan:
-			err := s.push(torr, email.Sender{})
+			err := s.push(torr, email.Poster)
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
 			}

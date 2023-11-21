@@ -27,11 +27,3 @@ type Payload struct {
 type Pusher interface {
 	Push(p Payload) error
 }
-
-type Mock struct{}
-
-func (m Mock) Push(p Payload) error {
-	return nil
-}
-
-var Mock_ Pusher = Mock{}
