@@ -3,6 +3,7 @@ package downloader
 import (
 	"fmt"
 	"github.com/NullpointerW/anicat/log"
+	"net/http"
 	"runtime"
 	"strconv"
 	"strings"
@@ -28,6 +29,15 @@ func setProxyTyp(qbtCfg *qbt.Config) error {
 		qbtCfg.ProxyType = qbt.Socks5A
 	default:
 		return fmt.Errorf("qbt:unknown proxy type %s", ptyp)
+	}
+	return nil
+}
+
+func setTracker(qbtCfg *qbt.Config) error {
+	// https://github.com/DeSireFire/animeTrackerList
+	_, err := http.Get("https://raw.githubusercontent.com/DeSireFire/animeTrackerList/master/AT_all.txt")
+	if err != nil {
+		return err
 	}
 	return nil
 }
