@@ -3,6 +3,7 @@ package downloader
 import (
 	"fmt"
 	"github.com/NullpointerW/anicat/log"
+	"io"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -35,10 +36,18 @@ func setProxyTyp(qbtCfg *qbt.Config) error {
 
 func setTracker(qbtCfg *qbt.Config) error {
 	// https://github.com/DeSireFire/animeTrackerList
-	_, err := http.Get("https://raw.githubusercontent.com/DeSireFire/animeTrackerList/master/AT_all.txt")
+	h := http.Client{Timeout: time.Second * 5}
+	get, err := h.Get("https://raw.githubusercontent.com/DeSireFire/animeTrackerList/master/AT_all.txt")
 	if err != nil {
 		return err
 	}
+	defer get.Body.Close()
+	b, err := io.ReadAll(get.Body)
+	if err != nil {
+		return err
+	}
+	qbtCfg.AddTrackers = string(b)
+	qbtCfg.AddTrackersEnabled = true
 	return nil
 }
 
@@ -96,9 +105,13 @@ func init() {
 	rssEnable(&cfg)
 	err = setProxy(&cfg)
 	if err != nil {
-		log.Error(log.Struct{"err", err}, "set qbt proxy failed")
+		log.Error(log.Struct{"err", err}, "qbt: set proxy failed")
 	} else if CFG.Env.Qbt.Proxy.Type != "" {
-		log.Info(log.Struct{"addr", CFG.Env.Qbt.Proxy.Addr, "type", CFG.Env.Qbt.Proxy.Type}, "qbt proxy has been set")
+		log.Info(log.Struct{"addr", CFG.Env.Qbt.Proxy.Addr, "type", CFG.Env.Qbt.Proxy.Type}, "qbt: proxy has been set")
+	}
+	err = setTracker(&cfg)
+	if err != nil {
+		log.Error(log.Struct{"err", err}, "qbt: set tracker failed")
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg), errCallbackFunc)
 	ver, err := Qbt.GetVersion()
