@@ -37,7 +37,7 @@ func setProxyTyp(qbtCfg *qbt.Config) error {
 func setTracker(qbtCfg *qbt.Config) error {
 	// https://github.com/DeSireFire/animeTrackerList
 	h := http.Client{Timeout: time.Second * 5}
-	get, err := h.Get("https://raw.githubusercontent.com/DeSireFire/animeTrackerList/master/AT_all.txt")
+	get, err := h.Get("https://cdn.jsdelivr.net/gh/DeSireFire/animeTrackerList/AT_all.txt")
 	if err != nil {
 		return err
 	}
