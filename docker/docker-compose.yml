@@ -5,7 +5,7 @@ services:
     image: wmooon/anicat:latest
     container_name: anicat
     ports:
-      - 9996:8080
+      - "12314:12314"
     environment:
       - DEBUG=false
     depends_on:
@@ -21,12 +21,12 @@ services:
     image: superng6/qbittorrentee:latest
     container_name: qb
     ports:
-      - 8989:8989 
+      - "8080:8080"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
-      - WEBUIPORT=8989 
+      - WEBUIPORT=8080
     volumes:
       - ./qb:/config
       - ./bangumi:/bangumi
