@@ -24,7 +24,7 @@ import (
 
 func TestEmailPush(t *testing.T) {
 	var pusher P.Pusher
-	pusher = email.Sender{}
+	pusher = email.Poster
 	fmt.Println(CFG.Env.Pusher)
 	err := pusher.Push(P.Payload{
 		8964,

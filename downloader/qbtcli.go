@@ -34,21 +34,25 @@ func setProxyTyp(qbtCfg *qbt.Config) error {
 	return nil
 }
 
-func setTracker(qbtCfg *qbt.Config) error {
+func setTracker(qbtCfg *qbt.Config) (string, error) {
 	// https://github.com/DeSireFire/animeTrackerList
+	provider := "https://cdn.jsdelivr.net/gh/DeSireFire/animeTrackerList/AT_all.txt"
+	if CFG.Env.Qbt.TrackerProvider != "" {
+		provider = CFG.Env.Qbt.TrackerProvider
+	}
 	h := http.Client{Timeout: time.Second * 5}
-	get, err := h.Get("https://cdn.jsdelivr.net/gh/DeSireFire/animeTrackerList/AT_all.txt")
+	get, err := h.Get(provider)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer get.Body.Close()
 	b, err := io.ReadAll(get.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 	qbtCfg.AddTrackers = string(b)
 	qbtCfg.AddTrackersEnabled = true
-	return nil
+	return provider, nil
 }
 
 func setProxy(qbtCfg *qbt.Config) error {
@@ -109,9 +113,10 @@ func init() {
 	} else if CFG.Env.Qbt.Proxy.Type != "" {
 		log.Info(log.Struct{"addr", CFG.Env.Qbt.Proxy.Addr, "type", CFG.Env.Qbt.Proxy.Type}, "qbt: proxy has been set")
 	}
-	err = setTracker(&cfg)
-	if err != nil {
+	if prov, err := setTracker(&cfg); err != nil {
 		log.Error(log.Struct{"err", err}, "qbt: set tracker failed")
+	} else {
+		log.Error(log.Struct{"err", err, "provider-url", prov}, "qbt: tracker has been set")
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg), errCallbackFunc)
 	ver, err := Qbt.GetVersion()

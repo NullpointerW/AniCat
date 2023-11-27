@@ -8,12 +8,12 @@ import (
 var (
 	EnvPath      string
 	debug        bool
-	IDEdebugging bool
+	IdeDebugging bool
 	Testing      bool
 )
 
-func flaginit() {
-	flag.BoolVar(&IDEdebugging, "idebug", false, "IDEdebugging mode")
+func flagInit() {
+	flag.BoolVar(&IdeDebugging, "idebug", false, "IdeDebugging mode")
 	flag.StringVar(&EnvPath, "e", "./env.yaml", "env yaml filepath")
 	flag.BoolVar(&debug, "d", false, "debug mode")
 	// use Testing flag to skip env.yaml init and qbittorrent cli init
@@ -24,7 +24,7 @@ func flaginit() {
 	testing.Init()
 	flag.Parse()
 	if Testing {
-		IDEdebugging = true
+		IdeDebugging = true
 	}
-	loginit(debug || IDEdebugging)
+	loginit(debug || IdeDebugging)
 }

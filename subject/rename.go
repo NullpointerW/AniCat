@@ -93,7 +93,9 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 				merr.Add(err)
 				// even rename failed ,Remove from the subfolder
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn)) // mabye drop?
-				CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId, "name", s.Name}, "episode update(unnamed): %s", torr.Name)
+				if CFG.Env.BgmiLog {
+					CFG.BgmiLogger.Infof(eslog.Struct{"sid", s.SubjId, "name", s.Name}, "episode update(unnamed): %s", torr.Name)
+				}
 				continue
 			}
 			se := util.TrimExtensionAndGetEpi(rn)

@@ -32,12 +32,13 @@ type Environment struct {
 		Proxies []string `yaml:"proxies"`
 	} `yaml:"crawl"`
 	Qbt struct {
-		Url          string `yaml:"url"`
-		Username     string `yaml:"username"`
-		Password     string `yaml:"password"`
-		LocalConnect bool   `yaml:"localed"`
-		Timeout      int    `yaml:"timeout"`
-		Proxy        struct {
+		Url             string `yaml:"url"`
+		Username        string `yaml:"username"`
+		Password        string `yaml:"password"`
+		LocalConnect    bool   `yaml:"localed"`
+		Timeout         int    `yaml:"timeout"`
+		TrackerProvider string `yaml:"tracker-provider"`
+		Proxy           struct {
 			Addr     string `yaml:"address"`
 			Type     string `yaml:"type"`
 			Username string `yaml:"username"`
@@ -95,7 +96,7 @@ func init() {
 	if SrvCTL {
 		return
 	}
-	flaginit()
+	flagInit()
 	if Testing {
 		// skip
 		return
@@ -137,7 +138,7 @@ func loginit(debug bool) {
 		level = "debug"
 	}
 	output := os.Stderr
-	if runtime.GOOS == "windows" && !IDEdebugging {
+	if runtime.GOOS == "windows" && !IdeDebugging {
 		var err error
 		executePath, err := util.GetExecutePath()
 		executePath += "/output.log"
@@ -147,6 +148,8 @@ func loginit(debug bool) {
 		}
 		executePath = util.FileSeparatorConv(executePath)
 		output, err = os.OpenFile(executePath, os.O_TRUNC|os.O_CREATE, 0777)
+		// recv PANIC
+		os.Stderr = output
 		if err != nil {
 			defer log.Error(log.Struct{"err", err}, "create logfile failed")
 		}
