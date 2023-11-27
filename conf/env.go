@@ -132,7 +132,7 @@ func init() {
 	}
 }
 
-func loginit(debug bool) {
+func logInit(debug bool) {
 	var level = "info"
 	if debug {
 		level = "debug"
@@ -151,6 +151,7 @@ func loginit(debug bool) {
 		// recv PANIC
 		os.Stderr = output
 		if err != nil {
+			output = os.Stderr
 			defer log.Error(log.Struct{"err", err}, "create logfile failed")
 		}
 	}

@@ -26,5 +26,5 @@ func flagInit() {
 	if Testing {
 		IdeDebugging = true
 	}
-	loginit(debug || IdeDebugging)
+	logInit(debug || IdeDebugging)
 }

@@ -41,7 +41,7 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 	defer Mgr.wg.Done()
 	if reload {
 		log.Debug(log.Struct{"sid", s.SubjId}, "subject reload")
-		s.checkDL()
+		//s.checkDL()
 	}
 	t := time.NewTicker(30 * time.Minute)
 	for {
