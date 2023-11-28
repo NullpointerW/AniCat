@@ -9,8 +9,9 @@ GOBUILD=CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/con
 all: 
 	$(MAKE) windows
 	$(MAKE) linux
-	$(MAKE) windows-cli
-	$(MAKE) linux-cli
+	$(MAKE) windows-service
+	$(MAKE) docker-build
+	$(MAKE) docker-push
 
 windows:
 	GOARCH=amd64 GOOS=windows CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$(VERSION)" -H=windowsgui' -o $(BUILDIR)/$(NAME)-$@-amd64.exe
