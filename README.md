@@ -40,6 +40,7 @@ qbittorrent:
   password: adminadmin
 # localed: yes # 如果qbt开启了本地登录选项，则可不用填写用户,名和密码，docker-compose部署则可忽视此项
   timeout: 3500 # qbt-api请求的超时时间，有时任务添加到qbt上，调用api后无法立即响应到数据
+# tracker-provider: tracker-list-url # 自定义tracker
   proxy: # qbt代理配置 可选项
     address: remote:7890 # 配置qbt的代理地址
     type: http # 类型可为 http,socks5等 详见qbt wiki

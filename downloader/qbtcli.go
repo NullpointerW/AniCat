@@ -116,7 +116,7 @@ func init() {
 	if prov, err := setTracker(&cfg); err != nil {
 		log.Error(log.Struct{"err", err}, "qbt: set tracker failed")
 	} else {
-		log.Error(log.Struct{"err", err, "provider-url", prov}, "qbt: tracker has been set")
+		log.Error(log.Struct{"provider-url", prov}, "qbt: tracker has been set")
 	}
 	errs.PanicErr(Qbt.SetPreferences(cfg), errCallbackFunc)
 	ver, err := Qbt.GetVersion()
