@@ -10,8 +10,7 @@ var _g *os.File
 
 func PanicRedirect(file *os.File) error {
 	_g = file
-	err := windows.SetStdHandle(windows.STD_ERROR_HANDLE, windows.Handle(file.Fd()))
-	if err != nil {
+	if err := windows.SetStdHandle(windows.STD_ERROR_HANDLE, windows.Handle(file.Fd())); err != nil {
 		return err
 	}
 	// 内存回收前关闭文件描述符
