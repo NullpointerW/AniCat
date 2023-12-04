@@ -8,6 +8,7 @@ import (
 	util "github.com/NullpointerW/anicat/utils"
 	"gopkg.in/yaml.v3"
 	"os"
+	"path/filepath"
 	"runtime"
 )
 
@@ -137,7 +138,7 @@ func logInit(debug bool) {
 	if debug {
 		level = "debug"
 	}
-	output := os.Stderr
+	output := os.Stdout
 	if runtime.GOOS == "windows" && !IdeDebugging {
 		var err error
 		executePath, err := util.GetExecutePath()
@@ -148,12 +149,22 @@ func logInit(debug bool) {
 		}
 		executePath = util.FileSeparatorConv(executePath)
 		output, err = os.OpenFile(executePath, os.O_TRUNC|os.O_CREATE, 0777)
-		// recv PANIC
-		os.Stderr = output
 		if err != nil {
-			output = os.Stderr
+			output = os.Stdout
 			defer log.Error(log.Struct{"err", err}, "create logfile failed")
 		}
+		// receive PANIC
+		dirP := filepath.Dir(executePath)
+		PanicP := filepath.Join(dirP, "panic.log")
+		panicOp, err := os.OpenFile(PanicP, os.O_APPEND|os.O_CREATE, 0777)
+		if err == nil {
+			err = errs.PanicRedirect(panicOp)
+			if err != nil {
+				defer log.Error(log.Struct{"err", err}, "redirect stderr failed")
+				_ = panicOp.Close()
+			}
+		}
+
 	}
 	log.Init("text", level, "2006-01-02T15:04:05", debug, output)
 	log.Debug(log.Struct{"os", runtime.GOOS}, "debug mode")
