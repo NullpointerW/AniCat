@@ -19,11 +19,10 @@ func init() {
 	add := cmd.NewCommandCase(cmd.Add, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		return addSubjProcess(c, false)
 	})
-
 	addFeed := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		return addSubjProcess(c, true)
 	})
-	remove := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	remove := cmd.NewCommandCase(cmd.Remove, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		i, er := strconv.Atoi(c.Arg)
 		if er != nil && c.Arg != "*" {
 			err = er
@@ -38,14 +37,12 @@ func init() {
 		subject.Delete <- pip
 		return "ok", pip.Error()
 	})
-
-	list := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	list := cmd.NewCommandCase(cmd.Ls, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		ls := subject.Mgr.List()
 		resp = r.Ls(ls)
 		return
 	})
-
-	listItem := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	listItem := cmd.NewCommandCase(cmd.LsItems, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		flag := new(cmd.LsiFlag)
 		err = json.Unmarshal(c.Raw, &flag)
 		if err != nil {
@@ -73,8 +70,7 @@ func init() {
 		resp = ls
 		return
 	})
-
-	status := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	status := cmd.NewCommandCase(cmd.Status, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		i, er := strconv.Atoi(c.Arg)
 		if er != nil {
 			err = er
@@ -103,7 +99,7 @@ func init() {
 		}
 		return
 	})
-	stop := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	stop := cmd.NewCommandCase(cmd.Stop, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		for _, s := range subject.Mgr.List() {
 			if !s.Terminate {
 				s.Exit()
