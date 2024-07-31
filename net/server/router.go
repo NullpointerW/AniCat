@@ -109,6 +109,26 @@ func init() {
 		resp = "exited."
 		return
 	})
+
+	rename := cmd.NewCommandCase(cmd.Rename, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+		i, err := strconv.Atoi(c.Arg)
+		if err != nil {
+			return
+		}
+		s := subject.Mgr.Get(i)
+		if s == nil {
+			err = errs.ErrSubjectNotFound
+			return
+		}
+		if s.Terminate {
+            <-s.Exited
+		}else{
+			select {
+				case  <-s.Exited:
+			case:<-
+			}
+		}
+	})
 	CmdSelector = cmd.NewSelector(add, addFeed, remove, list, listItem, status, stop)
 }
 

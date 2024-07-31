@@ -15,6 +15,7 @@ const (
 	LsItems
 	Status
 	Stop
+	Rename
 )
 
 type Cmd struct {

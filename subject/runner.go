@@ -21,6 +21,7 @@ import (
 func (s *Subject) runtimeInit(reload bool) {
 	s.Exited = make(chan struct{})
 	if s.Terminate {
+		close(s.Exited)
 		Mgr.Add(s)
 		return
 	}
