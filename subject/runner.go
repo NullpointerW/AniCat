@@ -32,6 +32,7 @@ func (s *Subject) runtimeInit(reload bool) {
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
 	}
+	s.OperationChan = make(chan Operate)
 	Mgr.Add(s)
 	go s.run(ctx, reload)
 	go JellyfinMetaDataHelper(s.Path, s.FolderName, s.Exited)
@@ -47,6 +48,14 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 	t := time.NewTicker(30 * time.Minute)
 	for {
 		select {
+		case o := <-s.OperationChan:
+			switch o.op {
+			case Rename:
+				err := s.Rename(o.arg.(string))
+				if err != nil {
+					log.Error(log.Struct{"sid", s.SubjId, "err", err}, "rename failed")
+				}
+			}
 		case torr := <-s.PushChan:
 			err := s.push(torr, email.Poster)
 			if err != nil {

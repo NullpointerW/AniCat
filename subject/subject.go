@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	DL "github.com/NullpointerW/anicat/downloader"
 	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strconv"
@@ -66,7 +67,21 @@ type Subject struct {
 	// content will like be `xxx S01E01,xxx S01E05...`
 	Pushed        map[string]string   `json:"pushed"`
 	RssTorrents   map[string]struct{} `json:"rssTorrents"`
-	OperationChan chan any
+	OperationChan chan Operate        `json:"-"`
+}
+type subjOp int
+
+const (
+	Rename subjOp = iota
+)
+
+type Operate struct {
+	op  subjOp
+	arg any
+}
+
+func NewOperate(op subjOp, arg any) Operate {
+	return Operate{op, arg}
 }
 
 type Extra struct {
@@ -235,20 +250,20 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	return sid, nil
 }
 
-func (subj *Subject) Loadfileds(tips map[string]string) error {
-	subj.Name = tips[IC.SubjName]
-	subj.OriginName = tips[IC.SubjOriginName]
-	if subj.Name == "" {
-		subj.Name = subj.OriginName
+func (s *Subject) Loadfileds(tips map[string]string) error {
+	s.Name = tips[IC.SubjName]
+	s.OriginName = tips[IC.SubjOriginName]
+	if s.Name == "" {
+		s.Name = s.OriginName
 	}
 	if _, e := tips[IC.SubjStartTime]; e {
-		subj.Typ = TV
+		s.Typ = TV
 	} else {
-		subj.Typ = MOVIE
+		s.Typ = MOVIE
 	}
-	subj.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode])
-	if subj.Typ == TV {
-		subj.StartTime = tips[IC.SubjStartTime]
+	s.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode])
+	if s.Typ == TV {
+		s.StartTime = tips[IC.SubjStartTime]
 		if et, e := tips[IC.SubjectEndTime]; e {
 			n := time.Now()
 			eti, err := util.ParseTime(et, util.YMDParseLayout)
@@ -265,33 +280,33 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 					return err
 				}
 			}
-			subj.EndTime = et
-			subj.Finished = n.After(eti) || n.Equal(eti)
+			s.EndTime = et
+			s.Finished = n.After(eti) || n.Equal(eti)
 		}
 	} else { // if movie finished
-		subj.StartTime = tips[IC.SubjMoveStartTime]
-		subj.Finished = true
+		s.StartTime = tips[IC.SubjMoveStartTime]
+		s.Finished = true
 	}
-	subj.Alias = tips[IC.Alias]
+	s.Alias = tips[IC.Alias]
 
 	// fetch folder info,source from tmdb
 	var tmdbTyp = IC.TMDB_TYP_TV
-	if subj.Typ == MOVIE {
+	if s.Typ == MOVIE {
 		tmdbTyp = IC.TMDB_TYP_MOVIE
 	}
 	var err error
 	// First, attempt to search for the folder using the subject's Name
-	subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.Name)
+	s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.Name)
 	if err != nil {
 		if errors.Is(err, errs.ErrCrawlNotFound) {
 			// If the search failed because the folder was not found,
 			// try again using the subject's OriginName
-			subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.OriginName)
+			s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.OriginName)
 		}
 		if errors.Is(err, errs.ErrCrawlNotFound) {
 			// If the search still cannot found, try using each alias from the subject's Alias field
-			for _, n := range strings.Split(subj.Alias, "|") {
-				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
+			for _, n := range strings.Split(s.Alias, "|") {
+				s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				if err == nil {
 					return nil
 				} else if !errors.Is(err, errs.ErrCrawlNotFound) {
@@ -301,12 +316,12 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 			}
 			// If all aliases failed, try removing the season number from the subject's Name and search again
 			re := regexp.MustCompile(`第(.)季`)
-			match := re.FindStringSubmatch(subj.Name)
+			match := re.FindStringSubmatch(s.Name)
 			if len(match) > 1 {
 				season := match[1]
-				n := strings.ReplaceAll(subj.Name, fmt.Sprintf("第%s季", season), "")
+				n := strings.ReplaceAll(s.Name, fmt.Sprintf("第%s季", season), "")
 				n = strings.TrimRight(n, " ")
-				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
+				s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				return err
 			}
 		}
@@ -579,5 +594,41 @@ func (s *Subject) rssToTorr(torrUrl string) (err error) {
 	s.ResourceTyp = Torrent
 	h, err := torrent.Add(torrUrl, s.Path, s.QbtTag())
 	s.TorrentHash = h
+	return err
+}
+
+func (s *Subject) Rename(new string) error {
+	if s.Terminate && s.ResourceTyp == Torrent {
+		fs, err := DL.Qbt.Files(s.TorrentHash)
+		if err != nil {
+			return err
+		}
+		for _, f := range fs {
+			old := f.Name
+			newFullName := strings.ReplaceAll(old, s.FolderName, new)
+			err = DL.Qbt.RenameFile(s.TorrentHash, old, newFullName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if s.ResourceTyp == RSS {
+		for th := range s.RssTorrents {
+			fs, err := DL.Qbt.Files(th)
+			if err != nil {
+				return err
+			}
+			for _, f := range fs {
+				old := f.Name
+				newFullName := strings.ReplaceAll(old, s.FolderName, new)
+				err = DL.Qbt.RenameFile(th, old, newFullName)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	s.FolderName = new
+	err := s.writeJson()
 	return err
 }

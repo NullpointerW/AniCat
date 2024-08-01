@@ -120,16 +120,25 @@ func init() {
 			err = errs.ErrSubjectNotFound
 			return
 		}
+		newName := new(string)
+		err = json.Unmarshal(c.Raw, newName)
+		if err != nil {
+			return "", err
+		}
+		op := subject.NewOperate(subject.Rename, newName)
 		if s.Terminate {
-            <-s.Exited
-		}else{
+			<-s.Exited
+			err = s.Rename(*newName)
+		} else {
 			select {
-				case  <-s.Exited:
-			case:<-
+			case <-s.Exited:
+				err = s.Rename(*newName)
+			case s.OperationChan <- op:
 			}
 		}
+		return "ok", err
 	})
-	CmdSelector = cmd.NewSelector(add, addFeed, remove, list, listItem, status, stop)
+	CmdSelector = cmd.NewSelector(add, addFeed, remove, list, listItem, status, stop, rename)
 }
 
 func route(c cmd.Cmd, r view.Render) (resp string, err error) {

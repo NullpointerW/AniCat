@@ -58,6 +58,7 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 			} else {
 				ok = csre.MatchString(s)
 				log.Debug(log.Struct{"containRegexp", csre.String(), "matchingString", s, "matched", ok})
+				//improve: break immediately
 				if !ok {
 					return false
 				}
@@ -82,7 +83,6 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 				log.Error(log.Struct{"err", err}, "globalFilter: exclusions regexp compile failed")
 				ok = true
 			} else {
-				//improve: break immediately
 				ok = !clsre.MatchString(s)
 				log.Debug(log.Struct{"exclusionRegexp", clsre.String(), "matchingString", s, "matched", ok})
 				if !ok {
