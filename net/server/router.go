@@ -125,7 +125,7 @@ func init() {
 		if err != nil {
 			return "", err
 		}
-		op := subject.NewOperate(subject.Rename, newName)
+		op := subject.NewOperate(subject.Rename, *newName)
 		if s.Terminate {
 			<-s.Exited
 			err = s.Rename(*newName)
