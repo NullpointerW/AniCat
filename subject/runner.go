@@ -97,6 +97,7 @@ func exit(s *Subject) {
 	}
 	close(s.Exited)
 	close(s.PushChan)
+	close(s.OperationChan)
 	Mgr.Sync()
 }
 
