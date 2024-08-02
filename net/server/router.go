@@ -100,11 +100,6 @@ func init() {
 		return
 	})
 	stop := cmd.NewCommandCase(cmd.Stop, func(c cmd.Cmd, r view.Render) (resp string, err error) {
-		for _, s := range subject.Mgr.List() {
-			if !s.Terminate {
-				s.Exit()
-			}
-		}
 		subject.Mgr.Exit()
 		resp = "exited."
 		return
