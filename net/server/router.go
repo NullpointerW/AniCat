@@ -13,13 +13,16 @@ import (
 	"github.com/NullpointerW/anicat/subject"
 )
 
-func route(c cmd.Cmd, r view.Render) (resp string, err error) {
-	switch c.Cmd {
-	case cmd.Add:
+var CmdSelector *cmd.Selector
+
+func init() {
+	add := cmd.NewCommandCase(cmd.Add, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		return addSubjProcess(c, false)
-	case cmd.AddFeed:
+	})
+	addFeed := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		return addSubjProcess(c, true)
-	case cmd.Remove:
+	})
+	remove := cmd.NewCommandCase(cmd.Remove, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		i, er := strconv.Atoi(c.Arg)
 		if er != nil && c.Arg != "*" {
 			err = er
@@ -33,11 +36,13 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 		}
 		subject.Delete <- pip
 		return "ok", pip.Error()
-	case cmd.Ls:
+	})
+	list := cmd.NewCommandCase(cmd.Ls, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		ls := subject.Mgr.List()
 		resp = r.Ls(ls)
 		return
-	case cmd.LsItems:
+	})
+	listItem := cmd.NewCommandCase(cmd.LsItems, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		flag := new(cmd.LsiFlag)
 		err = json.Unmarshal(c.Raw, &flag)
 		if err != nil {
@@ -64,7 +69,8 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 		}
 		resp = ls
 		return
-	case cmd.Status:
+	})
+	status := cmd.NewCommandCase(cmd.Status, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		i, er := strconv.Atoi(c.Arg)
 		if er != nil {
 			err = er
@@ -92,7 +98,8 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 			resp = r.Status(subj, hs...)
 		}
 		return
-	case cmd.Stop:
+	})
+	stop := cmd.NewCommandCase(cmd.Stop, func(c cmd.Cmd, r view.Render) (resp string, err error) {
 		for _, s := range subject.Mgr.List() {
 			if !s.Terminate {
 				s.Exit()
@@ -101,9 +108,41 @@ func route(c cmd.Cmd, r view.Render) (resp string, err error) {
 		subject.Mgr.Exit()
 		resp = "exited."
 		return
-	default:
-		return
-	}
+	})
+
+	rename := cmd.NewCommandCase(cmd.Rename, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+		i, err := strconv.Atoi(c.Arg)
+		if err != nil {
+			return
+		}
+		s := subject.Mgr.Get(i)
+		if s == nil {
+			err = errs.ErrSubjectNotFound
+			return
+		}
+		newName := new(string)
+		err = json.Unmarshal(c.Raw, newName)
+		if err != nil {
+			return "", err
+		}
+		op := subject.NewOperate(subject.Rename, *newName)
+		if s.Terminate {
+			<-s.Exited
+			err = s.Rename(*newName)
+		} else {
+			select {
+			case <-s.Exited:
+				err = s.Rename(*newName)
+			case s.OperationChan <- op:
+			}
+		}
+		return "ok", err
+	})
+	CmdSelector = cmd.NewSelector(add, addFeed, remove, list, listItem, status, stop, rename)
+}
+
+func route(c cmd.Cmd, r view.Render) (resp string, err error) {
+	return CmdSelector.Select(c, r)
 }
 
 func addSubjProcess(c cmd.Cmd, isFeed bool) (resp string, err error) {

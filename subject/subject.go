@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	DL "github.com/NullpointerW/anicat/downloader"
 	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strconv"
@@ -64,8 +65,23 @@ type Subject struct {
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed renamed episodes,avoid duplicate push.
 	// content will like be `xxx S01E01,xxx S01E05...`
-	Pushed      map[string]string   `json:"pushed"`
-	RssTorrents map[string]struct{} `json:"rssTorrents"`
+	Pushed        map[string]string   `json:"pushed"`
+	RssTorrents   map[string]struct{} `json:"rssTorrents"`
+	OperationChan chan Operate        `json:"-"`
+}
+type subjOp int
+
+const (
+	Rename subjOp = iota
+)
+
+type Operate struct {
+	op  subjOp
+	arg any
+}
+
+func NewOperate(op subjOp, arg any) Operate {
+	return Operate{op, arg}
 }
 
 type Extra struct {
@@ -84,120 +100,6 @@ type Extra struct {
 func (ex *Extra) NoArgs() bool {
 	opt := ex.RssOption
 	return opt.MustContain == "" && opt.MustNotContain == ""
-}
-
-func BuildFilterPerlReg(vbs []string) string {
-	var reg string
-	const tmp = `(?=.*?%s)`
-	if len(vbs) != 0 {
-		reg += "(?i)"
-		for _, ct := range vbs {
-			vb := strings.ReplaceAll(ct, ",", "|")
-			vb = "(" + vb + ")"
-			reg += fmt.Sprintf(tmp, vb)
-		}
-		return reg
-	} else {
-		return ""
-	}
-}
-
-func BuildFilterRegs(vbs []string) []string {
-	if len(vbs) != 0 {
-		regs := make([]string, 0, len(vbs))
-		for _, ct := range vbs {
-			vb := strings.ReplaceAll(ct, ",", "|")
-			vb = "(?i)" + vb
-			regs = append(regs, vb)
-		}
-		return regs
-	} else {
-		return nil
-	}
-}
-
-func FilterWithRegs(s string, contains, exclusions []string) bool {
-	var (
-		containOk, exclusionOk bool
-	)
-	if len(contains) == 0 {
-		containOk = true
-	}
-	if len(exclusions) == 0 {
-		exclusionOk = true
-	}
-	if !containOk {
-		containOks := make([]bool, 0, len(contains))
-		for _, reg := range contains {
-			var ok bool
-			csre, err := regexp.Compile(reg)
-			if err != nil {
-				log.Error(log.Struct{"err", err}, "globalFilter: contains regexp compile failed")
-				ok = true
-			} else {
-				ok = csre.MatchString(s)
-				log.Debug(log.Struct{"containRegexp", csre.String(), "matchingString", s, "matched", ok})
-			}
-			containOks = append(containOks, ok)
-		}
-		containOk = true
-		for _, ok := range containOks {
-			if !ok {
-				containOk = false
-				break
-			}
-		}
-	}
-
-	if !exclusionOk {
-		exclusionOks := make([]bool, 0, len(exclusions))
-		for _, reg := range exclusions {
-			var ok bool
-			clsre, err := regexp.Compile(reg)
-			if err != nil {
-				log.Error(log.Struct{"err", err}, "globalFilter: exclusions regexp compile failed")
-				ok = true
-			} else {
-				ok = !clsre.MatchString(s)
-				log.Debug(log.Struct{"exclusionRegexp", clsre.String(), "matchingString", s, "matched", ok})
-			}
-			exclusionOks = append(exclusionOks, ok)
-		}
-		exclusionOk = true
-		for _, ok := range exclusionOks {
-			if !ok {
-				exclusionOk = false
-				break
-			}
-		}
-	}
-	return containOk && exclusionOk
-}
-
-func FilterWithCustomReg(s string, e Extra) bool {
-	clsOk, exlOk := true, true
-	if cls := e.RssOption.MustContain; cls != "" {
-		clsReg, err := regexp.Compile(cls)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
-		} else {
-			clsOk = clsReg.MatchString(s)
-		}
-	}
-	if exl := e.RssOption.MustNotContain; exl != "" {
-		exlReg, err := regexp.Compile(exl)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
-		} else {
-			exlOk = !exlReg.MatchString(s)
-		}
-	}
-	return clsOk && exlOk
-}
-
-func FilterWithCustom(s string, e Extra) bool {
-	cls, ext := strings.Fields(e.RssOption.MustContain), strings.Fields(e.RssOption.MustNotContain)
-	return FilterWithRegs(s, cls, ext)
 }
 
 // QbtTag The tag used when adding a torrent with qbt
@@ -348,20 +250,20 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	return sid, nil
 }
 
-func (subj *Subject) Loadfileds(tips map[string]string) error {
-	subj.Name = tips[IC.SubjName]
-	subj.OriginName = tips[IC.SubjOriginName]
-	if subj.Name == "" {
-		subj.Name = subj.OriginName
+func (s *Subject) Loadfileds(tips map[string]string) error {
+	s.Name = tips[IC.SubjName]
+	s.OriginName = tips[IC.SubjOriginName]
+	if s.Name == "" {
+		s.Name = s.OriginName
 	}
 	if _, e := tips[IC.SubjStartTime]; e {
-		subj.Typ = TV
+		s.Typ = TV
 	} else {
-		subj.Typ = MOVIE
+		s.Typ = MOVIE
 	}
-	subj.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode])
-	if subj.Typ == TV {
-		subj.StartTime = tips[IC.SubjStartTime]
+	s.Episode, _ = strconv.Atoi(tips[IC.SubjEpisode])
+	if s.Typ == TV {
+		s.StartTime = tips[IC.SubjStartTime]
 		if et, e := tips[IC.SubjectEndTime]; e {
 			n := time.Now()
 			eti, err := util.ParseTime(et, util.YMDParseLayout)
@@ -378,33 +280,33 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 					return err
 				}
 			}
-			subj.EndTime = et
-			subj.Finished = n.After(eti) || n.Equal(eti)
+			s.EndTime = et
+			s.Finished = n.After(eti) || n.Equal(eti)
 		}
 	} else { // if movie finished
-		subj.StartTime = tips[IC.SubjMoveStartTime]
-		subj.Finished = true
+		s.StartTime = tips[IC.SubjMoveStartTime]
+		s.Finished = true
 	}
-	subj.Alias = tips[IC.Alias]
+	s.Alias = tips[IC.Alias]
 
 	// fetch folder info,source from tmdb
 	var tmdbTyp = IC.TMDB_TYP_TV
-	if subj.Typ == MOVIE {
+	if s.Typ == MOVIE {
 		tmdbTyp = IC.TMDB_TYP_MOVIE
 	}
 	var err error
 	// First, attempt to search for the folder using the subject's Name
-	subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.Name)
+	s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.Name)
 	if err != nil {
 		if errors.Is(err, errs.ErrCrawlNotFound) {
 			// If the search failed because the folder was not found,
 			// try again using the subject's OriginName
-			subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, subj.OriginName)
+			s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.OriginName)
 		}
 		if errors.Is(err, errs.ErrCrawlNotFound) {
 			// If the search still cannot found, try using each alias from the subject's Alias field
-			for _, n := range strings.Split(subj.Alias, "|") {
-				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
+			for _, n := range strings.Split(s.Alias, "|") {
+				s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				if err == nil {
 					return nil
 				} else if !errors.Is(err, errs.ErrCrawlNotFound) {
@@ -414,12 +316,12 @@ func (subj *Subject) Loadfileds(tips map[string]string) error {
 			}
 			// If all aliases failed, try removing the season number from the subject's Name and search again
 			re := regexp.MustCompile(`第(.)季`)
-			match := re.FindStringSubmatch(subj.Name)
+			match := re.FindStringSubmatch(s.Name)
 			if len(match) > 1 {
 				season := match[1]
-				n := strings.ReplaceAll(subj.Name, fmt.Sprintf("第%s季", season), "")
+				n := strings.ReplaceAll(s.Name, fmt.Sprintf("第%s季", season), "")
 				n = strings.TrimRight(n, " ")
-				subj.FolderName, subj.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
+				s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
 				return err
 			}
 		}
@@ -692,5 +594,41 @@ func (s *Subject) rssToTorr(torrUrl string) (err error) {
 	s.ResourceTyp = Torrent
 	h, err := torrent.Add(torrUrl, s.Path, s.QbtTag())
 	s.TorrentHash = h
+	return err
+}
+
+func (s *Subject) Rename(new string) error {
+	if s.Terminate && s.ResourceTyp == Torrent {
+		fs, err := DL.Qbt.Files(s.TorrentHash)
+		if err != nil {
+			return err
+		}
+		for _, f := range fs {
+			old := f.Name
+			newFullName := strings.ReplaceAll(old, s.FolderName, new)
+			err = DL.Qbt.RenameFile(s.TorrentHash, old, newFullName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if s.ResourceTyp == RSS {
+		for th := range s.RssTorrents {
+			fs, err := DL.Qbt.Files(th)
+			if err != nil {
+				return err
+			}
+			for _, f := range fs {
+				old := f.Name
+				newFullName := strings.ReplaceAll(old, s.FolderName, new)
+				err = DL.Qbt.RenameFile(th, old, newFullName)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	s.FolderName = new
+	err := s.writeJson()
 	return err
 }

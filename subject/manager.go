@@ -106,7 +106,24 @@ func (m *Manager) clear() {
 }
 
 func (m *Manager) Exit() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, s := range m.sto {
+		if !s.Terminate {
+			s.Exit()
+		}
+	}
 	m.wg.Wait()
+}
+
+func (m *Manager) Range(f func(int, *Subject) bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for i, s := range m.sto {
+		if !f(i, s) {
+			return
+		}
+	}
 }
 
 func StartManagement() {

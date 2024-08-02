@@ -1,6 +1,9 @@
 package cmd
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/NullpointerW/anicat/net/cmd/view"
+)
 
 type cTyp int
 
@@ -12,6 +15,7 @@ const (
 	LsItems
 	Status
 	Stop
+	Rename
 )
 
 type Cmd struct {
@@ -31,4 +35,32 @@ type AddFlag struct {
 
 type LsiFlag struct {
 	SearchList bool `json:"searchList"`
+}
+
+type CommandCase struct {
+	invoke func(Cmd, view.Render) (string, error)
+	flag   cTyp
+}
+
+func NewCommandCase(flag cTyp, invokeFunc func(Cmd, view.Render) (string, error)) CommandCase {
+	return CommandCase{invokeFunc, flag}
+}
+
+type Selector struct {
+	cases []CommandCase
+}
+
+func (sl *Selector) Select(c Cmd, r view.Render) (string, error) {
+	for _, _case := range sl.cases {
+		if c.Cmd == _case.flag {
+			return _case.invoke(c, r)
+		}
+	}
+	return "", nil
+}
+
+func NewSelector(cases ...CommandCase) *Selector {
+	return &Selector{
+		cases: cases,
+	}
 }
