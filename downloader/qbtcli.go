@@ -83,7 +83,7 @@ func setProxy(qbtCfg *qbt.Config) error {
 }
 
 func init() {
-	if CFG.Testing || CFG.SrvCTL {
+	if CFG.Testing || CFG.SrvCTL || CFG.Env.BuiltinDownloader {
 		// skip
 		return
 	}

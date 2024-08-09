@@ -59,7 +59,8 @@ type Environment struct {
 			SkipSSL      bool   `yaml:"skipssl"`
 		} `yaml:"email"`
 	} `yaml:"push"`
-	BgmiLog bool `yaml:"bangumi-log"`
+	BgmiLog           bool `yaml:"bangumi-log"`
+	BuiltinDownloader bool `yaml:"builtin-downloader"`
 }
 
 func (env *Environment) Print() {
