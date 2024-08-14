@@ -1,4 +1,4 @@
-package main
+package builtin
 
 import (
 	"fmt"
@@ -12,9 +12,48 @@ import (
 )
 
 type Downloader struct {
-	client    *torrent.Client
-	nopUpload bool
-	baseDir   string
+	client *torrent.Client
+	ReaderSeeker
+}
+type FileName interface {
+	Name() storage.FilePathMaker
+}
+
+type FileOption interface {
+	FileName
+	Dir() storage.TorrentDirFilePathMaker
+}
+
+func NewDownloader(basedir string, nopUpload bool, reader ReaderSeeker) *Downloader {
+	cfg := torrent.NewDefaultClientConfig()
+	cfg.NoUpload = nopUpload
+	fop := storage.NewFileClientOpts{}
+	fop.ClientBaseDir = basedir
+	cfg.DefaultStorage = storage.NewFileOpts(fop)
+	client, err := torrent.NewClient(cfg)
+	if err != nil {
+		panic(err)
+	}
+	return &Downloader{client, reader}
+}
+
+func (d *Downloader) Download(s string, fOp FileOption) (*torrent.Torrent, error) {
+	reader, err := d.Reader(s)
+	if err != nil {
+		return nil, err
+	}
+	mf, err := metainfo.Load(reader)
+	if err != nil {
+		return nil, err
+	}
+	ts := torrent.TorrentSpecFromMetaInfo(mf)
+	fop := storage.NewFileClientOpts{}
+	fop.TorrentDirMaker = fOp.Dir()
+	fop.FilePathMaker = fOp.Name()
+	ts.Storage = storage.NewFileOpts(fop)
+	t, _, err := d.client.AddTorrentSpec(ts)
+	return t, err
+
 }
 
 func main() {

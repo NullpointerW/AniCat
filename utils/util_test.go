@@ -70,3 +70,10 @@ func TestTrimGetEpi2(t *testing.T) {
 	// fmt.Printf("%02d", 1)
 	fmt.Printf("%02s", "02")
 }
+func TestStringAppender_Append(t *testing.T) {
+	ap := new(StringAppender)
+	ap.Append("i", "am", " ", "your", "father")
+	fmt.Println(ap.String())
+	ap.Append("Bye")
+	fmt.Println(ap.String())
+}

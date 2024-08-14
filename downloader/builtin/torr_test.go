@@ -1,4 +1,4 @@
-package main
+package builtin
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestReader(t *testing.T) {
-	var r Reader = NewHttpReader()
+	var r ReaderSeeker = NewHttpReader()
 	_, err := r.Reader("https://mikanani.me/Download/20240629/799328b2d580a66e25640fdea2d17302501eca08.torrent")
 	if err != nil {
 		fmt.Println(err)

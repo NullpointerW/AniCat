@@ -9,7 +9,7 @@ import (
 
 var (
 	logger *eslog.EnhanceLogger
-	init_  sync.Once
+	_init  sync.Once
 )
 
 type Struct []any
@@ -27,9 +27,9 @@ func NewUrlStruct(a ...any) Struct {
 	return append(s, a...)
 }
 
-// Warn: must use Init if imported, otherwise trigger nil pointer panic
+// Init initialization a structure log  must use Init if imported, otherwise trigger nil pointer panic
 func Init(handleType, level, timeLayout string, sourceFile bool, out io.Writer) {
-	init_.Do(func() {
+	_init.Do(func() {
 		logger = eslog.New(handleType, level, timeLayout, sourceFile, 1, out)
 	})
 }

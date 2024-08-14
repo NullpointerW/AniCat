@@ -1,4 +1,4 @@
-package main
+package builtin
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Reader interface {
+type ReaderSeeker interface {
 	Reader(n string) (io.Reader, error)
 }
 

@@ -54,15 +54,15 @@ const (
 
 var sregs = []string{reg0, reg1}
 
-const (
-	reg0v_epi  = `\[(\d{2})[vV]`  // [02v1] // \[(\d+)\w*\]
-	reg1_epi   = `\[(\d+)\]`      // [02]
-	reg2_epi   = `- ?(\d+)`       // - 02
-	reg3_epi   = `\[(\d+)[集话話]\]` // [02集]
-	reg4_epi   = `第(\d+)[话話集]`    // 第02集
-	reg5_epi   = `\s+(\d+)`       // xxx 02
-	regSpecial = `#\s*(\d+)`      // #02
-)
+//const (
+//	reg0v_epi  = `\[(\d{2})[vV]`  // [02v1] // \[(\d+)\w*\]
+//	reg1_epi   = `\[(\d+)\]`      // [02]
+//	reg2_epi   = `- ?(\d+)`       // - 02
+//	reg3_epi   = `\[(\d+)[集话話]\]` // [02集]
+//	reg4_epi   = `第(\d+)[话話集]`    // 第02集
+//	reg5_epi   = `\s+(\d+)`       // xxx 02
+//	regSpecial = `#\s*(\d+)`      // #02
+//)
 
 const (
 	reg0_coll = `\[[^\]]*\d+(\.\d+)\s*[Gg][Bb][^\]]*\]`
@@ -83,7 +83,7 @@ const (
 
 var coll_regs = []string{reg0_coll}
 
-var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi, reg3_epi, reg4_epi, reg5_epi}
+//var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi, reg3_epi, reg4_epi, reg5_epi}
 
 var part_regs = []string{reg0_part, reg1_part, reg2_part}
 
