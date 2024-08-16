@@ -65,9 +65,13 @@ type Subject struct {
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed renamed episodes,avoid duplicate push.
 	// content will like be `xxx S01E01,xxx S01E05...`
-	Pushed        map[string]string   `json:"pushed"`
-	RssTorrents   map[string]struct{} `json:"rssTorrents"`
-	OperationChan chan Operate        `json:"-"`
+	Pushed          map[string]string   `json:"pushed"`
+	RssTorrents     map[string]struct{} `json:"rssTorrents"`
+	OperationChan   chan Operate        `json:"-"`
+	BuiltinDownload bool                `json:"builtinDownload"`
+	RssReader       *rss.Reader         `json:"-"`
+	RssGuids        map[string]struct{} `json:"rssGuids"`
+	Filter          *FilterVerb         `json:"filter"`
 }
 type subjOp int
 
@@ -163,9 +167,13 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		return 0, err
 	}
 
-	err = download(subject, ext)
-	if err != nil {
-		return 0, err
+	if !subject.BuiltinDownload {
+		err = download(subject, ext)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		err = BuiltinDownloadPrepare(subject, ext)
 	}
 
 	// create Info-Json after init completed
@@ -631,4 +639,10 @@ func (s *Subject) Rename(new string) error {
 	s.FolderName = new
 	err := s.writeJson()
 	return err
+}
+func BuiltinDownloadPrepare(s *Subject, ex *Extra) error {
+	if s.ResourceTyp != Torrent {
+		BuildFilter(s, ex)
+	}
+	return RssReader(s)
 }

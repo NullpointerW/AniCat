@@ -1,7 +1,9 @@
 package subject
 
 import (
+	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/downloader/builtin"
+	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/rename"
 	util "github.com/NullpointerW/anicat/utils"
 	"github.com/anacrolix/torrent/metainfo"
@@ -19,6 +21,90 @@ func (d FilePath) Dir() storage.TorrentDirFilePathMaker {
 	return func(baseDir string, info *metainfo.Info, infoHash metainfo.Hash) string {
 		return d.DirPath
 	}
+}
+
+func BuildFilter(s *Subject, ex *Extra) {
+	if ex == nil || ex.NoArgs() {
+		if CFG.Env.EnabledFilter() {
+			c := BuildFilterRegs(CFG.Env.RssFilter.Contain)
+			e := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
+			s.Filter = &FilterVerb{
+				false,
+				c,
+				e,
+			}
+		}
+	} else {
+		if ex.RssOption.UseRegex {
+			s.Filter = &FilterVerb{
+				true,
+				ex.RssOption.MustContain,
+				ex.RssOption.MustNotContain,
+			}
+			return
+		}
+		s.Filter = &FilterVerb{
+			false,
+			strings.Fields(ex.RssOption.MustContain),
+			strings.Fields(ex.RssOption.MustNotContain),
+		}
+	}
+}
+func RssReader(s *Subject) error {
+	if s.ResourceTyp == Torrent {
+		return nil
+	}
+	var ff rss.FilterFunc
+	if s.Filter != nil {
+		ff = s.Filter.Filter()
+	}
+	r := rss.NewReader(s.ResourceUrl, s.RssGuids, ff)
+	if s.Typ == TV {
+		if s.Finished {
+			its, ok, err := r.Seek()
+			if err != nil {
+				return err
+			}
+			if ok {
+				for _, it := range its {
+					if s.isCollection(it.Desc) {
+						s.ResourceTyp = Torrent
+						s.ResourceUrl = it.TorrUrl
+						return nil
+					}
+				}
+			}
+		}
+	} else {
+		it, ok, err := r.ReadOne()
+		if err != nil {
+			return err
+		}
+		if ok {
+			s.ResourceTyp = Torrent
+			s.ResourceUrl = it.TorrUrl
+			return nil
+		}
+	}
+	s.RssReader = r
+	return nil
+}
+
+func (s *Subject) builtinDownload() error {
+	//switch {
+	//case s.ResourceTyp == Torrent && s.Typ == TV:
+	//	dirPath := s.Path
+	//	fileOpt := TorrFileOpt{
+	//		s,
+	//	}
+	//	fp := FilePath{
+	//		DirPath:  dirPath,
+	//		FileName: &fileOpt,
+	//	}
+	//
+	//case RSS:
+	//}
+	return nil
 }
 
 type RssFileOpt struct {

@@ -2,10 +2,36 @@ package subject
 
 import (
 	"fmt"
+	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strings"
 )
+
+type FilterVerb struct {
+	Single    bool `json:"regexp"`
+	Contain   any  `json:"contain"`
+	Exclusion any  `json:"exclusion"`
+}
+
+func NewFilterVerb(regexp bool, c, e any) *FilterVerb {
+	return &FilterVerb{
+		Single:    regexp,
+		Contain:   c,
+		Exclusion: e,
+	}
+}
+func (f *FilterVerb) Filter() rss.FilterFunc {
+	if f.Single {
+		return func(n string) bool {
+			return FilterWithReg(n, f.Contain.(string), f.Exclusion.(string))
+		}
+	}
+	return func(n string) bool {
+		return FilterWithRegs(n, f.Contain.([]string), f.Exclusion.([]string))
+	}
+
+}
 
 func BuildFilterPerlReg(vbs []string) string {
 	var reg string
@@ -103,8 +129,12 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 }
 
 func FilterWithCustomReg(s string, e Extra) bool {
+	return FilterWithReg(s, e.RssOption.MustContain, e.RssOption.MustNotContain)
+}
+
+func FilterWithReg(s string, c, e string) bool {
 	clsOk, exlOk := true, true
-	if cls := e.RssOption.MustContain; cls != "" {
+	if cls := c; cls != "" {
 		clsReg, err := regexp.Compile(cls)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
@@ -112,7 +142,7 @@ func FilterWithCustomReg(s string, e Extra) bool {
 			clsOk = clsReg.MatchString(s)
 		}
 	}
-	if exl := e.RssOption.MustNotContain; exl != "" {
+	if exl := e; exl != "" {
 		exlReg, err := regexp.Compile(exl)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")

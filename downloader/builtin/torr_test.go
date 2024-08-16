@@ -7,12 +7,12 @@ import (
 )
 
 func TestReader(t *testing.T) {
-	var r ReaderSeeker = NewHttpReader()
-	_, err := r.Reader("https://mikanani.me/Download/20240629/799328b2d580a66e25640fdea2d17302501eca08.torrent")
+	var r Seeker = NewHttpReader()
+	_, err := r.Seek("https://mikanani.me/Download/20240629/799328b2d580a66e25640fdea2d17302501eca08.torrent")
 	if err != nil {
 		fmt.Println(err)
 	}
-	rr, err := r.Reader("https://mikanani.me/Download/20240629/799328b2d580a66e25640fdea2d17302501eca08.x")
+	rr, err := r.Seek("https://mikanani.me/Download/20240629/799328b2d580a66e25640fdea2d17302501eca08.x")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -22,7 +22,7 @@ func TestReader(t *testing.T) {
 	} else {
 		fmt.Println(string(all))
 	}
-	_, err = r.Reader("x-man")
+	_, err = r.Seek("x-man")
 	if err != nil {
 		fmt.Println(err)
 	}

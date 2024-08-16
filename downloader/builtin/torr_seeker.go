@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
-type ReaderSeeker interface {
-	Reader(n string) (io.Reader, error)
+type TorrentSeeker interface {
+	Seek(n string) (io.Reader, error)
 }
 
 type HttpUrlReader struct {
 	*http.Client
 }
 
-func (hr *HttpUrlReader) Reader(n string) (io.Reader, error) {
+func (hr *HttpUrlReader) Seek(n string) (io.Reader, error) {
 	p, err := url.Parse(n)
 	if err != nil || !(p.Scheme == "http" || p.Scheme == "https") {
 		return nil, fmt.Errorf("invalid url: %s", n)
