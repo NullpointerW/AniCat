@@ -7,7 +7,7 @@ import (
 )
 
 func TestReader(t *testing.T) {
-	var r Seeker = NewHttpReader()
+	var r TorrentSeeker = NewHttpReader()
 	_, err := r.Seek("https://mikanani.me/Download/20240629/799328b2d580a66e25640fdea2d17302501eca08.torrent")
 	if err != nil {
 		fmt.Println(err)
