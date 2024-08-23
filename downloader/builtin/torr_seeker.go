@@ -2,21 +2,22 @@ package builtin
 
 import (
 	"fmt"
-	"io"
+	"github.com/anacrolix/torrent"
+	"github.com/anacrolix/torrent/metainfo"
 	"net/http"
 	"net/url"
 	"time"
 )
 
 type TorrentSeeker interface {
-	Seek(n string) (io.Reader, error)
+	Seek(n string) (*torrent.TorrentSpec, error)
 }
 
-type HttpUrlReader struct {
+type HttpUrlSeeker struct {
 	*http.Client
 }
 
-func (hr *HttpUrlReader) Seek(n string) (io.Reader, error) {
+func (hr *HttpUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
 	p, err := url.Parse(n)
 	if err != nil || !(p.Scheme == "http" || p.Scheme == "https") {
 		return nil, fmt.Errorf("invalid url: %s", n)
@@ -25,17 +26,29 @@ func (hr *HttpUrlReader) Seek(n string) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
-	return resp.Body, nil
+	mf, err := metainfo.Load(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	ts := torrent.TorrentSpecFromMetaInfo(mf)
+	return ts, nil
 }
-func NewHttpReader() *HttpUrlReader {
+func NewHttpSeeker() *HttpUrlSeeker {
 	transport := &http.Transport{
 		MaxIdleConns:        10,
 		MaxIdleConnsPerHost: 10,
 		IdleConnTimeout:     90 * time.Second,
 		MaxConnsPerHost:     10,
 	}
-	return &HttpUrlReader{
+	return &HttpUrlSeeker{
 		&http.Client{Transport: transport},
 	}
 
+}
+
+type MagnetUrlSeeker struct {
+}
+
+func (m *MagnetUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
+	return torrent.TorrentSpecFromMagnetUri(n)
 }
