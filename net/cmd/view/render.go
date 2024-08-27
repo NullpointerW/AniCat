@@ -3,6 +3,7 @@ package view
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NullpointerW/anicat/net"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -18,9 +19,12 @@ type Render interface {
 	TorrList(its []CR.Item) string
 	Ls(ls []subject.Subject) string
 	Status(subj *subject.Subject, torrs ...qbt.Torrent) string
+	StatusBuiltin(subj *subject.Subject)
 }
 
-type AsciiRender struct{}
+type AsciiRender struct {
+	Conn *net.Conn
+}
 
 func (_ AsciiRender) RssGroup(rgs []CR.RssGroup) string {
 	var row [][]string
@@ -143,6 +147,10 @@ func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string 
 	table.AppendBulk(row)
 	table.Render()
 	return "\n" + header + tableString.String()
+}
+
+func (r AsciiRender) StatusBuiltin(s *subject.Subject) {
+
 }
 
 type TorrItem struct {

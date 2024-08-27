@@ -14,6 +14,18 @@ import (
 	"strconv"
 )
 
+type hijackConn struct {
+	*N.Conn
+	hijacked bool
+}
+
+func (hc *hijackConn) Write(s string) error {
+	if s != "" {
+		return hc.Conn.Write(s)
+	}
+	return nil
+}
+
 func Listen() {
 	p := CFG.Env.Port
 	if p == 0 {
@@ -36,16 +48,22 @@ func Listen() {
 			continue
 		}
 
-		go process(&N.Conn{
+		go process(&hijackConn{&N.Conn{
 			TcpConn: c,
-		})
+		}, false})
 	}
 }
 
-func process(c *N.Conn) {
-	defer c.TcpConn.Close()
+func process(c *hijackConn) {
+	defer func() {
+		if !c.hijacked {
+			_ = c.TcpConn.Close()
+		}
+	}()
 	var (
-		render  view.Render = view.AsciiRender{}
+		render view.Render = view.AsciiRender{
+			Conn: c.Conn,
+		}
 		command cmd.Cmd
 	)
 	if msg, err := c.Read(); err == nil {
