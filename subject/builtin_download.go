@@ -12,6 +12,10 @@ import (
 	"strings"
 )
 
+type DownloadedInfo struct {
+	Size int
+	Name int
+}
 type FilePath struct {
 	builtin.FileName
 	DirPath string

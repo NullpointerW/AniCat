@@ -59,6 +59,8 @@ type Subject struct {
 	// it will send downLoad message to subject-running goroutine
 	// received and push to terminal
 	PushChan chan qbt.Torrent `json:"-"`
+
+	PushChanBuiltin chan DownloadedInfo `json:"-"`
 	// The anime series of this project has already ended and all episodes have been downloaded.
 	// while init,if this flag is true then there is no need to start a goroutine to run it
 	// exit actively flag should be set to true
@@ -169,15 +171,18 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 
 	if !subject.BuiltinDownload {
 		err = download(subject, ext)
-		if err != nil {
-			return 0, err
-		}
 	} else {
 		err = BuiltinDownloadPrepare(subject, ext)
 	}
+	if err != nil {
+		return 0, err
+	}
 
 	// create Info-Json after init completed
-	subject.writeJson()
+	err = subject.writeJson()
+	if err != nil {
+		return 0, err
+	}
 
 	subject.runtimeInit(false)
 
@@ -248,11 +253,20 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	err = download(subject, ext)
+
+	if !subject.BuiltinDownload {
+		err = download(subject, ext)
+	} else {
+		err = BuiltinDownloadPrepare(subject, ext)
+	}
 	if err != nil {
 		return 0, err
 	}
-	subject.writeJson()
+
+	err = subject.writeJson()
+	if err != nil {
+		return 0, err
+	}
 	subject.runtimeInit(false)
 	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
 	return sid, nil

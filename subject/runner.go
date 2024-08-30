@@ -5,6 +5,7 @@ import (
 	"fmt"
 	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/downloader"
+	"github.com/NullpointerW/anicat/downloader/builtin"
 	"github.com/NullpointerW/anicat/downloader/rss"
 	TORR "github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -14,6 +15,7 @@ import (
 	"github.com/NullpointerW/anicat/pusher/email"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	"strings"
 	"time"
 )
 
@@ -28,14 +30,56 @@ func (s *Subject) runtimeInit(reload bool) {
 	c := context.Background()
 	ctx, exit := context.WithCancel(c)
 	s.Exit = exit
-	s.PushChan = make(chan qbt.Torrent, 1024)
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
 	}
 	s.OperationChan = make(chan Operate)
 	Mgr.Add(s)
-	go s.run(ctx, reload)
+	if s.BuiltinDownload {
+		s.PushChanBuiltin = make(chan DownloadedInfo, 1024)
+		go s.runWithBuiltinDownloader(ctx, reload)
+	} else {
+		s.PushChan = make(chan qbt.Torrent, 1024)
+		go s.run(ctx, reload)
+	}
 	go JellyfinMetaDataHelper(s.Path, s.FolderName, s.Exited)
+}
+
+func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
+	Mgr.wg.Add(1)
+	defer Mgr.wg.Done()
+	if reload {
+		log.Debug(log.Struct{"sid", s.SubjId}, "subject reload")
+		//s.checkDL()
+	}
+	t := time.NewTicker(30 * time.Minute)
+	for {
+		select {
+		case o := <-s.OperationChan:
+			switch o.op {
+			case Rename:
+				err := s.Rename(o.arg.(string))
+				if err != nil {
+					log.Error(log.Struct{"sid", s.SubjId, "err", err}, "rename failed")
+				}
+			}
+		case torr := <-s.PushChan:
+			err := s.push(torr, email.Poster)
+			if err != nil {
+				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
+			}
+		case <-ctx.Done():
+			log.Debug(log.Struct{"sid", s.SubjId}, "runner exited")
+			exit(s)
+			return
+		case <-t.C:
+			log.Debug(log.Struct{"sid", s.SubjId}, "subject update mission started")
+			err := s.update()
+			if err != nil {
+				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "update mission failed")
+			}
+		}
+	}
 }
 
 func (s *Subject) run(ctx context.Context, reload bool) {
@@ -289,4 +333,45 @@ func (s *Subject) terminate() {
 		log.Info(log.Struct{"err", err}, "write json failed")
 	}
 	s.Exit()
+}
+
+func (s *Subject) readRssAndDownload() {
+	if s.ResourceTyp == Torrent {
+		return
+	}
+	read, ok, err := s.RssReader.Read()
+	if err != nil {
+		log.Error(log.Struct{"err", err}, "read rss error")
+		return
+	}
+	if ok {
+		for _, r := range read {
+			fakeFn := r.Title + ".mp4"
+			renamed, err := renameTV(s, fakeFn)
+			if err != nil {
+				log.Error(log.Struct{"err", err}, "rename failed")
+				renamed = r.Title
+			} else {
+				renamed = strings.TrimSuffix(renamed, ".mp4")
+			}
+			if s.RssTorrents == nil {
+				s.RssTorrents = map[string]struct{}{}
+			}
+			if _, ex := s.RssTorrents[renamed]; ex {
+				log.Warn(log.Struct{"file", r.Desc}, "skip duplicate episode")
+				continue
+			}
+			s.RssTorrents[renamed] = struct{}{}
+			rop := RssFileOpt{Renamed: renamed}
+			fop := FilePath{FileName: &rop, DirPath: s.Path}
+			torrent, err := builtin.DefaultDownLoader.Download(r.TorrUrl, fop, nil)
+			if err != nil {
+				log.Error(log.Struct{"err", err}, "download failed")
+				s.RssReader.Undo(r.Guid)
+				continue
+			}
+
+		}
+	}
+
 }

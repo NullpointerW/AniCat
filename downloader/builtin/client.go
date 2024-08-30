@@ -1,12 +1,15 @@
 package builtin
 
 import (
-	"fmt"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/storage"
 )
 
 var DefaultDownLoader *Downloader
+
+func InitDownloader() {
+	DefaultDownLoader = NewDownloader("./.db", false, NewHttpSeeker())
+}
 
 type Downloader struct {
 	client *torrent.Client
@@ -60,8 +63,8 @@ func (d *Downloader) Download(s string, fOp FileOption, seeker TorrentSeeker) (*
 	fop.TorrentDirMaker = fOp.Dir()
 	fop.FilePathMaker = fOp.Name()
 	ts.Storage = storage.NewFileOpts(fop)
-	t, n, err := d.client.AddTorrentSpec(ts)
-	fmt.Println("torr is new?: ", n)
+	t, _, err := d.client.AddTorrentSpec(ts)
+	//fmt.Println("torr is new?: ", n)
 	return t, err
 
 }

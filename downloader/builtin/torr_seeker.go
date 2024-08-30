@@ -49,6 +49,6 @@ func NewHttpSeeker() *HttpUrlSeeker {
 type MagnetUrlSeeker struct {
 }
 
-func (m *MagnetUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
+func (_ *MagnetUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
 	return torrent.TorrentSpecFromMagnetUri(n)
 }

@@ -17,6 +17,7 @@ type Item struct {
 	TorrUrl string
 	Desc    string
 	Title   string
+	Guid    string
 }
 
 func NewReader(feed string, guids map[string]struct{}, filterFunc FilterFunc) *Reader {
@@ -39,6 +40,7 @@ func (r *Reader) Read() ([]Item, bool, error) {
 	for _, it := range f.Items {
 		if _, ex := r.guids[it.GUID]; !ex {
 			itt := Item{}
+			itt.Guid = it.GUID
 			itt.TorrUrl = it.Enclosures[0].URL
 			itt.Title = it.Title
 			itt.Desc = it.Description
@@ -94,4 +96,8 @@ func (r *Reader) Guids() map[string]struct{} {
 	var readonly = make(map[string]struct{})
 	maps.Copy(readonly, r.guids)
 	return readonly
+}
+
+func (r *Reader) Undo(guid string) {
+	delete(r.guids, guid)
 }
