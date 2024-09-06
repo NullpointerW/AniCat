@@ -22,6 +22,7 @@ import (
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
+	builtin_torrent "github.com/anacrolix/torrent"
 )
 
 // Subject as a basic object of each bangumi
@@ -67,13 +68,18 @@ type Subject struct {
 	Terminate bool `json:"terminate"`
 	// a Set store all pushed renamed episodes,avoid duplicate push.
 	// content will like be `xxx S01E01,xxx S01E05...`
-	Pushed          map[string]string   `json:"pushed"`
-	RssTorrents     map[string]struct{} `json:"rssTorrents"`
-	OperationChan   chan Operate        `json:"-"`
-	BuiltinDownload bool                `json:"builtinDownload"`
-	RssReader       *rss.Reader         `json:"-"`
-	RssGuids        map[string]struct{} `json:"rssGuids"`
-	Filter          *FilterVerb         `json:"filter"`
+	Pushed        map[string]string   `json:"pushed"`
+	RssTorrents   map[string]struct{} `json:"rssTorrents"`
+	OperationChan chan Operate        `json:"-"`
+	// builtin-downloader filed
+	BuiltinDownload     bool                          `json:"builtinDownload"`
+	RssTorrentsName     map[string]struct{}           `json:"rssTorrentsName"`
+	RssReader           *rss.Reader                   `json:"-"`
+	RssGuids            map[string]struct{}           `json:"rssGuids"`
+	Filter              *FilterVerb                   `json:"filter"`
+	TorrentUrls         map[string]struct{}           `json:"torrentUrls"`
+	TorrentFinishedUrls map[string]struct{}           `json:"torrentFinishedUrls"`
+	Detctchan           chan *builtin_torrent.Torrent `json:"-"`
 }
 type subjOp int
 

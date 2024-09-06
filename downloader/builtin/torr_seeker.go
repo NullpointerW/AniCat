@@ -2,11 +2,13 @@ package builtin
 
 import (
 	"fmt"
-	"github.com/anacrolix/torrent"
-	"github.com/anacrolix/torrent/metainfo"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
+
+	"github.com/anacrolix/torrent"
+	"github.com/anacrolix/torrent/metainfo"
 )
 
 type TorrentSeeker interface {
@@ -19,7 +21,7 @@ type HttpUrlSeeker struct {
 
 func (hr *HttpUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
 	p, err := url.Parse(n)
-	if err != nil || !(p.Scheme == "http" || p.Scheme == "https") {
+	if scheme := strings.ToLower(p.Scheme); err != nil || !(scheme == "http" || scheme == "https") {
 		return nil, fmt.Errorf("invalid url: %s", n)
 	}
 	resp, err := hr.Get(n)
@@ -44,11 +46,4 @@ func NewHttpSeeker() *HttpUrlSeeker {
 		&http.Client{Transport: transport},
 	}
 
-}
-
-type MagnetUrlSeeker struct {
-}
-
-func (_ *MagnetUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
-	return torrent.TorrentSpecFromMagnetUri(n)
 }

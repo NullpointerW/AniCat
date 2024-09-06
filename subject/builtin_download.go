@@ -1,15 +1,17 @@
 package subject
 
 import (
+	"path/filepath"
+	"strings"
+
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/downloader/builtin"
 	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/rename"
 	util "github.com/NullpointerW/anicat/utils"
+	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/anacrolix/torrent/storage"
-	"path/filepath"
-	"strings"
 )
 
 type DownloadedInfo struct {
@@ -25,6 +27,12 @@ func (d FilePath) Dir() storage.TorrentDirFilePathMaker {
 	return func(baseDir string, info *metainfo.Info, infoHash metainfo.Hash) string {
 		return d.DirPath
 	}
+}
+
+func (s *Subject) builtinDownload(t *torrent.Torrent) {
+	<-t.GotInfo()
+	t.DownloadAll()
+	s.Detctchan <- t
 }
 
 func BuildFilter(s *Subject, ex *Extra) {
@@ -91,23 +99,6 @@ func RssReader(s *Subject) error {
 		}
 	}
 	s.RssReader = r
-	return nil
-}
-
-func (s *Subject) builtinDownload() error {
-	//switch {
-	//case s.ResourceTyp == Torrent && s.Typ == TV:
-	//	dirPath := s.Path
-	//	fileOpt := TorrFileOpt{
-	//		s,
-	//	}
-	//	fp := FilePath{
-	//		DirPath:  dirPath,
-	//		FileName: &fileOpt,
-	//	}
-	//
-	//case RSS:
-	//}
 	return nil
 }
 
@@ -183,4 +174,12 @@ func (m *MovieFileOpt) Name() storage.FilePathMaker {
 		}
 		return opts.Info.Name
 	}
+}
+
+
+type MagnetUrlSeeker struct {
+}
+
+func (_ *MagnetUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
+	return torrent.TorrentSpecFromMagnetUri(n)
 }

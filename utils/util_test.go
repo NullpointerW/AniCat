@@ -77,3 +77,14 @@ func TestStringAppender_Append(t *testing.T) {
 	ap.Append("Bye")
 	fmt.Println(ap.String())
 }
+
+func TestSetSubtract(t *testing.T) {
+	a :=map[string]struct{}{}
+	b :=map[string]struct{}{}
+	a["abc"]=struct{}{}
+	a["abc1"]=struct{}{}
+	a["abc3"]=struct{}{}
+	b["abc3"]=struct{}{}
+	c:=SetSubtract(a,b)
+	fmt.Println(c)
+}

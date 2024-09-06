@@ -3,6 +3,11 @@ package subject
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"reflect"
+	"strings"
+	"time"
+
 	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/downloader"
 	"github.com/NullpointerW/anicat/downloader/builtin"
@@ -15,8 +20,6 @@ import (
 	"github.com/NullpointerW/anicat/pusher/email"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	"strings"
-	"time"
 )
 
 // runtimeInit before goroutine handle it init inner channels and ctx func
@@ -53,6 +56,38 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 		//s.checkDL()
 	}
 	t := time.NewTicker(30 * time.Minute)
+	if s.ResourceTyp == Torrent {
+		var seeker builtin.TorrentSeeker
+		u, err := url.Parse(s.ResourceUrl)
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "parse torrentUrl failed")
+			s.Exit()
+		}
+		scheme := strings.ToLower(u.Scheme)
+		switch {
+		case scheme == "magnet":
+			seeker = &MagnetUrlSeeker{}
+		case scheme == "http" || scheme == "https":
+			seeker = nil
+		default:
+			log.Error(log.Struct{"err", fmt.Errorf("unexpected scheme %q", u.Scheme)}, "parse torrentUrl failed")
+			s.Exit()
+		}
+		var fop builtin.FileOption
+		switch s.Typ {
+		case TV:
+			fop = FilePath{FileName: &TorrFileOpt{s}, DirPath: s.Path}
+		case MOVIE:
+			fop = FilePath{FileName: new(MovieFileOpt), DirPath: s.Path}
+		}
+		t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
+		if err != nil {
+			log.Error(log.Struct{"err",err}, "download torrentResource failed")
+			s.Exit()
+		}
+		go s.builtinDownload(t)
+	}
+	
 	for {
 		select {
 		case o := <-s.OperationChan:
@@ -78,6 +113,7 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "update mission failed")
 			}
+			s.readRssAndDownload()
 		}
 	}
 }
@@ -328,6 +364,7 @@ func (s *Subject) push(torr qbt.Torrent, pusher P.Pusher) error {
 func (s *Subject) terminate() {
 	log.Debug(log.Struct{"sid", s.SubjId, "resType", s.ResourceTyp.String()}, "exited")
 	s.Terminate, s.Finished = true, true
+	//FIXME: maybe ignore writejson case writing while exit context
 	err := s.writeJson()
 	if err != nil {
 		log.Info(log.Struct{"err", err}, "write json failed")
@@ -354,23 +391,23 @@ func (s *Subject) readRssAndDownload() {
 			} else {
 				renamed = strings.TrimSuffix(renamed, ".mp4")
 			}
-			if s.RssTorrents == nil {
-				s.RssTorrents = map[string]struct{}{}
+			if s.RssTorrentsName == nil {
+				s.RssTorrentsName = map[string]struct{}{}
 			}
-			if _, ex := s.RssTorrents[renamed]; ex {
+			if _, ex := s.RssTorrentsName[renamed]; ex {
 				log.Warn(log.Struct{"file", r.Desc}, "skip duplicate episode")
 				continue
 			}
-			s.RssTorrents[renamed] = struct{}{}
+			s.RssTorrentsName[renamed] = struct{}{}
 			rop := RssFileOpt{Renamed: renamed}
 			fop := FilePath{FileName: &rop, DirPath: s.Path}
-			torrent, err := builtin.DefaultDownLoader.Download(r.TorrUrl, fop, nil)
+			t, err := builtin.DefaultDownLoader.Download(r.TorrUrl, fop, nil)
 			if err != nil {
 				log.Error(log.Struct{"err", err}, "download failed")
 				s.RssReader.Undo(r.Guid)
 				continue
 			}
-
+			go s.builtinDownload(t)
 		}
 	}
 
