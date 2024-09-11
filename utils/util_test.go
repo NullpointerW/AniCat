@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	// "reflect"
 	"testing"
 )
 
@@ -87,4 +88,16 @@ func TestSetSubtract(t *testing.T) {
 	b["abc3"]=struct{}{}
 	c:=SetSubtract(a,b)
 	fmt.Println(c)
+}
+
+func Test2(t *testing.T) {
+	ch:=make(chan string)
+	close(ch)
+		select{
+		case 	ch<- "didi":
+		default:
+			fmt.Println("ok?")	
+		}
+		
+	
 }

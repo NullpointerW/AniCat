@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	DL "github.com/NullpointerW/anicat/downloader"
-	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	DL "github.com/NullpointerW/anicat/downloader"
+	"github.com/NullpointerW/anicat/log"
 
 	CC "github.com/NullpointerW/anicat/crawl/cover"
 	IC "github.com/NullpointerW/anicat/crawl/information"
@@ -17,12 +18,13 @@ import (
 
 	// DL "github.com/NullpointerW/anicat/downloader"
 	CFG "github.com/NullpointerW/anicat/conf"
+
+	"github.com/NullpointerW/anicat/downloader/builtin"
 	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
-	builtin_torrent "github.com/anacrolix/torrent"
 )
 
 // Subject as a basic object of each bangumi
@@ -72,14 +74,14 @@ type Subject struct {
 	RssTorrents   map[string]struct{} `json:"rssTorrents"`
 	OperationChan chan Operate        `json:"-"`
 	// builtin-downloader filed
-	BuiltinDownload     bool                          `json:"builtinDownload"`
-	RssTorrentsName     map[string]struct{}           `json:"rssTorrentsName"`
-	RssReader           *rss.Reader                   `json:"-"`
-	RssGuids            map[string]struct{}           `json:"rssGuids"`
-	Filter              *FilterVerb                   `json:"filter"`
-	TorrentUrls         map[string]struct{}           `json:"torrentUrls"`
-	TorrentFinishedUrls map[string]struct{}           `json:"torrentFinishedUrls"`
-	Detctchan           chan *builtin_torrent.Torrent `json:"-"`
+	BuiltinDownload     bool                            `json:"builtinDownload"`
+	RssTorrentsName     map[string]struct{}             `json:"rssTorrentsName"`
+	RssReader           *rss.Reader                     `json:"-"`
+	RssGuids            map[string]struct{}             `json:"rssGuids"`
+	Filter              *FilterVerb                     `json:"filter"`
+	TorrentUrls         map[string]struct{}             `json:"torrentUrls"`
+	TorrentFinishedUrls map[string]struct{}             `json:"torrentFinishedUrls"`
+	Detctchan           chan builtin.MonitoredTorrent `json:"-"`
 }
 type subjOp int
 
@@ -523,7 +525,7 @@ func GetSeason(s *Subject) {
 		if len(match) > 1 {
 			m := match[1]
 			if iszh := util.CheckZhCn(m); iszh {
-				m = util.ConvertZhCnNumbToa(m)
+				m,_ = util.ConvertZhCnNumbToa(m)
 			}
 			s.Season = fmt.Sprintf("%02s", m)
 			return
