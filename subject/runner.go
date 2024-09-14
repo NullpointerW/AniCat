@@ -39,7 +39,9 @@ func (s *Subject) runtimeInit(reload bool) {
 	s.OperationChan = make(chan Operate)
 	Mgr.Add(s)
 	if s.BuiltinDownload {
-		s.PushChanBuiltin = make(chan DownloadedInfo, 1024)
+		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
+		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
+		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx)
 		go s.runWithBuiltinDownloader(ctx, reload)
 	} else {
 		s.PushChan = make(chan qbt.Torrent, 1024)
@@ -82,12 +84,12 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 		}
 		t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
 		if err != nil {
-			log.Error(log.Struct{"err",err}, "download torrentResource failed")
+			log.Error(log.Struct{"err", err}, "download torrentResource failed")
 			s.Exit()
 		}
 		go s.builtinDownload(t)
 	}
-	
+
 	for {
 		select {
 		case o := <-s.OperationChan:

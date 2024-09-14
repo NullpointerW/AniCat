@@ -62,8 +62,6 @@ type Subject struct {
 	// it will send downLoad message to subject-running goroutine
 	// received and push to terminal
 	PushChan chan qbt.Torrent `json:"-"`
-
-	PushChanBuiltin chan DownloadedInfo `json:"-"`
 	// The anime series of this project has already ended and all episodes have been downloaded.
 	// while init,if this flag is true then there is no need to start a goroutine to run it
 	// exit actively flag should be set to true
@@ -74,14 +72,15 @@ type Subject struct {
 	RssTorrents   map[string]struct{} `json:"rssTorrents"`
 	OperationChan chan Operate        `json:"-"`
 	// builtin-downloader filed
-	BuiltinDownload     bool                            `json:"builtinDownload"`
-	RssTorrentsName     map[string]struct{}             `json:"rssTorrentsName"`
-	RssReader           *rss.Reader                     `json:"-"`
-	RssGuids            map[string]struct{}             `json:"rssGuids"`
-	Filter              *FilterVerb                     `json:"filter"`
-	TorrentUrls         map[string]struct{}             `json:"torrentUrls"`
-	TorrentFinishedUrls map[string]struct{}             `json:"torrentFinishedUrls"`
-	Detctchan           chan builtin.MonitoredTorrent `json:"-"`
+	BuiltinDownload     bool                          `json:"builtinDownload"`
+	RssTorrentsName     map[string]struct{}           `json:"rssTorrentsName"`
+	RssReader           *rss.Reader                   `json:"-"`
+	RssGuids            map[string]struct{}           `json:"rssGuids"`
+	Filter              *FilterVerb                   `json:"filter"`
+	TorrentUrls         map[string]struct{}           `json:"torrentUrls"`
+	TorrentFinishedUrls map[string]struct{}           `json:"torrentFinishedUrls"`
+	DetctchanBuiltin         chan builtin.MonitoredTorrent `json:"-"`
+	PushChanBuiltin     chan builtin.MonitoredTorrent `json:"-"`
 }
 type subjOp int
 
@@ -525,7 +524,7 @@ func GetSeason(s *Subject) {
 		if len(match) > 1 {
 			m := match[1]
 			if iszh := util.CheckZhCn(m); iszh {
-				m,_ = util.ConvertZhCnNumbToa(m)
+				m, _ = util.ConvertZhCnNumbToa(m)
 			}
 			s.Season = fmt.Sprintf("%02s", m)
 			return
