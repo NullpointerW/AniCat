@@ -43,6 +43,12 @@ func (s *Subject) runtimeInit(reload bool) {
 		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
 		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx)
 		go s.runWithBuiltinDownloader(ctx, reload)
+		if s.TorrentUrls == nil {
+			s.TorrentUrls = make(map[string]RssFileOptStrage)
+		}
+		if s.TorrentFinishedUrls == nil {
+			s.TorrentFinishedUrls = make(map[string]struct{})
+		}
 	} else {
 		s.PushChan = make(chan qbt.Torrent, 1024)
 		go s.run(ctx, reload)
@@ -87,9 +93,20 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			log.Error(log.Struct{"err", err}, "download torrentResource failed")
 			s.Exit()
 		}
-		go s.builtinDownload(t)
+		s.builtinDownload(builtin.MonitoredTorrent{Torrent: t})
 	}
-
+	if s.ResourceTyp == RSS {
+		var ff rss.FilterFunc
+		if s.Filter != nil {
+			ff = s.Filter.Filter()
+		}
+		s.RssReader = rss.NewReader(s.ResourceUrl, s.RssGuids, ff)
+	}
+	err := s.resumeRssDownload()
+	if err != nil {
+		log.Error(log.Struct{"err", err, "subj", s.SubjId}, "resume download failed")
+		s.Exit()
+	}
 	for {
 		select {
 		case o := <-s.OperationChan:
@@ -100,8 +117,8 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 					log.Error(log.Struct{"sid", s.SubjId, "err", err}, "rename failed")
 				}
 			}
-		case torr := <-s.PushChan:
-			err := s.push(torr, email.Poster)
+		case torr := <-s.PushChanBuiltin:
+			err := s.pushBuiltin(torr, email.Poster)
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
 			}
@@ -111,11 +128,12 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			return
 		case <-t.C:
 			log.Debug(log.Struct{"sid", s.SubjId}, "subject update mission started")
+			s.readRssAndDownload()
 			err := s.update()
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "update mission failed")
 			}
-			s.readRssAndDownload()
+
 		}
 	}
 }
@@ -407,10 +425,17 @@ func (s *Subject) readRssAndDownload() {
 			if err != nil {
 				log.Error(log.Struct{"err", err}, "download failed")
 				s.RssReader.Undo(r.Guid)
+				delete(s.RssTorrentsName,renamed)
 				continue
 			}
-			go s.builtinDownload(t)
+			s.builtinDownload(builtin.MonitoredTorrent{Url: r.TorrUrl, Rename: renamed, Torrent: t})
+			s.TorrentUrls[r.TorrUrl] = RssFileOptStrage{renamed}
 		}
+		s.RssGuids = s.RssReader.Guids()
 	}
 
+}
+
+func (s *Subject) pushBuiltin(torr builtin.MonitoredTorrent, pusher P.Pusher) error {
+	return nil
 }

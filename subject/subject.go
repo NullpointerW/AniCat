@@ -77,9 +77,9 @@ type Subject struct {
 	RssReader           *rss.Reader                   `json:"-"`
 	RssGuids            map[string]struct{}           `json:"rssGuids"`
 	Filter              *FilterVerb                   `json:"filter"`
-	TorrentUrls         map[string]struct{}           `json:"torrentUrls"`
+	TorrentUrls         map[string]RssFileOptStrage   `json:"torrentUrls"`
 	TorrentFinishedUrls map[string]struct{}           `json:"torrentFinishedUrls"`
-	DetctchanBuiltin         chan builtin.MonitoredTorrent `json:"-"`
+	DetctchanBuiltin    chan builtin.MonitoredTorrent `json:"-"`
 	PushChanBuiltin     chan builtin.MonitoredTorrent `json:"-"`
 }
 type subjOp int

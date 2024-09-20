@@ -29,10 +29,8 @@ func (d FilePath) Dir() storage.TorrentDirFilePathMaker {
 	}
 }
 
-func (s *Subject) builtinDownload(t *torrent.Torrent) {
-	<-t.GotInfo()
-	t.DownloadAll()
-	s.DetctchanBuiltin <- builtin.MonitoredTorrent{}
+func (s *Subject) builtinDownload(mt builtin.MonitoredTorrent) {
+	s.DetctchanBuiltin <- mt
 }
 
 func BuildFilter(s *Subject, ex *Extra) {
@@ -176,10 +174,32 @@ func (m *MovieFileOpt) Name() storage.FilePathMaker {
 	}
 }
 
-
 type MagnetUrlSeeker struct {
 }
 
 func (_ *MagnetUrlSeeker) Seek(n string) (*torrent.TorrentSpec, error) {
 	return torrent.TorrentSpecFromMagnetUri(n)
+}
+
+type RssFileOptStrage struct {
+	Renamed string `json:"renamed"`
+}
+
+func (s *Subject) resumeRssDownload() error {
+	if s.ResourceTyp != RSS {
+		return nil
+	}
+	sr := util.SetSubtract(s.TorrentUrls, s.TorrentFinishedUrls)
+	for u, v := range sr {
+		ropt := RssFileOpt{
+			v.Renamed,
+		}
+		fop := FilePath{FileName: &ropt, DirPath: s.Path}
+		t, err := builtin.DefaultDownLoader.Download(u, fop, nil)
+		if err != nil {
+			return err
+		}
+		s.builtinDownload(builtin.MonitoredTorrent{Url: u,Rename: v.Renamed,Torrent: t})
+	}
+	return nil
 }

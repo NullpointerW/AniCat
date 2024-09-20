@@ -2,6 +2,8 @@ package builtin
 
 import (
 	"reflect"
+
+	util "github.com/NullpointerW/anicat/utils"
 	"github.com/anacrolix/torrent"
 	"golang.org/x/net/context"
 )
@@ -34,7 +36,10 @@ func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
 			cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(gch)})
 		} else {
 			ptr := cases[c].Chan.Pointer()
-			ts := torrents[ptr]
+			ts,ex := torrents[ptr]
+			if !ex{// push ok
+				goto cleancases
+			}
 			delete(torrents, ptr)
 			if ts.gotInfo {// push
 				ts.m.Size = ts.m.Torrent.Length()
@@ -46,6 +51,8 @@ func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
 				torrents[reflect.ValueOf(dch).Pointer()] = ts
 				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(dch)})
 			}
+			cleancases:
+			util.SliceDelete(cases,c)
 		}
 	}
 

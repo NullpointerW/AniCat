@@ -80,24 +80,21 @@ func TestStringAppender_Append(t *testing.T) {
 }
 
 func TestSetSubtract(t *testing.T) {
-	a :=map[string]struct{}{}
-	b :=map[string]struct{}{}
-	a["abc"]=struct{}{}
-	a["abc1"]=struct{}{}
-	a["abc3"]=struct{}{}
-	b["abc3"]=struct{}{}
-	c:=SetSubtract(a,b)
+	a := map[string]int{}
+	b := map[string]struct{}{}
+	a["abc"] = 3
+	a["abc1"] = 4
+	a["abc3"] = 5
+	b["abc3"] = struct{}{}
+	c := SetSubtract(a, b)
 	fmt.Println(c)
 }
 
-func Test2(t *testing.T) {
-	ch:=make(chan string)
-	close(ch)
-		select{
-		case 	ch<- "didi":
-		default:
-			fmt.Println("ok?")	
-		}
-		
-	
+func TestSliceDelete(t *testing.T) {
+	var a []int
+	a = append(a, 0)
+	a = append(a, 1)
+	a = append(a, 2)
+	a = SliceDelete(a, 1)
+	fmt.Println(a)
 }
