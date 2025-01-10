@@ -39,16 +39,17 @@ func (s *Subject) runtimeInit(reload bool) {
 	s.OperationChan = make(chan Operate)
 	Mgr.Add(s)
 	if s.BuiltinDownload {
-		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
-		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
-		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx)
-		go s.runWithBuiltinDownloader(ctx, reload)
 		if s.TorrentUrls == nil {
 			s.TorrentUrls = make(map[string]RssFileOptStrage)
 		}
 		if s.TorrentFinishedUrls == nil {
 			s.TorrentFinishedUrls = make(map[string]struct{})
 		}
+		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
+		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
+		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx)
+		go s.runWithBuiltinDownloader(ctx, reload)
+
 	} else {
 		s.PushChan = make(chan qbt.Torrent, 1024)
 		go s.run(ctx, reload)
@@ -56,6 +57,18 @@ func (s *Subject) runtimeInit(reload bool) {
 	go JellyfinMetaDataHelper(s.Path, s.FolderName, s.Exited)
 }
 
+// runWithBuiltinDownloader handles the downloading process for a given subject
+// using built-in downloaders. It supports both torrent and RSS resource types.
+// The function performs the following tasks:
+//  1. Adds a wait group counter for the download process.
+//  2. Logs a debug message if the subject is set to reload.
+//  3. Sets up a ticker to periodically check for updates.
+//  4. For torrent resources, it initializes the appropriate torrent seeker based
+//     on the URL scheme and starts the download process using the built-in downloader.
+//  5. For RSS resources, it initializes an RSS reader and resumes any pending downloads.
+//  6. Enters a loop to handle various operations such as renaming, pushing updates,
+//     and periodic updates based on the ticker.
+//  7. Exits gracefully when the context is done, logging the exit event.
 func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 	Mgr.wg.Add(1)
 	defer Mgr.wg.Done()
@@ -88,6 +101,7 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 		case MOVIE:
 			fop = FilePath{FileName: new(MovieFileOpt), DirPath: s.Path}
 		}
+		fmt.Printf("TorrFileOpt: %+v \n", fop)
 		t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "download torrentResource failed")
@@ -95,7 +109,7 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 		}
 		s.builtinDownload(builtin.MonitoredTorrent{Torrent: t})
 	}
-	if s.ResourceTyp == RSS {
+	if s.ResourceTyp == RSS && reload {
 		var ff rss.FilterFunc
 		if s.Filter != nil {
 			ff = s.Filter.Filter()
@@ -118,6 +132,7 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 				}
 			}
 		case torr := <-s.PushChanBuiltin:
+			s.TorrentFinishedUrls[torr.Url] = struct{}{}
 			err := s.pushBuiltin(torr, email.Poster)
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
@@ -185,6 +200,9 @@ func (s *Subject) update() error {
 		return s.writeJson()
 	})
 	wrap.Handle(func() error {
+		if s.BuiltinDownload {
+			return s.checkDLWithBuiltin()
+		}
 		return s.checkDL()
 	})
 	return wrap.Error()
@@ -200,7 +218,9 @@ func exit(s *Subject) {
 	close(s.OperationChan)
 	Mgr.Sync()
 }
-
+func (s *Subject) checkDLWithBuiltin() (err error) {
+	return nil
+}
 func (s *Subject) checkDL() (err error) {
 	if s.ResourceTyp == Torrent {
 		log.Debug(log.Struct{"sid", s.SubjId, "type", "torrent"}, "start check DL")
@@ -392,6 +412,19 @@ func (s *Subject) terminate() {
 	s.Exit()
 }
 
+// readRssAndDownload reads RSS feeds and downloads the corresponding files.
+// It performs the following steps:
+// 1. Checks if the resource type is Torrent, and if so, returns immediately.
+// 2. Reads the RSS feed using the RssReader.
+// 3. If reading is successful, iterates over the read items.
+// 4. For each item, constructs a fake filename and attempts to rename it using renameTV.
+// 5. If renaming fails, logs the error and uses the original title as the renamed value.
+// 6. Checks for duplicate episodes and skips them if found.
+// 7. Downloads the torrent file using the DefaultDownLoader.
+// 8. If the download fails, logs the error, undoes the RSS read operation, and removes the renamed entry.
+// 9. If the download succeeds, calls builtinDownload with the downloaded torrent information.
+// 10. Updates the TorrentUrls map with the new torrent information.
+// 11. Updates the RssGuids with the current GUIDs from the RssReader.
 func (s *Subject) readRssAndDownload() {
 	if s.ResourceTyp == Torrent {
 		return
@@ -425,7 +458,7 @@ func (s *Subject) readRssAndDownload() {
 			if err != nil {
 				log.Error(log.Struct{"err", err}, "download failed")
 				s.RssReader.Undo(r.Guid)
-				delete(s.RssTorrentsName,renamed)
+				delete(s.RssTorrentsName, renamed)
 				continue
 			}
 			s.builtinDownload(builtin.MonitoredTorrent{Url: r.TorrUrl, Rename: renamed, Torrent: t})
@@ -437,5 +470,7 @@ func (s *Subject) readRssAndDownload() {
 }
 
 func (s *Subject) pushBuiltin(torr builtin.MonitoredTorrent, pusher P.Pusher) error {
+	log.Debug(log.Struct{"sid", s.SubjId, "torrHash", torr.Rename}, "push builtin")
+	pusher.Push(P.Payload{})
 	return nil
 }

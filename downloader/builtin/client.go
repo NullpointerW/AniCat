@@ -1,14 +1,22 @@
 package builtin
 
 import (
+	CFG "github.com/NullpointerW/anicat/conf"
+	"github.com/NullpointerW/anicat/log"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/storage"
 )
 
 var DefaultDownLoader *Downloader
 
+func init() {
+	if CFG.Env.BuiltinDownloader {
+		InitDownloader()
+		log.Info(log.Struct{"github", "https://github.com/anacrolix/torrent"}, "builtin downloader enabled, using anacrolix/torrent")
+	}
+}
 func InitDownloader() {
-	DefaultDownLoader = NewDownloader("./.db", false, NewHttpSeeker())
+	DefaultDownLoader = NewDownloader("./.db", true, NewHttpSeeker())
 }
 
 type Downloader struct {
@@ -52,6 +60,7 @@ func (d *Downloader) Download(s string, fOp FileOption, seeker TorrentSeeker) (t
 	fop := storage.NewFileClientOpts{}
 	fop.TorrentDirMaker = fOp.Dir()
 	fop.FilePathMaker = fOp.Name()
+	fop.PieceCompletion = storage.NewMapPieceCompletion()
 	ts.Storage = storage.NewFileOpts(fop)
 	t, _, err = d.client.AddTorrentSpec(ts)
 	return

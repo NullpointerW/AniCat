@@ -28,9 +28,17 @@ func (f *FilterVerb) Filter() rss.FilterFunc {
 		}
 	}
 	return func(n string) bool {
-		return FilterWithRegs(n, f.Contain.([]string), f.Exclusion.([]string))
+		return FilterWithRegs(n, sfaceConvertStrSlice(f.Contain.([]interface{})), sfaceConvertStrSlice(f.Exclusion.([]interface{})))
 	}
 
+}
+
+func sfaceConvertStrSlice(sface []interface{}) []string {
+	ss := make([]string, 0, len(sface))
+	for _, f := range sface {
+		ss = append(ss, f.(string))
+	}
+	return ss
 }
 
 func BuildFilterPerlReg(vbs []string) string {

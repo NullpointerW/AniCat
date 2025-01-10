@@ -2,6 +2,7 @@ package detector
 
 import (
 	"fmt"
+	CFG "github.com/NullpointerW/anicat/conf"
 	DL "github.com/NullpointerW/anicat/downloader"
 	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -14,6 +15,9 @@ import (
 )
 
 func Detect() {
+	if CFG.Env.BuiltinDownloader {
+		return
+	}
 	for {
 		sync, err := DL.Qbt.GetMainData()
 		if err == nil {

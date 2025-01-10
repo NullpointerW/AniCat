@@ -155,7 +155,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		return 0, fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
-	err = subject.Loadfileds(tips)
+	err = subject.Loadfields(tips)
 	if err != nil {
 		return 0, err
 	}
@@ -176,6 +176,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		return 0, err
 	}
 
+	subject.BuiltinDownload = CFG.Env.BuiltinDownloader
 	if !subject.BuiltinDownload {
 		err = download(subject, ext)
 	} else {
@@ -241,7 +242,7 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 		return 0, fmt.Errorf("%w: sid=%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
-	err = subject.Loadfileds(tips)
+	err = subject.Loadfields(tips)
 	if err != nil {
 		return 0, err
 	}
@@ -279,7 +280,7 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	return sid, nil
 }
 
-func (s *Subject) Loadfileds(tips map[string]string) error {
+func (s *Subject) Loadfields(tips map[string]string) error {
 	s.Name = tips[IC.SubjName]
 	s.OriginName = tips[IC.SubjOriginName]
 	if s.Name == "" {
@@ -367,7 +368,7 @@ func (s *Subject) FetchInfo() error {
 	}
 	wrap := errs.ErrWrapper{}
 	wrap.Handle(func() error {
-		return s.Loadfileds(tips)
+		return s.Loadfields(tips)
 	})
 	wrap.Handle(func() error {
 		Mgr.Sync()

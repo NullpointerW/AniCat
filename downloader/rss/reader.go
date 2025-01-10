@@ -5,7 +5,12 @@ import (
 	"maps"
 )
 
+
 type FilterFunc func(n string) bool
+
+// Reader represents an RSS feed reader that parses and filters feed items.
+// It contains a parser for RSS feeds, the feed URL, a map to track processed
+// item GUIDs, and a filter function to apply custom filtering logic to feed items.
 type Reader struct {
 	parser gofeed.Parser
 	feed   string
@@ -65,6 +70,8 @@ func (r *Reader) ReadOne() (Item, bool, error) {
 			itt.Desc = it.Description
 			r.guids[it.GUID] = struct{}{}
 			if r.filter != nil && r.filter(itt.Title) {
+				return itt, true, nil
+			}else if r.filter == nil {
 				return itt, true, nil
 			}
 		}

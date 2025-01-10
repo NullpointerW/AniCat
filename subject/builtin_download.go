@@ -1,6 +1,7 @@
 package subject
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -61,6 +62,7 @@ func BuildFilter(s *Subject, ex *Extra) {
 	}
 }
 func RssReader(s *Subject) error {
+	fmt.Println("init rss reader")
 	if s.ResourceTyp == Torrent {
 		return nil
 	}
@@ -78,11 +80,13 @@ func RssReader(s *Subject) error {
 			if ok {
 				for _, it := range its {
 					if s.isCollection(it.Desc) {
+						fmt.Println("rss reader:  found collection:", it.Title)
 						s.ResourceTyp = Torrent
 						s.ResourceUrl = it.TorrUrl
 						return nil
 					}
 				}
+				fmt.Println("rss reader:  no collection found")
 			}
 		}
 	} else {
@@ -114,7 +118,7 @@ type RssFileOpt struct {
 func (r *RssFileOpt) Name() storage.FilePathMaker {
 	return func(opts storage.FilePathMakerOpts) string {
 		if len(opts.File.Path) != 0 {
-			p := opts.File.Path[len(opts.File.Path)]
+			p := opts.File.Path[len(opts.File.Path)-1]
 			if util.IsSubtitleFile(p) {
 				ss := new(util.StringAppender)
 				ss.Append(r.Renamed, " ", rename.SubtitleFileLang(p), filepath.Ext(p))
@@ -199,7 +203,11 @@ func (s *Subject) resumeRssDownload() error {
 		if err != nil {
 			return err
 		}
-		s.builtinDownload(builtin.MonitoredTorrent{Url: u,Rename: v.Renamed,Torrent: t})
+		s.builtinDownload(builtin.MonitoredTorrent{Url: u, Rename: v.Renamed, Torrent: t})
+	}
+	if len(sr) == 0 {
+		fmt.Println("no resume torrent found,strat new download")
+		s.readRssAndDownload()
 	}
 	return nil
 }

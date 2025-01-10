@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"sync"
 	// "reflect"
 	"testing"
 )
@@ -9,6 +10,17 @@ import (
 type tests struct{}
 
 func (t tests) Print() {
+
+}
+
+func TestGetEpi(t *testing.T) {
+
+	strs:=[]string{"123","456","789"}
+	var a any = strs
+	fmt.Println(a.([]string)) 
+	var mu sync.Mutex
+	mu.Unlock()
+	mu.Lock()
 
 }
 
