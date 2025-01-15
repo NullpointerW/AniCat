@@ -28,11 +28,20 @@ func (f *FilterVerb) Filter() rss.FilterFunc {
 		}
 	}
 	return func(n string) bool {
-		return FilterWithRegs(n, sfaceConvertStrSlice(f.Contain.([]interface{})), sfaceConvertStrSlice(f.Exclusion.([]interface{})))
+		return FilterWithRegs(n, ifaceConvertStrSlice(f.Contain), ifaceConvertStrSlice(f.Exclusion))
 	}
 
 }
-
+func ifaceConvertStrSlice(iface any) []string {
+	if sfaceAssert(iface){
+		return sfaceConvertStrSlice(iface.([]interface{}))
+	}
+	return iface.([]string)
+}
+func sfaceAssert(iface any )bool{
+	_, ok := iface.([]interface{})
+	return ok
+}
 func sfaceConvertStrSlice(sface []interface{}) []string {
 	ss := make([]string, 0, len(sface))
 	for _, f := range sface {

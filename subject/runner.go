@@ -218,7 +218,23 @@ func exit(s *Subject) {
 	close(s.OperationChan)
 	Mgr.Sync()
 }
+
 func (s *Subject) checkDLWithBuiltin() (err error) {
+	if s.ResourceTyp == Torrent {
+		if len(s.TorrentFinishedUrls) > 0 {
+			log.Info(log.Struct{"sname", s.Name, "resType", "Torrent"}, "compiled,exited now")
+			s.terminate()
+		}
+	} else {
+		fin, err := s.ElapsedfromFinishedTime(util.Day * 2)
+		if err != nil {
+			return fmt.Errorf("checkDLWithBuiltin: %w", err)
+		}
+		if fin && len(s.TorrentFinishedUrls) == len(s.TorrentUrls) {
+			log.Info(log.Struct{"sname", s.Name, "resType", "RSS"}, "compiled,exited now")
+			s.terminate()
+		}
+	}
 	return nil
 }
 func (s *Subject) checkDL() (err error) {

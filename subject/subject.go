@@ -668,3 +668,14 @@ func BuiltinDownloadPrepare(s *Subject, ex *Extra) error {
 	}
 	return RssReader(s)
 }
+
+func (s *Subject) ElapsedfromFinishedTime(e time.Duration) (bool, error) {
+	if !s.Finished || s.EndTime == "" {
+		return false, nil
+	}
+	end, err := util.ParseTime(s.EndTime, util.YMDParseLayout)
+	if err != nil {
+		return false, err
+	}
+	return time.Since(end) >= e, nil
+}
