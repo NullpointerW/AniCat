@@ -14,6 +14,7 @@ func CaptureEpisNum(text string) (string, error) {
 		regexper := regexp.MustCompile(reg)
 		match := regexper.FindStringSubmatch(text)
 		if len(match) > 1 {
+			// fmt.Println("matched", i)
 			episNum := match[1]
 			if len([]byte(episNum)) == 1 {
 				return "0" + episNum, nil

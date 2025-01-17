@@ -9,14 +9,14 @@ import (
 )
 
 type FilterVerb struct {
-	Single    bool `json:"regexp"`
+	Single    bool `json:"single"`
 	Contain   any  `json:"contain"`
 	Exclusion any  `json:"exclusion"`
 }
 
-func NewFilterVerb(regexp bool, c, e any) *FilterVerb {
+func NewFilterVerb(single bool, c, e any) *FilterVerb {
 	return &FilterVerb{
-		Single:    regexp,
+		Single:    single,
 		Contain:   c,
 		Exclusion: e,
 	}

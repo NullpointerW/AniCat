@@ -42,6 +42,11 @@ func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
 	for {
 		c, v, _ := reflect.Select(cases)
 		if c == 0 { // cancel
+			close(recv)
+			close(send)
+			for _,t := range torrents {
+				t.m.Torrent.Drop()
+			}
 			return
 		} else if c == 1 { // recv
 			mt := v.Interface().(MonitoredTorrent)

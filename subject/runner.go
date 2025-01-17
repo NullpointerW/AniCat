@@ -214,7 +214,9 @@ func exit(s *Subject) {
 		log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed while exited")
 	}
 	close(s.Exited)
-	close(s.PushChan)
+	if !s.BuiltinDownload{
+		close(s.PushChan)
+	}
 	close(s.OperationChan)
 	Mgr.Sync()
 }

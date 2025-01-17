@@ -122,6 +122,9 @@ func (s *Subject) writeJson() (err error) {
 }
 
 func (s *Subject) RmRes() error {
+	if s.BuiltinDownload {
+		return nil
+	}
 	wrap := errs.ErrWrapper{}
 	if s.ResourceTyp == RSS {
 		wrap.Handle(func() error {
