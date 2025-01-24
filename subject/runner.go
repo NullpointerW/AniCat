@@ -133,7 +133,11 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			}
 		case torr := <-s.PushChanBuiltin:
 			s.TorrentFinishedUrls[torr.Url] = struct{}{}
-			err := s.pushBuiltin(torr, email.Poster)
+			err := s.writeJson()
+			if err != nil {
+				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed")
+			}
+			err = s.pushBuiltin(torr, email.Poster)
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
 			}
@@ -214,7 +218,7 @@ func exit(s *Subject) {
 		log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed while exited")
 	}
 	close(s.Exited)
-	if !s.BuiltinDownload{
+	if !s.BuiltinDownload {
 		close(s.PushChan)
 	}
 	close(s.OperationChan)

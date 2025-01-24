@@ -27,3 +27,7 @@ func TestTv(t *testing.T) {
 func TestSubtitleFileLang(t *testing.T) {
 	SubtitleFileLang("")
 }
+func TestSubtitleFileLang2(t *testing.T) {
+	fmt.Println("a&" == "a\u0026")    
+	fmt.Println("\n")
+}
