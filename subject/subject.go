@@ -281,6 +281,11 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 }
 
 func (s *Subject) Loadfields(tips map[string]string) error {
+	defer func() {
+		if s.FolderName != "" && strings.ContainsRune(s.FolderName, '?') {
+			s.FolderName = strings.ReplaceAll(s.FolderName, "?", "？")
+		}
+	}()
 	s.Name = tips[IC.SubjName]
 	s.OriginName = tips[IC.SubjOriginName]
 	if s.Name == "" {
@@ -357,7 +362,6 @@ func (s *Subject) Loadfields(tips map[string]string) error {
 		}
 		return err
 	}
-
 	return nil
 }
 

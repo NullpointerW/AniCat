@@ -1,9 +1,11 @@
 package log_test
 
 import (
-	"github.com/NullpointerW/anicat/log"
+	"fmt"
 	"os"
 	"testing"
+
+	"github.com/NullpointerW/anicat/log"
 )
 
 func TestDebug(t *testing.T) {
@@ -81,4 +83,20 @@ func TestMute(t *testing.T) {
 	log.Error(log.Struct{"test", "error"}, "hello", "world")
 	log.Error(log.Struct{"test", "error"}, "hello", " ", "world")
 	log.Errorf(log.Struct{"test", "error"}, "hello %s", " world")
+}
+func 	TestXxx(t *testing.T) {
+	ax :=0
+
+	type s struct {a int}
+	var b s
+	b.a=1
+	type ss s
+	var bb ss
+	bb.a=1
+	bb=ss(b)
+	b=s(bb)
+	defer func ()  {
+		fmt.Println(ax)
+	}()
+	ax=1
 }

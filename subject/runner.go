@@ -492,7 +492,7 @@ func (s *Subject) readRssAndDownload() {
 }
 
 func (s *Subject) pushBuiltin(torr builtin.MonitoredTorrent, pusher P.Pusher) error {
-	log.Debug(log.Struct{"sid", s.SubjId, "torrHash", torr.Rename}, "push builtin")
+	log.Debug(log.Struct{"sid", s.SubjId, "torrName", torr.Rename}, "push builtin")
 	pusher.Push(P.Payload{})
 	return nil
 }
