@@ -9,6 +9,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+type TorrentProgress struct {
+	Progress float64
+	Name     string
+}
+type TorrentMonitor struct {
+}
 type MonitoredTorrent struct {
 	Torrent *torrent.Torrent
 	Rename  string
@@ -44,7 +50,7 @@ func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
 		if c == 0 { // cancel
 			close(recv)
 			close(send)
-			for _,t := range torrents {
+			for _, t := range torrents {
 				t.m.Torrent.Drop()
 			}
 			return

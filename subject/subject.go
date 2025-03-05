@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	// "sync"
 	"time"
 
 	DL "github.com/NullpointerW/anicat/downloader"
@@ -72,15 +73,16 @@ type Subject struct {
 	RssTorrents   map[string]struct{} `json:"rssTorrents"`
 	OperationChan chan Operate        `json:"-"`
 	// builtin-downloader filed
-	BuiltinDownload     bool                          `json:"builtinDownload"`
-	RssTorrentsName     map[string]struct{}           `json:"rssTorrentsName"`
-	RssReader           *rss.Reader                   `json:"-"`
-	RssGuids            map[string]struct{}           `json:"rssGuids"`
-	Filter              *FilterVerb                   `json:"filter"`
-	TorrentUrls         map[string]RssFileOptStrage   `json:"torrentUrls"`
-	TorrentFinishedUrls map[string]struct{}           `json:"torrentFinishedUrls"`
-	DetctchanBuiltin    chan builtin.MonitoredTorrent `json:"-"`
-	PushChanBuiltin     chan builtin.MonitoredTorrent `json:"-"`
+	BuiltinDownload         bool                          `json:"builtinDownload"`
+	RssTorrentsName         map[string]struct{}           `json:"rssTorrentsName"`
+	RssReader               *rss.Reader                   `json:"-"`
+	RssGuids                map[string]struct{}           `json:"rssGuids"`
+	Filter                  *FilterVerb                   `json:"filter"`
+	TorrentUrls             map[string]RssFileOptStrage   `json:"torrentUrls"`
+	TorrentFinishedUrls     map[string]struct{}           `json:"torrentFinishedUrls"`
+	DetctchanBuiltin        chan builtin.MonitoredTorrent `json:"-"`
+	PushChanBuiltin         chan builtin.MonitoredTorrent `json:"-"`
+	finihsedTorrentNameList *util.ListView[string]        `json:"-"`
 }
 type subjOp int
 
@@ -113,6 +115,16 @@ type Extra struct {
 func (ex *Extra) NoArgs() bool {
 	opt := ex.RssOption
 	return opt.MustContain == "" && opt.MustNotContain == ""
+}
+
+func (s *Subject) initializeFinishedTorrentNameList() {
+	if s.finihsedTorrentNameList == nil && s.ResourceTyp == RSS {
+		f := make([]string, 0, len(s.TorrentFinishedUrls))
+		for u, _ := range s.TorrentFinishedUrls {
+			f = append(f, s.TorrentUrls[u].Renamed)
+		}
+		s.finihsedTorrentNameList = util.NewListView(f)
+	}
 }
 
 // QbtTag The tag used when adding a torrent with qbt

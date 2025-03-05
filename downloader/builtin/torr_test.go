@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 )
 
@@ -25,4 +26,6 @@ func TestReader(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	s:=sync.Pool{}
+	s.Get()
 }
