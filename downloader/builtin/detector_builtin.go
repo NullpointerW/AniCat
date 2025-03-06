@@ -13,53 +13,52 @@ import (
 )
 
 type TorrentProgress struct {
-	Percentage  int
-	Name     string
+	Percentage int
+	Name       string
 }
 
 type TorrentProgressMonitor struct {
-	mu             sync.Mutex
-	torrentsInfo   map[TorrentInfo]struct{}
-	list, lasttime atomic.Value
-	deadline       time.Duration
+	mu              sync.Mutex
+	activeTorrents  map[TorrentInfo]struct{}
+	cache, lasttime atomic.Value
+	ttl             time.Duration
 }
 
 func (tm *TorrentProgressMonitor) AddTorrent(t TorrentInfo) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
-	tm.torrentsInfo[t] = struct{}{}
-    tm.list.Store(nil)
+	tm.activeTorrents[t] = struct{}{}
 }
 
 func (tm *TorrentProgressMonitor) GetProgressList() []TorrentProgress {
-	if l,ok:=tm.checkAndGet();ok{
-		return l
+	if c, ok := tm.checkAndGet(); ok {
+		return c
 	}
 	return tm.getSlow()
 }
 func (tm *TorrentProgressMonitor) getSlow() []TorrentProgress {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
-	if l,ok:=tm.checkAndGet();ok{
-		return l
+	if c, ok := tm.checkAndGet(); ok {
+		return c
 	}
-	l := make([]TorrentProgress, 0, len(tm.torrentsInfo))
-	for t := range tm.torrentsInfo {
+	c := make([]TorrentProgress, 0, len(tm.activeTorrents))
+	for t := range tm.activeTorrents {
 		tt := t.Torrent
 		p := int(float64(tt.BytesCompleted()) / float64(tt.Length()) * 100)
 		if p == 100 {
-			delete(tm.torrentsInfo, t)
+			delete(tm.activeTorrents, t)
 		}
-		tg := TorrentProgress{Percentage : p, Name: t.Rename}
-			l = append(l, tg)
+		tg := TorrentProgress{Percentage: p, Name: t.Rename}
+		c = append(c, tg)
 	}
-	tm.list.Store(l)
+	tm.cache.Store(c)
 	tm.lasttime.Store(time.Now())
-	return l
+	return c
 }
 
 func (tm *TorrentProgressMonitor) checkAndGet() ([]TorrentProgress, bool) {
-	if l, lt, now := tm.list.Load(), tm.lasttime.Load().(time.Time), time.Now(); lt.Add(tm.deadline).Sub(now) >= 0 && l != nil {
+	if l, lt, now := tm.cache.Load(), tm.lasttime.Load().(time.Time), time.Now(); lt.Add(tm.ttl).Sub(now) >= 0 && l != nil {
 		return l.([]TorrentProgress), true
 	}
 	return nil, false

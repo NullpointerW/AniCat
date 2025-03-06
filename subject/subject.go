@@ -124,6 +124,8 @@ func (s *Subject) initializeFinishedTorrentNameList() {
 			f = append(f, s.TorrentUrls[u].Renamed)
 		}
 		s.FinihsedTorrentNameList = util.NewListView(f)
+	}else if s.FinihsedTorrentNameList == nil {
+         
 	}
 }
 
