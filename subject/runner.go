@@ -45,6 +45,9 @@ func (s *Subject) runtimeInit(reload bool) {
 		if s.TorrentFinishedUrls == nil {
 			s.TorrentFinishedUrls = make(map[string]struct{})
 		}
+		if reload {
+			s.initializeFinishedTorrentNameList()
+		}
 		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
 		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
 		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx)
@@ -107,7 +110,7 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			log.Error(log.Struct{"err", err}, "download torrentResource failed")
 			s.Exit()
 		}
-		s.builtinDownload(builtin.MonitoredTorrent{Torrent: t})
+		s.builtinDownload(builtin.MonitoredTorrent{TorrentInfo: builtin.TorrentInfo{Torrent: t}, Url: s.ResourceUrl})
 	}
 	if s.ResourceTyp == RSS && reload {
 		var ff rss.FilterFunc
@@ -133,6 +136,7 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			}
 		case torr := <-s.PushChanBuiltin:
 			s.TorrentFinishedUrls[torr.Url] = struct{}{}
+			s.FinihsedTorrentNameList.Append(s.TorrentUrls[torr.Url].Renamed)
 			err := s.writeJson()
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed")
@@ -483,7 +487,7 @@ func (s *Subject) readRssAndDownload() {
 				delete(s.RssTorrentsName, renamed)
 				continue
 			}
-			s.builtinDownload(builtin.MonitoredTorrent{Url: r.TorrUrl, Rename: renamed, Torrent: t})
+			s.builtinDownload(builtin.MonitoredTorrent{Url: r.TorrUrl, TorrentInfo: builtin.TorrentInfo{Rename: renamed, Torrent: t}})
 			s.TorrentUrls[r.TorrUrl] = RssFileOptStrage{renamed}
 		}
 		s.RssGuids = s.RssReader.Guids()

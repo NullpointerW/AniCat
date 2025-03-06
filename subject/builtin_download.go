@@ -203,7 +203,7 @@ func (s *Subject) resumeRssDownload() error {
 		if err != nil {
 			return err
 		}
-		s.builtinDownload(builtin.MonitoredTorrent{Url: u, Rename: v.Renamed, Torrent: t})
+		s.builtinDownload(builtin.MonitoredTorrent{Url: u, TorrentInfo: builtin.TorrentInfo{Rename: v.Renamed, Torrent: t}})
 	}
 	if len(sr) == 0 {
 		fmt.Println("no resume torrent found,strat new download")

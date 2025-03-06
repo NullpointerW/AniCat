@@ -3,6 +3,9 @@ package builtin
 import (
 	"fmt"
 	"reflect"
+	"sync"
+	"sync/atomic"
+	"time"
 
 	util "github.com/NullpointerW/anicat/utils"
 	"github.com/anacrolix/torrent"
@@ -10,16 +13,66 @@ import (
 )
 
 type TorrentProgress struct {
-	Progress float64
+	Percentage  int
 	Name     string
 }
-type TorrentMonitor struct {
+
+type TorrentProgressMonitor struct {
+	mu             sync.Mutex
+	torrentsInfo   map[TorrentInfo]struct{}
+	list, lasttime atomic.Value
+	deadline       time.Duration
 }
-type MonitoredTorrent struct {
+
+func (tm *TorrentProgressMonitor) AddTorrent(t TorrentInfo) {
+	tm.mu.Lock()
+	defer tm.mu.Unlock()
+	tm.torrentsInfo[t] = struct{}{}
+    tm.list.Store(nil)
+}
+
+func (tm *TorrentProgressMonitor) GetProgressList() []TorrentProgress {
+	if l,ok:=tm.checkAndGet();ok{
+		return l
+	}
+	return tm.getSlow()
+}
+func (tm *TorrentProgressMonitor) getSlow() []TorrentProgress {
+	tm.mu.Lock()
+	defer tm.mu.Unlock()
+	if l,ok:=tm.checkAndGet();ok{
+		return l
+	}
+	l := make([]TorrentProgress, 0, len(tm.torrentsInfo))
+	for t := range tm.torrentsInfo {
+		tt := t.Torrent
+		p := int(float64(tt.BytesCompleted()) / float64(tt.Length()) * 100)
+		if p == 100 {
+			delete(tm.torrentsInfo, t)
+		}
+		tg := TorrentProgress{Percentage : p, Name: t.Rename}
+			l = append(l, tg)
+	}
+	tm.list.Store(l)
+	tm.lasttime.Store(time.Now())
+	return l
+}
+
+func (tm *TorrentProgressMonitor) checkAndGet() ([]TorrentProgress, bool) {
+	if l, lt, now := tm.list.Load(), tm.lasttime.Load().(time.Time), time.Now(); lt.Add(tm.deadline).Sub(now) >= 0 && l != nil {
+		return l.([]TorrentProgress), true
+	}
+	return nil, false
+}
+
+type TorrentInfo struct {
 	Torrent *torrent.Torrent
 	Rename  string
-	Size    int64
-	Url     string
+}
+type MonitoredTorrent struct {
+	TorrentInfo
+	Size int64
+	Url  string
 }
 type torrentState struct {
 	m       MonitoredTorrent
@@ -76,6 +129,9 @@ func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
 				ts.gotInfo = true
 				ts.m.Torrent.DownloadAll()
 				dch := ts.m.Torrent.Complete.On()
+				if ts.m.Rename == "" {
+					ts.m.Rename = ts.m.Torrent.Name()
+				}
 				torrents[reflect.ValueOf(dch).Pointer()] = ts
 				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(dch)})
 				fmt.Printf("bultin-detector: got torrent info ok,downloading :%+v \n", ts.m)

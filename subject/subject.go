@@ -82,7 +82,7 @@ type Subject struct {
 	TorrentFinishedUrls     map[string]struct{}           `json:"torrentFinishedUrls"`
 	DetctchanBuiltin        chan builtin.MonitoredTorrent `json:"-"`
 	PushChanBuiltin         chan builtin.MonitoredTorrent `json:"-"`
-	finihsedTorrentNameList *util.ListView[string]        `json:"-"`
+	FinihsedTorrentNameList *util.ListView[string]        `json:"-"`
 }
 type subjOp int
 
@@ -118,12 +118,12 @@ func (ex *Extra) NoArgs() bool {
 }
 
 func (s *Subject) initializeFinishedTorrentNameList() {
-	if s.finihsedTorrentNameList == nil && s.ResourceTyp == RSS {
+	if s.FinihsedTorrentNameList == nil && s.ResourceTyp == RSS {
 		f := make([]string, 0, len(s.TorrentFinishedUrls))
-		for u, _ := range s.TorrentFinishedUrls {
+		for u := range s.TorrentFinishedUrls {
 			f = append(f, s.TorrentUrls[u].Renamed)
 		}
-		s.finihsedTorrentNameList = util.NewListView(f)
+		s.FinihsedTorrentNameList = util.NewListView(f)
 	}
 }
 
