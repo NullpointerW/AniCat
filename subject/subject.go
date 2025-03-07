@@ -73,16 +73,16 @@ type Subject struct {
 	RssTorrents   map[string]struct{} `json:"rssTorrents"`
 	OperationChan chan Operate        `json:"-"`
 	// builtin-downloader filed
-	BuiltinDownload         bool                          `json:"builtinDownload"`
-	RssTorrentsName         map[string]struct{}           `json:"rssTorrentsName"`
-	RssReader               *rss.Reader                   `json:"-"`
-	RssGuids                map[string]struct{}           `json:"rssGuids"`
-	Filter                  *FilterVerb                   `json:"filter"`
-	TorrentUrls             map[string]RssFileOptStrage   `json:"torrentUrls"`
-	TorrentFinishedUrls     map[string]struct{}           `json:"torrentFinishedUrls"`
-	DetctchanBuiltin        chan builtin.MonitoredTorrent `json:"-"`
-	PushChanBuiltin         chan builtin.MonitoredTorrent `json:"-"`
-	FinihsedTorrentNameList *util.ListView[string]        `json:"-"`
+	BuiltinDownload         bool                                    `json:"builtinDownload"`
+	RssTorrentsName         map[string]struct{}                     `json:"rssTorrentsName"`
+	RssReader               *rss.Reader                             `json:"-"`
+	RssGuids                map[string]struct{}                     `json:"rssGuids"`
+	Filter                  *FilterVerb                             `json:"filter"`
+	TorrentUrls             map[string]RssFileOptStrage             `json:"torrentUrls"`
+	TorrentFinishedUrls     map[string]struct{}                     `json:"torrentFinishedUrls"`
+	DetctchanBuiltin        chan builtin.MonitoredTorrent           `json:"-"`
+	PushChanBuiltin         chan builtin.MonitoredTorrent           `json:"-"`
+	FinihsedTorrentNameList *util.ListView[builtin.TorrentProgress] `json:"-"`
 }
 type subjOp int
 
@@ -119,13 +119,23 @@ func (ex *Extra) NoArgs() bool {
 
 func (s *Subject) initializeFinishedTorrentNameList() {
 	if s.FinihsedTorrentNameList == nil && s.ResourceTyp == RSS {
-		f := make([]string, 0, len(s.TorrentFinishedUrls))
+		f := make([]builtin.TorrentProgress, 0, len(s.TorrentFinishedUrls))
 		for u := range s.TorrentFinishedUrls {
-			f = append(f, s.TorrentUrls[u].Renamed)
+			f = append(f, builtin.TorrentProgress{
+				Percentage: 100,
+				Name:       s.TorrentUrls[u].Renamed,
+			})
 		}
 		s.FinihsedTorrentNameList = util.NewListView(f)
-	}else if s.FinihsedTorrentNameList == nil {
-         
+	} else if s.FinihsedTorrentNameList == nil {
+		f := make([]builtin.TorrentProgress, 0, len(s.TorrentFinishedUrls))
+		for u := range s.TorrentFinishedUrls {
+			// torrent type will store name to finished list
+			f = append(f, builtin.TorrentProgress{
+				Percentage: 100,
+				Name:       u})
+		}
+		s.FinihsedTorrentNameList = util.NewListView(f)
 	}
 }
 

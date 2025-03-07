@@ -12,6 +12,26 @@ import (
 	"golang.org/x/net/context"
 )
 
+type TorrentProgressList struct {
+	list  map[TorrentInfo]struct{}
+	dirty []TorrentInfo
+}
+
+func (l *TorrentProgressList) Put(ts []TorrentInfo) {
+	if l.list == nil {
+		l.list = make(map[TorrentInfo]struct{})
+	}
+	for _, t := range ts {
+		if _, ex := l.list[t]; !ex {
+			l.list[t] = struct{}{}
+			l.dirty = append(l.dirty, t)
+		}
+	}
+}
+func (l *TorrentProgressList) Get() []TorrentInfo {
+	return l.dirty
+}
+
 type TorrentProgress struct {
 	Percentage int
 	Name       string

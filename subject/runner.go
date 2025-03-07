@@ -48,7 +48,7 @@ func (s *Subject) runtimeInit(reload bool) {
 		if reload {
 			s.initializeFinishedTorrentNameList()
 		} else {
-			s.FinihsedTorrentNameList = util.NewListView([]string(nil))
+			s.FinihsedTorrentNameList = util.NewListView([]builtin.TorrentProgress(nil))
 		}
 		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
 		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
@@ -137,8 +137,12 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 				}
 			}
 		case torr := <-s.PushChanBuiltin:
-			s.TorrentFinishedUrls[torr.Url] = struct{}{}
-			s.FinihsedTorrentNameList.Append(torr.Rename)
+			if s.ResourceTyp == Torrent {
+				s.TorrentFinishedUrls[torr.Rename] = struct{}{}
+			} else {
+				s.TorrentFinishedUrls[torr.Url] = struct{}{}
+			}
+			s.FinihsedTorrentNameList.Append(builtin.TorrentProgress{Percentage: 100, Name: torr.Rename})
 			err := s.writeJson()
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed")
