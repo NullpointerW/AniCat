@@ -44,6 +44,11 @@ type TorrentProgressMonitor struct {
 	ttl             time.Duration
 }
 
+func NewTorrentProgressMonitor(ttl time.Duration) *TorrentProgressMonitor {
+	tm := &TorrentProgressMonitor{ttl: ttl, activeTorrents: make(map[TorrentInfo]struct{})}
+	return tm
+}
+
 func (tm *TorrentProgressMonitor) AddTorrent(t TorrentInfo) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
@@ -78,7 +83,7 @@ func (tm *TorrentProgressMonitor) getSlow() []TorrentProgress {
 }
 
 func (tm *TorrentProgressMonitor) checkAndGet() ([]TorrentProgress, bool) {
-	if l, lt, now := tm.cache.Load(), tm.lasttime.Load().(time.Time), time.Now(); lt.Add(tm.ttl).Sub(now) >= 0 && l != nil {
+	if l, lt, now := tm.cache.Load(), tm.lasttime.Load(), time.Now(); lt != nil && lt.(time.Time).Add(tm.ttl).Sub(now) >= 0 && l != nil {
 		return l.([]TorrentProgress), true
 	}
 	return nil, false
@@ -112,7 +117,7 @@ type torrentState struct {
 // and manage the state of each torrent. It tracks torrent states in a map
 // and updates their status based on events such as receiving torrent info
 // or completing the download.
-func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
+func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context,monitor *TorrentProgressMonitor) {
 	torrents := make(map[uintptr]torrentState)
 	cases := make([]reflect.SelectCase, 0)
 	cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ctx.Done())},
@@ -153,6 +158,7 @@ func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context) {
 				}
 				torrents[reflect.ValueOf(dch).Pointer()] = ts
 				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(dch)})
+				monitor.AddTorrent(ts.m.TorrentInfo)
 				fmt.Printf("bultin-detector: got torrent info ok,downloading :%+v \n", ts.m)
 			}
 		cleancases:
