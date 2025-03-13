@@ -83,6 +83,7 @@ type Subject struct {
 	DetctchanBuiltin        chan builtin.MonitoredTorrent           `json:"-"`
 	PushChanBuiltin         chan builtin.MonitoredTorrent           `json:"-"`
 	FinihsedTorrentNameList *util.ListView[builtin.TorrentProgress] `json:"-"`
+	TorrentMonitor          *builtin.TorrentProgressMonitor          `json:"-"`
 }
 type subjOp int
 

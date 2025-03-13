@@ -13,13 +13,13 @@ import (
 )
 
 type TorrentProgressList struct {
-	list  map[TorrentInfo]struct{}
-	dirty []TorrentInfo
+	list  map[TorrentProgress]struct{}
+	dirty []TorrentProgress
 }
 
-func (l *TorrentProgressList) Put(ts []TorrentInfo) {
+func (l *TorrentProgressList) Put(ts []TorrentProgress) {
 	if l.list == nil {
-		l.list = make(map[TorrentInfo]struct{})
+		l.list = make(map[TorrentProgress]struct{})
 	}
 	for _, t := range ts {
 		if _, ex := l.list[t]; !ex {
@@ -28,13 +28,24 @@ func (l *TorrentProgressList) Put(ts []TorrentInfo) {
 		}
 	}
 }
-func (l *TorrentProgressList) Get() []TorrentInfo {
+func (l *TorrentProgressList) Get() []TorrentProgress {
+	if l.dirty == nil {
+		l.dirty = make([]TorrentProgress, 0)
+	}
 	return l.dirty
+}
+func (l *TorrentProgressList) Fin() bool {
+	for t := range l.list {
+		if t.Percentage != 100 {
+			return false
+		}
+	}
+	return true
 }
 
 type TorrentProgress struct {
-	Percentage int
-	Name       string
+	Percentage int    `json:"percentage"`
+	Name       string `json:"name"`
 }
 
 type TorrentProgressMonitor struct {
@@ -117,7 +128,7 @@ type torrentState struct {
 // and manage the state of each torrent. It tracks torrent states in a map
 // and updates their status based on events such as receiving torrent info
 // or completing the download.
-func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context,monitor *TorrentProgressMonitor) {
+func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monitor *TorrentProgressMonitor) {
 	torrents := make(map[uintptr]torrentState)
 	cases := make([]reflect.SelectCase, 0)
 	cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ctx.Done())},

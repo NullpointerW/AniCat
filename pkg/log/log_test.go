@@ -1,7 +1,9 @@
 package log
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -76,4 +78,11 @@ func TestSOURCE(t *testing.T) {
 
 }
 
-
+func TestNewUrlStruct(t *testing.T) {
+	var aa []int
+	bb := make ([]int, 0, 0)
+	a,_:=json.Marshal(aa)
+	b,_:=json.Marshal(bb)
+	fmt.Println(string(a))
+	fmt.Println(string(b))
+}

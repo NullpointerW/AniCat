@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	// "errors"
 	"strconv"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
@@ -81,7 +82,11 @@ func init() {
 			err = errs.ErrSubjectNotFound
 			return
 		}
-
+		if subj.BuiltinDownload {
+			r.StatusBuiltin(subj)
+			err = errs.ErrConnHajcked
+			return
+		}
 		if subj.ResourceTyp == subject.Torrent {
 			h, er := torrent.Get(subj.TorrentHash)
 			if er != nil {

@@ -68,6 +68,10 @@ func process(c *N.Conn) {
 		}
 		resp, err := route(command, render)
 		if err != nil {
+			if err == errs.ErrConnHajcked {
+				log.Warn(log.Struct{"warn", err.Error()})
+				return
+			}
 			_ = c.Write(err.Error())
 			return
 		}

@@ -28,7 +28,7 @@ func (s *Subject) runtimeInit(reload bool) {
 	if s.Terminate {
 		close(s.Exited)
 		Mgr.Add(s)
-		if s.BuiltinDownload{
+		if s.BuiltinDownload {
 			s.initializeFinishedTorrentNameList()
 		}
 		return
@@ -55,8 +55,9 @@ func (s *Subject) runtimeInit(reload bool) {
 		}
 		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
 		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
-		m:=builtin.NewTorrentProgressMonitor(time.Second*15)
-		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx,m)
+		m := builtin.NewTorrentProgressMonitor(time.Second * 15)
+		s.TorrentMonitor = m
+		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx, m)
 		go s.runWithBuiltinDownloader(ctx, reload)
 
 	} else {
