@@ -23,7 +23,7 @@ type Render interface {
 	TorrList(its []CR.Item) string
 	Ls(ls []subject.Subject) string
 	Status(subj *subject.Subject, torrs ...qbt.Torrent) string
-	StatusBuiltin(subj *subject.Subject) 
+	StatusBuiltin(subj *subject.Subject)
 }
 
 type AsciiRender struct {
@@ -118,7 +118,7 @@ func (_ AsciiRender) Ls(ls []subject.Subject) string {
 	return "\n" + tableString.String()
 }
 
-func (r AsciiRender) StatusBuiltin(subj *subject.Subject)  {
+func (r AsciiRender) StatusBuiltin(subj *subject.Subject) {
 	r.statusBuiltin(subj)
 }
 
@@ -162,6 +162,7 @@ func (r AsciiRender) statusBuiltin(s *subject.Subject) {
 	go HandleStatus(s, r.Conn)
 }
 func HandleStatus(s *subject.Subject, c *net.Conn) {
+	c.Write("keep-alive")
 	var list builtin.TorrentProgressList
 	for {
 		if s.Terminate {
@@ -176,7 +177,8 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 		list.Put(s.FinihsedTorrentNameList.List())
 		list.Put(s.TorrentMonitor.GetProgressList())
 		list2, fin := list.Get(), list.Fin()
-		r, _ := json.Marshal(list2)
+		lse := builtin.TorrentProgressListSend{List: list2, Fin: fin}
+		r, _ := json.Marshal(lse)
 		c.Write(string(r))
 		if fin {
 			c.TcpConn.Close()

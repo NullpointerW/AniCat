@@ -43,6 +43,10 @@ func (l *TorrentProgressList) Fin() bool {
 	return true
 }
 
+type TorrentProgressListSend struct {
+	List []TorrentProgress `json:"list"`
+	Fin  bool              `json:"fin"`
+}
 type TorrentProgress struct {
 	Percentage int    `json:"percentage"`
 	Name       string `json:"name"`
