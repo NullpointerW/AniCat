@@ -14,25 +14,25 @@ import (
 
 type TorrentProgressList struct {
 	list  map[TorrentProgress]struct{}
-	dirty []TorrentProgress
+	clean []TorrentProgress
 }
 
-func (l *TorrentProgressList) Put(ts []TorrentProgress) {
+func (l *TorrentProgressList) Put(dirty []TorrentProgress) {
 	if l.list == nil {
 		l.list = make(map[TorrentProgress]struct{})
 	}
-	for _, t := range ts {
+	for _, t := range dirty {
 		if _, ex := l.list[t]; !ex {
 			l.list[t] = struct{}{}
-			l.dirty = append(l.dirty, t)
+			l.clean = append(l.clean, t)
 		}
 	}
 }
 func (l *TorrentProgressList) Get() []TorrentProgress {
-	if l.dirty == nil {
-		l.dirty = make([]TorrentProgress, 0)
+	if l.clean == nil {
+		l.clean = make([]TorrentProgress, 0)
 	}
-	return l.dirty
+	return l.clean
 }
 func (l *TorrentProgressList) Fin() bool {
 	for t := range l.list {
