@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	Ver    = "x.x.x"
+	Ver    = "unknown"
 	projlk = "https://github.com/NullpointerW/AniCat"
 	SrvCTL = len(os.Args) > 1 && (os.Args[1] == "install" || os.Args[1] == "uninstall" || os.Args[1] == "start")
 )

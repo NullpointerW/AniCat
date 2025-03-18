@@ -2,7 +2,7 @@ NAME=anicat
 BUILDIR=build
 
 SRV_FILE=service-exec/service.go
-VERSION := $(patsubst v%,%,$(shell git describe --tags || echo "x.x.x"))
+VERSION := $(patsubst v%,%,$(shell git describe --tags || echo "unknown"))
 GOBUILD=CGO_ENABLED=0 go build  -ldflags '-X "github.com/NullpointerW/anicat/conf.Ver=$(VERSION)"'
 
 

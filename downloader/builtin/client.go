@@ -1,6 +1,10 @@
 package builtin
 
 import (
+	"crypto/rand"
+	"fmt"
+	"runtime/debug"
+
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/log"
 	"github.com/anacrolix/torrent"
@@ -11,12 +15,18 @@ var DefaultDownLoader *Downloader
 
 func init() {
 	if CFG.Env.BuiltinDownloader {
+		log.Info(log.Struct{"github", "https://github.com/anacrolix/torrent"}, "builtin-enabled, using anacrolix/torrent")
 		InitDownloader()
-		log.Info(log.Struct{"github", "https://github.com/anacrolix/torrent"}, "builtin downloader enabled, using anacrolix/torrent")
 	}
 }
 func InitDownloader() {
-	DefaultDownLoader = NewDownloader("./.db", true, NewHttpSeeker())
+	cfg := &DownloaderConfig{
+		BaseDir:    "./.db",
+		FakePeerID: true,
+		NopUpload:  true,
+		Seeker:     NewHttpSeeker(),
+	}
+	DefaultDownLoader = NewDownloader(cfg)
 }
 
 type Downloader struct {
@@ -31,19 +41,57 @@ type FileOption interface {
 	FileName
 	Dir() storage.TorrentDirFilePathMaker
 }
+type DownloaderConfig struct {
+	BaseDir    string
+	Seeker     TorrentSeeker
+	NopUpload  bool
+	FakePeerID bool
+}
 
-func NewDownloader(basedir string, nopUpload bool, seeker TorrentSeeker) *Downloader {
+func NewDownloader(c *DownloaderConfig) *Downloader {
 	cfg := torrent.NewDefaultClientConfig()
-	cfg.Seed = !nopUpload
+	cfg.Seed = !c.NopUpload
+	cfg.NoUpload = c.NopUpload
 	fop := storage.NewFileClientOpts{}
-	fop.ClientBaseDir = basedir
+	fop.ClientBaseDir = c.BaseDir
 	cfg.DefaultStorage = storage.NewFileOpts(fop)
+	if c.FakePeerID {
+		f := "-qB419E-" // qBittorrent
+		var b [20]byte
+		n := copy(b[:], ([]byte)(f))
+		_, err := rand.Read(b[n:])
+		if err != nil {
+			panic("builtin-downloader: error generating peer id")
+		}
+		cfg.PeerID = (string)(b[:])
+		cfg.HTTPUserAgent = "qBittorrent/v4.1.9.14"
+		mainPath := "github.com/NullpointerW/anicat"
+		mainVersion := "unknown"
+		if buildInfo, ok := debug.ReadBuildInfo(); ok {
+			mainPath = buildInfo.Main.Path
+			mainVersion = buildInfo.Main.Version
+		}
+		exhskVer := fmt.Sprintf(
+			"%v %v (%v %v)",
+			mainPath,
+			mainVersion,
+			"qBittorrent",
+			"v4.1.9.14",
+		)
+		cfg.ExtendedHandshakeClientVersion = exhskVer
+	}
 	client, err := torrent.NewClient(cfg)
 	if err != nil {
 		panic(err)
 	}
-	log.Info(log.Struct{"version",cfg.ExtendedHandshakeClientVersion,"userAgent",cfg.HTTPUserAgent,"peerID",cfg.PeerID,"upnpID",cfg.UpnpID},"torrent-client initialized")
-	return &Downloader{client, seeker}
+	peerIDStr := func(p torrent.PeerID) string {
+		b := ([20]byte)(p)
+		// fmt.Println((string)(b[:]))
+		return string(b[:])
+	}
+
+	log.Info(log.Struct{"version", cfg.ExtendedHandshakeClientVersion, "userAgent", cfg.HTTPUserAgent, "peerID", peerIDStr(client.PeerID()), "upnpID", cfg.UpnpID}, "torrent-client initialized")
+	return &Downloader{client, c.Seeker}
 
 }
 
