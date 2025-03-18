@@ -31,7 +31,7 @@ func (d FilePath) Dir() storage.TorrentDirFilePathMaker {
 }
 
 func (s *Subject) builtinDownload(mt builtin.MonitoredTorrent) {
-	s.DetctchanBuiltin <- mt
+	s.MonitorchanBuiltin <- mt
 }
 
 func BuildFilter(s *Subject, ex *Extra) {

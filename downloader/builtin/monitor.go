@@ -118,7 +118,7 @@ type torrentState struct {
 	gotInfo bool
 }
 
-// DetectBuiltin monitors torrents and handles their state transitions.
+// MonitorBuiltin monitors torrents and handles their state transitions.
 // It listens for incoming MonitoredTorrent objects on the recv channel,
 // processes them, and sends updated MonitoredTorrent objects on the send channel.
 // The function also listens for context cancellation to gracefully exit.
@@ -132,7 +132,7 @@ type torrentState struct {
 // and manage the state of each torrent. It tracks torrent states in a map
 // and updates their status based on events such as receiving torrent info
 // or completing the download.
-func DetectBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monitor *TorrentProgressMonitor) {
+func MonitorBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monitor *TorrentProgressMonitor) {
 	torrents := make(map[uintptr]torrentState)
 	cases := make([]reflect.SelectCase, 0)
 	cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ctx.Done())},

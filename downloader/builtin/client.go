@@ -42,6 +42,7 @@ func NewDownloader(basedir string, nopUpload bool, seeker TorrentSeeker) *Downlo
 	if err != nil {
 		panic(err)
 	}
+	log.Info(log.Struct{"version",cfg.ExtendedHandshakeClientVersion,"userAgent",cfg.HTTPUserAgent,"peerID",cfg.PeerID,"upnpID",cfg.UpnpID},"torrent-client initialized")
 	return &Downloader{client, seeker}
 
 }

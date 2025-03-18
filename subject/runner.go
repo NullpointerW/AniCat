@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+
 	// "reflect"
 	"strings"
 	"time"
@@ -54,10 +55,10 @@ func (s *Subject) runtimeInit(reload bool) {
 			s.FinihsedTorrentNameList = util.NewListView([]builtin.TorrentProgress(nil))
 		}
 		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
-		s.DetctchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
+		s.MonitorchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
 		m := builtin.NewTorrentProgressMonitor(time.Second * 15)
 		s.TorrentMonitor = m
-		go builtin.DetectBuiltin(s.DetctchanBuiltin, s.PushChanBuiltin, ctx, m)
+		go builtin.MonitorBuiltin(s.MonitorchanBuiltin, s.PushChanBuiltin, ctx, m)
 		go s.runWithBuiltinDownloader(ctx, reload)
 
 	} else {

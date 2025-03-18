@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
 	// "sync"
 	"time"
 
@@ -80,10 +81,10 @@ type Subject struct {
 	Filter                  *FilterVerb                             `json:"filter"`
 	TorrentUrls             map[string]RssFileOptStrage             `json:"torrentUrls"`
 	TorrentFinishedUrls     map[string]struct{}                     `json:"torrentFinishedUrls"`
-	DetctchanBuiltin        chan builtin.MonitoredTorrent           `json:"-"`
+	MonitorchanBuiltin      chan builtin.MonitoredTorrent           `json:"-"`
 	PushChanBuiltin         chan builtin.MonitoredTorrent           `json:"-"`
 	FinihsedTorrentNameList *util.ListView[builtin.TorrentProgress] `json:"-"`
-	TorrentMonitor          *builtin.TorrentProgressMonitor          `json:"-"`
+	TorrentMonitor          *builtin.TorrentProgressMonitor         `json:"-"`
 }
 type subjOp int
 
