@@ -13,22 +13,20 @@ import (
 )
 
 type TorrentProgressList struct {
-	list  map[string]TorrentProgressElem
+	list  map[string]int
 	clean []TorrentProgress
 }
 
 func (l *TorrentProgressList) Put(dirty []TorrentProgress) {
 	if l.list == nil {
-		l.list = make(map[string]TorrentProgressElem)
+		l.list = make(map[string]int)
 	}
 	for _, t := range dirty {
-		if ot, ex := l.list[t.Name]; !ex {
-			l.list[t.Name] = TorrentProgressElem{TorrentProgress: t, idx: len(l.clean)}
+		if idx, ex := l.list[t.Name]; !ex {
+			l.list[t.Name] =  len(l.clean)
 			l.clean = append(l.clean, t)
 		} else {
-			ot.TorrentProgress = t
-			l.list[t.Name] = ot
-			l.clean[ot.idx] = t
+			l.clean[idx] = t
 		}
 	}
 }
@@ -39,7 +37,7 @@ func (l *TorrentProgressList) Get() []TorrentProgress {
 	return l.clean
 }
 func (l *TorrentProgressList) Fin() bool {
-	for _, t := range l.list {
+	for _, t := range l.clean {
 		if t.Percentage != 100 {
 			return false
 		}
@@ -55,10 +53,10 @@ type TorrentProgress struct {
 	Percentage int    `json:"percentage"`
 	Name       string `json:"name"`
 }
-type TorrentProgressElem struct {
-	idx int
-	TorrentProgress
-}
+// type TorrentProgressElem struct {
+// 	idx int
+// 	TorrentProgress
+// }
 
 type TorrentProgressMonitor struct {
 	mu              sync.Mutex
