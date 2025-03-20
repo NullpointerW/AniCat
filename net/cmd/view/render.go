@@ -181,7 +181,9 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 		}
 		list.Put(s.FinihsedTorrentNameList.List())
 		list.Put(s.TorrentMonitor.GetProgressList())
+		// fmt.Println("activelist",s.TorrentMonitor.GetProgressList())
 		list2, fin := list.Get(), list.Fin()
+		// fmt.Println("send list",list2)
 		lse := builtin.TorrentProgressListSend{List: list2, Fin: fin}
 		r, _ := json.Marshal(lse)
 		err := c.Write(string(r))
