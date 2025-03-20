@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/NullpointerW/anicat/downloader/builtin"
+	"github.com/NullpointerW/anicat/log"
 	"github.com/NullpointerW/anicat/net"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
@@ -170,7 +171,11 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 			list.Put(s.FinihsedTorrentNameList.List())
 			list2 := list.Get()
 			r, _ := json.Marshal(list2)
-			c.Write(string(r))
+			err := c.Write(string(r))
+			if err != nil {
+				log.Error(log.Struct{"err", err}, "conn write err")
+				return
+			}
 			c.TcpConn.Close()
 			break
 		}
@@ -179,7 +184,11 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 		list2, fin := list.Get(), list.Fin()
 		lse := builtin.TorrentProgressListSend{List: list2, Fin: fin}
 		r, _ := json.Marshal(lse)
-		c.Write(string(r))
+		err := c.Write(string(r))
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "conn write err")
+			return
+		}
 		if fin {
 			c.TcpConn.Close()
 			break

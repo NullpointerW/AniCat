@@ -82,8 +82,10 @@ func (env *Environment) Print() {
 		log.Info(logStruct, "crawling setting")
 		logStruct.Clear()
 	}
-	logStruct.Append("qbt-webUrl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
-	log.Info(logStruct, "qbt setting")
+	if !env.BuiltinDownloader {
+		logStruct.Append("qbt-webUrl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
+		log.Info(logStruct, "qbt setting")
+	}
 }
 
 func (env *Environment) EmailPrint() {

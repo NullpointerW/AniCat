@@ -26,6 +26,10 @@ func TestReader(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	s:=sync.Pool{}
+	s := sync.Pool{}
 	s.Get()
+}
+
+func TestXxx(t *testing.T) {
+	fmt.Println(extraTrackers())
 }
