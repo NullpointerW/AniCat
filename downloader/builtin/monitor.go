@@ -23,7 +23,7 @@ func (l *TorrentProgressList) Put(dirty []TorrentProgress) {
 	}
 	for _, t := range dirty {
 		if idx, ex := l.list[t.Name]; !ex {
-			l.list[t.Name] =  len(l.clean)
+			l.list[t.Name] = len(l.clean)
 			l.clean = append(l.clean, t)
 		} else {
 			l.clean[idx] = t
@@ -53,10 +53,6 @@ type TorrentProgress struct {
 	Percentage int    `json:"percentage"`
 	Name       string `json:"name"`
 }
-// type TorrentProgressElem struct {
-// 	idx int
-// 	TorrentProgress
-// }
 
 type TorrentProgressMonitor struct {
 	mu              sync.Mutex
@@ -120,7 +116,7 @@ type MonitoredTorrent struct {
 	Url  string
 }
 type torrentState struct {
-	m       MonitoredTorrent
+	MonitoredTorrent
 	gotInfo bool
 }
 
@@ -149,12 +145,12 @@ func MonitorBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monit
 			close(recv)
 			close(send)
 			for _, t := range torrents {
-				t.m.Torrent.Drop()
+				t.Torrent.Drop()
 			}
 			return
 		} else if c == 1 { // recv
 			mt := v.Interface().(MonitoredTorrent)
-			ts := torrentState{m: mt, gotInfo: false}
+			ts := torrentState{MonitoredTorrent: mt, gotInfo: false}
 			gch := mt.Torrent.GotInfo()
 			torrents[reflect.ValueOf(gch).Pointer()] = ts
 			cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(gch)})
@@ -167,20 +163,21 @@ func MonitorBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monit
 			}
 			delete(torrents, ptr)
 			if ts.gotInfo { // push
-				ts.m.Size = ts.m.Torrent.Length()
-				fmt.Printf("bultin-detector: download complete :%+v \n", ts.m)
-				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectSend, Chan: reflect.ValueOf(send), Send: reflect.ValueOf(ts.m)})
+				ts.Size = ts.Torrent.Length()
+				fmt.Printf("bultin-detector: download complete :%+v \n", ts.MonitoredTorrent)
+				ts.Torrent.Drop()
+				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectSend, Chan: reflect.ValueOf(send), Send: reflect.ValueOf(ts.MonitoredTorrent)})
 			} else { // download
 				ts.gotInfo = true
-				ts.m.Torrent.DownloadAll()
-				dch := ts.m.Torrent.Complete.On()
-				if ts.m.Rename == "" {
-					ts.m.Rename = ts.m.Torrent.Name()
+				ts.Torrent.DownloadAll()
+				dch := ts.Torrent.Complete.On()
+				if ts.Rename == "" {
+					ts.Rename = ts.Torrent.Name()
 				}
 				torrents[reflect.ValueOf(dch).Pointer()] = ts
 				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(dch)})
-				monitor.AddTorrent(ts.m.TorrentInfo)
-				fmt.Printf("bultin-detector: got torrent info ok,downloading :%+v \n", ts.m)
+				monitor.AddTorrent(ts.TorrentInfo)
+				fmt.Printf("bultin-detector: got torrent info ok,downloading :%+v \n", ts.MonitoredTorrent)
 			}
 		cleancases:
 			cases = util.SliceDelete(cases, c)
