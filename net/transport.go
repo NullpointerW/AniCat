@@ -19,6 +19,7 @@ type Conn struct {
 	s       *bufio.Scanner
 	once    sync.Once
 	Max     int
+	Hajacked bool
 }
 
 func (c *Conn) Write(s string) error {

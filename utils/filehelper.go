@@ -34,11 +34,8 @@ func IsSubtitleFile(fn string) bool {
 }
 
 func IsJsonFile(fn string) bool {
-	sep := strings.Split(fn, ".")
-	if len(sep) < 2 {
-		return false
-	}
-	return strings.ToLower(sep[1]) == "json"
+	ext := ".json"
+	return strings.ToLower(filepath.Ext(fn)) == ext
 }
 
 func FileSeparatorConv(path string) string {

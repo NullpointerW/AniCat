@@ -4,13 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	CFG "github.com/NullpointerW/anicat/conf"
-	DL "github.com/NullpointerW/anicat/downloader"
-	"github.com/NullpointerW/anicat/downloader/rss"
-	TORR "github.com/NullpointerW/anicat/downloader/torrent"
-	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/log"
-	util "github.com/NullpointerW/anicat/utils"
 	"io"
 	"os"
 	"path/filepath"
@@ -18,11 +11,20 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	CFG "github.com/NullpointerW/anicat/conf"
+	DL "github.com/NullpointerW/anicat/downloader"
+	"github.com/NullpointerW/anicat/downloader/rss"
+	TORR "github.com/NullpointerW/anicat/downloader/torrent"
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/log"
+	util "github.com/NullpointerW/anicat/utils"
 )
 
 var HOME = CFG.Env.SubjPath
 
 func Scan() {
+	builtin := CFG.Env.BuiltinDownloader
 	home := trimPath(HOME)
 	if fs, err := os.ReadDir(home); err == nil {
 		for _, f := range fs {
@@ -42,6 +44,9 @@ func Scan() {
 							err := json.Unmarshal(jsraw, &s)
 							if err != nil {
 								log.Error(log.Struct{"err", err}, "scan: unmarshal json failed")
+								continue
+							}
+							if builtin != s.BuiltinDownload {
 								continue
 							}
 							s.runtimeInit(true)
@@ -117,6 +122,9 @@ func (s *Subject) writeJson() (err error) {
 }
 
 func (s *Subject) RmRes() error {
+	if s.BuiltinDownload {
+		return nil
+	}
 	wrap := errs.ErrWrapper{}
 	if s.ResourceTyp == RSS {
 		wrap.Handle(func() error {
@@ -154,7 +162,7 @@ func (s *Subject) RmRes() error {
 }
 
 func trimPath(n string) string {
-	return strings.TrimSuffix(strings.TrimSuffix(CFG.Env.SubjPath, "\\"), "/")
+	return strings.TrimSuffix(strings.TrimSuffix(n, "\\"), "/")
 }
 
 func FindLastSeason(p string) (int, error) {

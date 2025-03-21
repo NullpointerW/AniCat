@@ -23,6 +23,9 @@ func flagInit() {
 	flag.BoolVar(&Testing, "t", false, "testing mode")
 	testing.Init()
 	flag.Parse()
+
+	// Testing=true
+
 	if Testing {
 		IdeDebugging = true
 	}

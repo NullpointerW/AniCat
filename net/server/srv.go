@@ -14,6 +14,7 @@ import (
 	"strconv"
 )
 
+// Listen start the server
 func Listen() {
 	p := CFG.Env.Port
 	if p == 0 {
@@ -43,9 +44,15 @@ func Listen() {
 }
 
 func process(c *N.Conn) {
-	defer c.TcpConn.Close()
+	defer func() {
+		if !c.Hajacked {
+			_ = c.TcpConn.Close()
+		}
+	}()
 	var (
-		render  view.Render = view.AsciiRender{}
+		render view.Render = view.AsciiRender{
+			Conn: c,
+		}
 		command cmd.Cmd
 	)
 	if msg, err := c.Read(); err == nil {
@@ -61,6 +68,10 @@ func process(c *N.Conn) {
 		}
 		resp, err := route(command, render)
 		if err != nil {
+			if err == errs.ErrConnHajcked {
+				log.Warn(log.Struct{"warn", err.Error()})
+				return
+			}
 			_ = c.Write(err.Error())
 			return
 		}

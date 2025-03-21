@@ -2,10 +2,53 @@ package subject
 
 import (
 	"fmt"
+	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strings"
 )
+
+type FilterVerb struct {
+	Single    bool `json:"single"`
+	Contain   any  `json:"contain"`
+	Exclusion any  `json:"exclusion"`
+}
+
+func NewFilterVerb(single bool, c, e any) *FilterVerb {
+	return &FilterVerb{
+		Single:    single,
+		Contain:   c,
+		Exclusion: e,
+	}
+}
+func (f *FilterVerb) Filter() rss.FilterFunc {
+	if f.Single {
+		return func(n string) bool {
+			return FilterWithReg(n, f.Contain.(string), f.Exclusion.(string))
+		}
+	}
+	return func(n string) bool {
+		return FilterWithRegs(n, ifaceConvertStrSlice(f.Contain), ifaceConvertStrSlice(f.Exclusion))
+	}
+
+}
+func ifaceConvertStrSlice(iface any) []string {
+	if sfaceAssert(iface){
+		return sfaceConvertStrSlice(iface.([]interface{}))
+	}
+	return iface.([]string)
+}
+func sfaceAssert(iface any )bool{
+	_, ok := iface.([]interface{})
+	return ok
+}
+func sfaceConvertStrSlice(sface []interface{}) []string {
+	ss := make([]string, 0, len(sface))
+	for _, f := range sface {
+		ss = append(ss, f.(string))
+	}
+	return ss
+}
 
 func BuildFilterPerlReg(vbs []string) string {
 	var reg string
@@ -103,8 +146,12 @@ func FilterWithRegs(s string, contains, exclusions []string) bool {
 }
 
 func FilterWithCustomReg(s string, e Extra) bool {
+	return FilterWithReg(s, e.RssOption.MustContain, e.RssOption.MustNotContain)
+}
+
+func FilterWithReg(s string, c, e string) bool {
 	clsOk, exlOk := true, true
-	if cls := e.RssOption.MustContain; cls != "" {
+	if cls := c; cls != "" {
 		clsReg, err := regexp.Compile(cls)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
@@ -112,7 +159,7 @@ func FilterWithCustomReg(s string, e Extra) bool {
 			clsOk = clsReg.MatchString(s)
 		}
 	}
-	if exl := e.RssOption.MustNotContain; exl != "" {
+	if exl := e; exl != "" {
 		exlReg, err := regexp.Compile(exl)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")

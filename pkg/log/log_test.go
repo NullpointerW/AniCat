@@ -1,7 +1,9 @@
 package log
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -74,4 +76,13 @@ func TestSOURCE(t *testing.T) {
 	logger := New("text", "info", time.RFC3339Nano, true, 0, os.Stderr)
 	logger.Errorf(Struct{"error", "<nil>", "hota l", "won z"}, "you can not see me")
 
+}
+
+func TestNewUrlStruct(t *testing.T) {
+	var aa []int
+	bb := make ([]int, 0, 0)
+	a,_:=json.Marshal(aa)
+	b,_:=json.Marshal(bb)
+	fmt.Println(string(a))
+	fmt.Println(string(b))
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/NullpointerW/anicat/log"
 	eslog "github.com/NullpointerW/anicat/pkg/log"
+	"github.com/NullpointerW/anicat/rename"
 	"os"
-	"regexp"
 	"strings"
 
 	CFG "github.com/NullpointerW/anicat/conf"
@@ -16,64 +16,12 @@ import (
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 
-func CaptureEpisNum(text string) (string, error) {
-	for _, reg := range epi_regs {
-		regexper := regexp.MustCompile(reg)
-		match := regexper.FindStringSubmatch(text)
-		if len(match) > 1 {
-			episNum := match[1]
-			if len([]byte(episNum)) == 1 {
-				return "0" + episNum, nil
-			}
-			return episNum, nil
-		}
-	}
-	regexper := regexp.MustCompile(regSpecial)
-	matchs := regexper.FindAllStringSubmatch(text, -1)
-	if matchs != nil {
-		if l := len(matchs); l == 1 {
-			episNum := matchs[0][1]
-			if len([]byte(episNum)) == 1 {
-				return "0" + episNum, nil
-			}
-			return episNum, nil
-		}
-		episNum := matchs[1][1]
-		if len([]byte(episNum)) == 1 {
-			return "0" + episNum, nil
-		}
-		return episNum, nil
-	}
-	return "", fmt.Errorf("%w:%s", errs.ErrCannotCaptureEpisNum, text)
-}
-
 func checkSingleVideo(torr qbt.Torrent) bool {
 	return util.IsVideofile(torr.Name)
 }
 
 func renameTV(s *Subject, fn string) (string, error) {
-	sep := "."
-	sp := strings.Split(fn, sep)
-	extension := sp[len(sp)-1]
-	extension = sep + extension
-	basename := s.FolderName
-	season := "S"
-	episode := "E"
-
-	epin, err := CaptureEpisNum(fn)
-	if err != nil {
-		return "", err
-	}
-	sean := s.Season
-	r := []rune(sean)
-	if len(r) == 1 {
-		sean = "0" + sean
-	}
-	season += sean
-	episode += epin
-	rename := basename + " " + season + episode + extension
-	log.Info(log.Struct{"from", fn, "to", rename}, "rename file")
-	return rename, nil
+	return rename.Tv(s.FolderName, s.Season, fn)
 }
 
 func renameTorr(s *Subject, torr qbt.Torrent) error {
@@ -125,7 +73,7 @@ func renameTorr(s *Subject, torr qbt.Torrent) error {
 	return merr.Err()
 }
 
-func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename string, err error) {
+func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, _rename string, err error) {
 	fs, err := DL.Qbt.Files(torr.Hash)
 	if err != nil {
 		return false, "", err
@@ -144,7 +92,7 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 				merr.Add(DL.Qbt.RenameFile(torr.Hash, f.Name, fn))
 				continue
 			}
-			rename = rn
+			_rename = rn
 			se := util.TrimExtensionAndGetEpi(rn)
 			if th, e := s.Pushed[se]; e {
 				dumpliErr := fmt.Errorf("%w: origin_name=%s,rename=%s", errs.ErrItemAlreadyPushed, torr.Name, rn)
@@ -172,16 +120,16 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 			subFsList = append(subFsList, fn)
 		}
 	}
-	// subFiles rename process
+	// subFiles _rename process
 	for _, fullFn := range subFsList {
 		fn := fullFn
 		fn = util.FileSeparatorConv(fn)
 		sep := strings.Split(fn, "/")
 		fn = sep[len(sep)-1]
 		subrn := fn
-		sublang := renameSubtitleFile(fn)
-		if sublang != "" && rename != "" {
-			seps := strings.Split(rename, ".")
+		sublang := rename.SubtitleFileLang(fn)
+		if sublang != "" && _rename != "" {
+			seps := strings.Split(_rename, ".")
 			seps = seps[:len(seps)-1]
 			extSep := strings.Split(fn, ".")
 			ext := extSep[len(extSep)-1]
@@ -193,19 +141,5 @@ func renameSubRssTorr(s *Subject, torr qbt.Torrent) (videoRnOk bool, rename stri
 	}
 	DL.Wait(1000) // wati for qbt moving files
 	merr.Add(os.RemoveAll(torr.ContentPath))
-	return videoRnOk, rename, merr.Err()
-}
-
-func renameSubtitleFile(fn string) string {
-	reg, _ := regexp.Compile(CHSSubStationReg)
-	ok := reg.MatchString(fn)
-	if ok {
-		return "chs"
-	}
-	reg, _ = regexp.Compile(CHTSubStationReg)
-	ok = reg.MatchString(fn)
-	if ok {
-		return "cht"
-	}
-	return ""
+	return videoRnOk, _rename, merr.Err()
 }

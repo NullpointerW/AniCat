@@ -10,8 +10,8 @@ import (
 )
 
 type Parser struct {
-	Feed  string
-	guids []string
+	Feed string
+	//guids []string
 }
 
 const mikanbgmiIdReg = `bangumiId=(\d+)`

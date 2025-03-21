@@ -6,25 +6,26 @@ import (
 )
 
 var (
-	ErrCrawlNotFound            = errors.New("crawl not found")
-	ErrCoverDownLoadZeroSize    = errors.New("cover file downloader zero size after multiple attempts")
-	ErrUnknownResCrawlLsType    = errors.New("unknown resource ls crawl type")
-	ErrLsGroupUnavailableOnTorr = errors.New("command `ls group` is unavailableOnTorrent type")
+	ErrCrawlNotFound            = errors.New("crawl notFound")
+	ErrCoverDownLoadZeroSize    = errors.New("coverFile downloader zeroSize after multiple attempts")
+	ErrUnknownResCrawlLsType    = errors.New("unknownResource ls crawl type")
+	ErrLsGroupUnavailableOnTorr = errors.New("command `ls group` is unavailable On TorrentType")
 
 	ErrBgmTVApiPrefix = errors.New("bgmTV api")
 
-	ErrTorrentNotFound           = errors.New("there are no torrent files on qbt")
-	ErrTorrentOnSavePathNotFound = errors.New("there are no torrent files on savepath of a subject")
-	ErrQbtDataNotFound           = errors.New("no data found from the api request (should be found)")
+	ErrTorrentNotFound           = errors.New("there are no torrentFiles on qbt")
+	ErrTorrentOnSavePathNotFound = errors.New("there are no torrentFiles on savepath of a subject")
+	ErrQbtDataNotFound           = errors.New("no data found from the apiRequest (should be found)")
 	ErrSubjectAlreadyExisted     = errors.New("subject already existed")
-	ErrSubjectNotFound           = errors.New("subject not found")
-	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url not found on anicat")
-	ErrUndefinedCrawlListType    = errors.New("undefined crawl list type")
+	ErrSubjectNotFound           = errors.New("subject notFound")
+	ErrBgmUrlNotFoundOnMikan     = errors.New("bgm url notFound on anicat")
+	ErrUndefinedCrawlListType    = errors.New("undefined crawlList type")
 	WarnRssRuleNotMatched        = errors.New("there is no any series mached,check your auto-downloader rule")
 
-	ErrCannotCaptureEpisNum = errors.New("can not capture episode num from text")
+	ErrCannotCaptureEpisNum = errors.New("can not capture episodeNum from text")
 	ErrItemAlreadyPushed    = errors.New("item was already pushed")
 	ErrNoLinkFoundOnRssFeed = errors.New("can not found link on feed")
+	ErrConnHajcked          = errors.New("conn hajacked")
 )
 
 type MultiErr struct {

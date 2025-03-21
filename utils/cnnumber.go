@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/NullpointerW/anicat/log"
+	"fmt"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -28,38 +28,34 @@ func IsNumber(s string) bool {
 	return true
 }
 
-func ConvertZhCnNumbToa(cnn string) string {
+func ConvertZhCnNumbToa(cnn string) (string,error) {
 	runes := []rune(cnn)
 	nl := len(runes)
 	if nl == 1 {
 		if cnn == "十" {
-			return "10"
+			return "10",nil
 		}
-		return string(zh_cn_numb[runes[0]])
+		return string(zh_cn_numb[runes[0]]),nil
 	} else if nl == 2 {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[1]]))
 		if err != nil {
-			log.Error(log.Struct{"err", err, "digits", nl}, "convert cn_number to int failed")
-			return "1"
+			return "1",fmt.Errorf("convert cn_number to int failed: %w",err)
 		}
-		return strconv.Itoa(10 + i)
+		return strconv.Itoa(10 + i),nil
 	} else if nl == 3 {
 		i, err := strconv.Atoi(string(zh_cn_numb[runes[0]]))
 		if err != nil {
-			log.Error(log.Struct{"err", err, "digits", nl}, "convert cn_number to int failed")
-			return "1"
+			return "1",fmt.Errorf("convert cn_number to int failed: %w",err)
 		}
 		i *= 10
 		e, err := strconv.Atoi(string(zh_cn_numb[runes[2]]))
 		if err != nil {
-			log.Error(log.Struct{"err", err, "digits", nl}, "convert cn_number to int failed")
-			return "1"
+			return "1",fmt.Errorf("convert cn_number to int failed: %w",err)
 		}
 		i += e
-		return strconv.Itoa(i)
+		return strconv.Itoa(i),nil
 	} else {
-		log.Error(log.Struct{"err", "cannot convert zh-cn numbers with more than 3 digits", "digits", nl}, "convert cn_number failed")
-		return "1"
+		return "1",fmt.Errorf("convert cn_number to int failed: cannot convert zh-cn numbers with more than 3 digits")
 	}
 }
 

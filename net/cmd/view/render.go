@@ -6,11 +6,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/NullpointerW/anicat/downloader/builtin"
+	"github.com/NullpointerW/anicat/log"
+	"github.com/NullpointerW/anicat/net"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
 	"github.com/NullpointerW/anicat/subject"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 	"github.com/olekukonko/tablewriter"
+	// CFG "github.com/NullpointerW/anicat/conf"
 )
 
 type Render interface {
@@ -18,9 +24,12 @@ type Render interface {
 	TorrList(its []CR.Item) string
 	Ls(ls []subject.Subject) string
 	Status(subj *subject.Subject, torrs ...qbt.Torrent) string
+	StatusBuiltin(subj *subject.Subject)
 }
 
-type AsciiRender struct{}
+type AsciiRender struct {
+	Conn *net.Conn
+}
 
 func (_ AsciiRender) RssGroup(rgs []CR.RssGroup) string {
 	var row [][]string
@@ -110,6 +119,10 @@ func (_ AsciiRender) Ls(ls []subject.Subject) string {
 	return "\n" + tableString.String()
 }
 
+func (r AsciiRender) StatusBuiltin(subj *subject.Subject) {
+	r.statusBuiltin(subj)
+}
+
 func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
 	var row [][]string
 	tableString := &strings.Builder{}
@@ -143,6 +156,47 @@ func (_ AsciiRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string 
 	table.AppendBulk(row)
 	table.Render()
 	return "\n" + header + tableString.String()
+}
+
+func (r AsciiRender) statusBuiltin(s *subject.Subject) {
+	r.Conn.Hajacked = true
+	go HandleStatus(s, r.Conn)
+}
+func HandleStatus(s *subject.Subject, c *net.Conn) {
+	c.Write("keep-alive")
+	var list builtin.TorrentProgressList
+	for {
+		if s.Terminate {
+			<-s.Exited
+			list.Put(s.FinihsedTorrentNameList.List())
+			list2 := list.Get()
+			r, _ := json.Marshal(list2)
+			err := c.Write(string(r))
+			if err != nil {
+				log.Error(log.Struct{"err", err}, "conn write err")
+				return
+			}
+			c.TcpConn.Close()
+			break
+		}
+		list.Put(s.FinihsedTorrentNameList.List())
+		list.Put(s.TorrentMonitor.GetProgressList())
+		// fmt.Println("activelist",s.TorrentMonitor.GetProgressList())
+		list2, fin := list.Get(), list.Fin()
+		// fmt.Println("send list",list2)
+		lse := builtin.TorrentProgressListSend{List: list2, Fin: fin}
+		r, _ := json.Marshal(lse)
+		err := c.Write(string(r))
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "conn write err")
+			return
+		}
+		if fin {
+			c.TcpConn.Close()
+			break
+		}
+		time.Sleep(15 * time.Second)
+	}
 }
 
 type TorrItem struct {

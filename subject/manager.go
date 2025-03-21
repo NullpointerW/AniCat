@@ -1,8 +1,10 @@
 package subject
 
 import (
-	"github.com/NullpointerW/anicat/log"
 	"sync"
+	"sync/atomic"
+
+	"github.com/NullpointerW/anicat/log"
 
 	"github.com/NullpointerW/anicat/errs"
 )
@@ -56,27 +58,25 @@ type Manager struct {
 	mu  sync.Mutex
 	sto map[int]*Subject
 	// a snapshot copy from the last list()-calling make caller fast get list
-	copy []Subject
+	copy atomic.Value
 	wg   sync.WaitGroup
 }
 
 func (m *Manager) Sync() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.copy = nil
+	m.copy.Store(([]Subject)(nil))
 }
 func (m *Manager) Add(s *Subject) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.sto[s.SubjId] = s
-	m.copy = nil
+	m.Sync()
 }
 
 func (m *Manager) Remove(sid int) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	delete(m.sto, sid)
-	m.copy = nil
+	m.Sync()
 }
 
 func (m *Manager) Get(sid int) *Subject {
@@ -86,15 +86,19 @@ func (m *Manager) Get(sid int) *Subject {
 }
 
 func (m *Manager) List() (ls []Subject) {
+	if v := m.copy.Load(); v != nil && v.([]Subject) != nil {
+		return v.([]Subject)
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if m.copy != nil {
-		return m.copy
+	// double check
+	if v := m.copy.Load(); v != nil && v.([]Subject) != nil  {
+		return v.([]Subject)
 	}
 	for _, ss := range m.sto {
 		ls = append(ls, *ss)
 	}
-	m.copy = ls
+	m.copy.Store(ls)
 	return ls
 }
 

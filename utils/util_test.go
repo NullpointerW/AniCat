@@ -2,12 +2,25 @@ package util
 
 import (
 	"fmt"
+	"sync"
+	// "reflect"
 	"testing"
 )
 
 type tests struct{}
 
 func (t tests) Print() {
+
+}
+
+func TestGetEpi(t *testing.T) {
+
+	strs:=[]string{"123","456","789"}
+	var a any = strs
+	fmt.Println(a.([]string)) 
+	var mu sync.Mutex
+	mu.Unlock()
+	mu.Lock()
 
 }
 
@@ -69,4 +82,31 @@ func TestTrimGetEpi(t *testing.T) {
 func TestTrimGetEpi2(t *testing.T) {
 	// fmt.Printf("%02d", 1)
 	fmt.Printf("%02s", "02")
+}
+func TestStringAppender_Append(t *testing.T) {
+	ap := new(StringAppender)
+	ap.Append("i", "am", " ", "your", "father")
+	fmt.Println(ap.String())
+	ap.Append("Bye")
+	fmt.Println(ap.String())
+}
+
+func TestSetSubtract(t *testing.T) {
+	a := map[string]int{}
+	b := map[string]struct{}{}
+	a["abc"] = 3
+	a["abc1"] = 4
+	a["abc3"] = 5
+	b["abc3"] = struct{}{}
+	c := SetSubtract(a, b)
+	fmt.Println(c)
+}
+
+func TestSliceDelete(t *testing.T) {
+	var a []int
+	a = append(a, 0)
+	a = append(a, 1)
+	a = append(a, 2)
+	a = SliceDelete(a, 1)
+	fmt.Println(a)
 }

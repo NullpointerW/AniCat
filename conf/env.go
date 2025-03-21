@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	Ver    = "x.x.x"
+	Ver    = "unknown"
 	projlk = "https://github.com/NullpointerW/AniCat"
 	SrvCTL = len(os.Args) > 1 && (os.Args[1] == "install" || os.Args[1] == "uninstall" || os.Args[1] == "start")
 )
@@ -59,7 +59,8 @@ type Environment struct {
 			SkipSSL      bool   `yaml:"skipssl"`
 		} `yaml:"email"`
 	} `yaml:"push"`
-	BgmiLog bool `yaml:"bangumi-log"`
+	BgmiLog           bool `yaml:"bangumi-log"`
+	BuiltinDownloader bool `yaml:"builtin-downloader"`
 }
 
 func (env *Environment) Print() {
@@ -81,8 +82,10 @@ func (env *Environment) Print() {
 		log.Info(logStruct, "crawling setting")
 		logStruct.Clear()
 	}
-	logStruct.Append("qbt-webUrl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
-	log.Info(logStruct, "qbt setting")
+	if !env.BuiltinDownloader {
+		logStruct.Append("qbt-webUrl", env.Qbt.Url, "qbt-apiRequestTimeout(ms)", env.Qbt.Timeout)
+		log.Info(logStruct, "qbt setting")
+	}
 }
 
 func (env *Environment) EmailPrint() {

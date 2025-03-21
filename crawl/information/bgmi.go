@@ -84,6 +84,10 @@ func DoScrape(url string) (tips map[string]string, err error) {
 		if ls != nil {
 			for _, l := range ls {
 				t := htmlquery.FindOne(l, "./span")
+				if t == nil {
+					continue
+				}
+				// fmt.Println(t)
 				tt := htmlquery.InnerText(t)
 				lt := htmlquery.InnerText(l)
 				lt = strings.Replace(lt, tt, "", 1)

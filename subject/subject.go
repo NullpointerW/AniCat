@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	DL "github.com/NullpointerW/anicat/downloader"
-	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strconv"
 	"strings"
+
+	// "sync"
 	"time"
+
+	DL "github.com/NullpointerW/anicat/downloader"
+	"github.com/NullpointerW/anicat/log"
 
 	CC "github.com/NullpointerW/anicat/crawl/cover"
 	IC "github.com/NullpointerW/anicat/crawl/information"
@@ -17,6 +20,8 @@ import (
 
 	// DL "github.com/NullpointerW/anicat/downloader"
 	CFG "github.com/NullpointerW/anicat/conf"
+
+	"github.com/NullpointerW/anicat/downloader/builtin"
 	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
@@ -68,6 +73,18 @@ type Subject struct {
 	Pushed        map[string]string   `json:"pushed"`
 	RssTorrents   map[string]struct{} `json:"rssTorrents"`
 	OperationChan chan Operate        `json:"-"`
+	// builtin-downloader filed
+	BuiltinDownload         bool                                    `json:"builtinDownload"`
+	RssTorrentsName         map[string]struct{}                     `json:"rssTorrentsName"`
+	RssReader               *rss.Reader                             `json:"-"`
+	RssGuids                map[string]struct{}                     `json:"rssGuids"`
+	Filter                  *FilterVerb                             `json:"filter"`
+	TorrentUrls             map[string]RssFileOptStrage             `json:"torrentUrls"`
+	TorrentFinishedUrls     map[string]struct{}                     `json:"torrentFinishedUrls"`
+	MonitorchanBuiltin      chan builtin.MonitoredTorrent           `json:"-"`
+	PushChanBuiltin         chan builtin.MonitoredTorrent           `json:"-"`
+	FinihsedTorrentNameList *util.ListView[builtin.TorrentProgress] `json:"-"`
+	TorrentMonitor          *builtin.TorrentProgressMonitor         `json:"-"`
 }
 type subjOp int
 
@@ -100,6 +117,28 @@ type Extra struct {
 func (ex *Extra) NoArgs() bool {
 	opt := ex.RssOption
 	return opt.MustContain == "" && opt.MustNotContain == ""
+}
+
+func (s *Subject) initializeFinishedTorrentNameList() {
+	if s.FinihsedTorrentNameList == nil && s.ResourceTyp == RSS {
+		f := make([]builtin.TorrentProgress, 0, len(s.TorrentFinishedUrls))
+		for u := range s.TorrentFinishedUrls {
+			f = append(f, builtin.TorrentProgress{
+				Percentage: 100,
+				Name:       s.TorrentUrls[u].Renamed,
+			})
+		}
+		s.FinihsedTorrentNameList = util.NewListView(f)
+	} else if s.FinihsedTorrentNameList == nil {
+		f := make([]builtin.TorrentProgress, 0, len(s.TorrentFinishedUrls))
+		for u := range s.TorrentFinishedUrls {
+			// torrent type will store name to finished list
+			f = append(f, builtin.TorrentProgress{
+				Percentage: 100,
+				Name:       u})
+		}
+		s.FinihsedTorrentNameList = util.NewListView(f)
+	}
 }
 
 // QbtTag The tag used when adding a torrent with qbt
@@ -142,7 +181,7 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		return 0, fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
-	err = subject.Loadfileds(tips)
+	err = subject.Loadfields(tips)
 	if err != nil {
 		return 0, err
 	}
@@ -163,13 +202,21 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 		return 0, err
 	}
 
-	err = download(subject, ext)
+	subject.BuiltinDownload = CFG.Env.BuiltinDownloader
+	if !subject.BuiltinDownload {
+		err = download(subject, ext)
+	} else {
+		err = BuiltinDownloadPrepare(subject, ext)
+	}
 	if err != nil {
 		return 0, err
 	}
 
 	// create Info-Json after init completed
-	subject.writeJson()
+	err = subject.writeJson()
+	if err != nil {
+		return 0, err
+	}
 
 	subject.runtimeInit(false)
 
@@ -221,7 +268,7 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 		return 0, fmt.Errorf("%w: sid=%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
-	err = subject.Loadfileds(tips)
+	err = subject.Loadfields(tips)
 	if err != nil {
 		return 0, err
 	}
@@ -240,17 +287,31 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	err = download(subject, ext)
+
+	if !subject.BuiltinDownload {
+		err = download(subject, ext)
+	} else {
+		err = BuiltinDownloadPrepare(subject, ext)
+	}
 	if err != nil {
 		return 0, err
 	}
-	subject.writeJson()
+
+	err = subject.writeJson()
+	if err != nil {
+		return 0, err
+	}
 	subject.runtimeInit(false)
 	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
 	return sid, nil
 }
 
-func (s *Subject) Loadfileds(tips map[string]string) error {
+func (s *Subject) Loadfields(tips map[string]string) error {
+	defer func() {
+		if s.FolderName != "" && strings.ContainsRune(s.FolderName, '?') {
+			s.FolderName = strings.ReplaceAll(s.FolderName, "?", "？")
+		}
+	}()
 	s.Name = tips[IC.SubjName]
 	s.OriginName = tips[IC.SubjOriginName]
 	if s.Name == "" {
@@ -327,7 +388,6 @@ func (s *Subject) Loadfileds(tips map[string]string) error {
 		}
 		return err
 	}
-
 	return nil
 }
 
@@ -338,7 +398,7 @@ func (s *Subject) FetchInfo() error {
 	}
 	wrap := errs.ErrWrapper{}
 	wrap.Handle(func() error {
-		return s.Loadfileds(tips)
+		return s.Loadfields(tips)
 	})
 	wrap.Handle(func() error {
 		Mgr.Sync()
@@ -495,7 +555,7 @@ func GetSeason(s *Subject) {
 		if len(match) > 1 {
 			m := match[1]
 			if iszh := util.CheckZhCn(m); iszh {
-				m = util.ConvertZhCnNumbToa(m)
+				m, _ = util.ConvertZhCnNumbToa(m)
 			}
 			s.Season = fmt.Sprintf("%02s", m)
 			return
@@ -631,4 +691,21 @@ func (s *Subject) Rename(new string) error {
 	s.FolderName = new
 	err := s.writeJson()
 	return err
+}
+func BuiltinDownloadPrepare(s *Subject, ex *Extra) error {
+	if s.ResourceTyp != Torrent {
+		BuildFilter(s, ex)
+	}
+	return RssReader(s)
+}
+
+func (s *Subject) ElapsedfromFinishedTime(e time.Duration) (bool, error) {
+	if !s.Finished || s.EndTime == "" {
+		return false, nil
+	}
+	end, err := util.ParseTime(s.EndTime, util.YMDParseLayout)
+	if err != nil {
+		return false, err
+	}
+	return time.Since(end) >= e, nil
 }

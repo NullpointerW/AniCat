@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	// "errors"
 	"strconv"
 
 	CR "github.com/NullpointerW/anicat/crawl/resource"
@@ -81,7 +82,11 @@ func init() {
 			err = errs.ErrSubjectNotFound
 			return
 		}
-
+		if subj.BuiltinDownload {
+			r.StatusBuiltin(subj)
+			err = errs.ErrConnHajcked
+			return
+		}
 		if subj.ResourceTyp == subject.Torrent {
 			h, er := torrent.Get(subj.TorrentHash)
 			if er != nil {
@@ -100,11 +105,6 @@ func init() {
 		return
 	})
 	stop := cmd.NewCommandCase(cmd.Stop, func(c cmd.Cmd, r view.Render) (resp string, err error) {
-		for _, s := range subject.Mgr.List() {
-			if !s.Terminate {
-				s.Exit()
-			}
-		}
 		subject.Mgr.Exit()
 		resp = "exited."
 		return
