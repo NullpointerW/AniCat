@@ -17,13 +17,13 @@ import (
 var CmdSelector *cmd.Selector
 
 func init() {
-	add := cmd.NewCommandCase(cmd.Add, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	add := cmd.NewCommandCase(cmd.Add, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		return addSubjProcess(c, false)
 	})
-	addFeed := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	addFeed := cmd.NewCommandCase(cmd.AddFeed, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		return addSubjProcess(c, true)
 	})
-	remove := cmd.NewCommandCase(cmd.Remove, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	remove := cmd.NewCommandCase(cmd.Remove, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		i, er := strconv.Atoi(c.Arg)
 		if er != nil && c.Arg != "*" {
 			err = er
@@ -38,12 +38,12 @@ func init() {
 		subject.Delete <- pip
 		return "ok", pip.Error()
 	})
-	list := cmd.NewCommandCase(cmd.Ls, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	list := cmd.NewCommandCase(cmd.Ls, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		ls := subject.Mgr.List()
 		resp = r.Ls(ls)
 		return
 	})
-	listItem := cmd.NewCommandCase(cmd.LsItems, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	listItem := cmd.NewCommandCase(cmd.LsItems, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		flag := new(cmd.LsiFlag)
 		err = json.Unmarshal(c.Raw, &flag)
 		if err != nil {
@@ -71,7 +71,7 @@ func init() {
 		resp = ls
 		return
 	})
-	status := cmd.NewCommandCase(cmd.Status, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	status := cmd.NewCommandCase(cmd.Status, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		i, er := strconv.Atoi(c.Arg)
 		if er != nil {
 			err = er
@@ -104,13 +104,13 @@ func init() {
 		}
 		return
 	})
-	stop := cmd.NewCommandCase(cmd.Stop, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	stop := cmd.NewCommandCase(cmd.Stop, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		subject.Mgr.Exit()
 		resp = "exited."
 		return
 	})
 
-	rename := cmd.NewCommandCase(cmd.Rename, func(c cmd.Cmd, r view.Render) (resp string, err error) {
+	rename := cmd.NewCommandCase(cmd.Rename, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 		i, err := strconv.Atoi(c.Arg)
 		if err != nil {
 			return
@@ -141,7 +141,7 @@ func init() {
 	CmdSelector = cmd.NewSelector(add, addFeed, remove, list, listItem, status, stop, rename)
 }
 
-func route(c cmd.Cmd, r view.Render) (resp string, err error) {
+func route(c cmd.Cmd, r view.JsonRender) (resp string, err error) {
 	return CmdSelector.Select(c, r)
 }
 

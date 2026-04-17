@@ -18,15 +18,14 @@
 Every request is a JSON object sent as one line:
 
 ```json
-{"cmd": <int>, "arg": "<string>", "raw": <object|null>, "format": "json"}
+{"cmd": <int>, "arg": "<string>", "raw": <object|null>}
 ```
 
-| Field    | Type            | Description                                      |
-|----------|-----------------|--------------------------------------------------|
-| `cmd`    | int             | Command type (see table below)                   |
-| `arg`    | string          | Primary argument (name, sid, etc.)               |
-| `raw`    | object or null  | Command-specific flags (see per-command section) |
-| `format` | string          | Set `"json"` for structured response; omit or `""` for ASCII text |
+| Field | Type           | Description                                      |
+|-------|----------------|--------------------------------------------------|
+| `cmd` | int            | Command type (see table below)                   |
+| `arg` | string         | Primary argument (name, sid, etc.)               |
+| `raw` | object or null | Command-specific flags (see per-command section) |
 
 ### Command Types
 
@@ -49,7 +48,7 @@ Every request is a JSON object sent as one line:
 
 **Request**
 ```json
-{"cmd": 3, "arg": "", "raw": null, "format": "json"}
+{"cmd": 3, "arg": "", "raw": null}
 ```
 
 **Response** — JSON array of subscription objects:
@@ -89,7 +88,7 @@ Every request is a JSON object sent as one line:
 
 **Request**
 ```json
-{"cmd": 5, "arg": "3", "raw": null, "format": "json"}
+{"cmd": 5, "arg": "3", "raw": null}
 ```
 
 `arg` is the subscription `sid` as a string.
@@ -137,7 +136,7 @@ When the subscription uses the built-in torrent client (`builtin-downloader: on`
 
 **Request**
 ```json
-{"cmd": 4, "arg": "葬送的芙莉莲", "raw": {"searchList": false}, "format": "json"}
+{"cmd": 4, "arg": "葬送的芙莉莲", "raw": {"searchList": false}}
 ```
 
 Set `"searchList": true` to return a flat item list instead of grouped by subtitle group.
@@ -169,7 +168,7 @@ Set `"searchList": true` to return a flat item list instead of grouped by subtit
 
 **Request**
 ```json
-{"cmd": 0, "arg": "葬送的芙莉莲", "raw": {"mustContain": "1080p,简中", "mustNotContain": "外挂", "useRegexp": false, "group": "", "index": 0, "feedInfoName": ""}, "format": "json"}
+{"cmd": 0, "arg": "葬送的芙莉莲", "raw": {"mustContain": "1080p,简中", "mustNotContain": "外挂", "useRegexp": false, "group": "", "index": 0, "feedInfoName": ""}}
 ```
 
 `raw` may be `null` if no filters needed.
@@ -187,7 +186,7 @@ On error: plain error message string.
 
 **Request**
 ```json
-{"cmd": 1, "arg": "https://mikanani.me/RSS/Bangumi?...", "raw": {"mustContain": "1080p", "mustNotContain": "", "useRegexp": false, "group": "", "index": 0, "feedInfoName": "葬送的芙莉莲"}, "format": "json"}
+{"cmd": 1, "arg": "https://mikanani.me/RSS/Bangumi?...", "raw": {"mustContain": "1080p", "mustNotContain": "", "useRegexp": false, "group": "", "index": 0, "feedInfoName": "葬送的芙莉莲"}}
 ```
 
 **Response** — same as Add: assigned `sid` string or error.
@@ -198,12 +197,12 @@ On error: plain error message string.
 
 **Request** (single):
 ```json
-{"cmd": 2, "arg": "3", "raw": null, "format": "json"}
+{"cmd": 2, "arg": "3", "raw": null}
 ```
 
 **Request** (all):
 ```json
-{"cmd": 2, "arg": "*", "raw": null, "format": "json"}
+{"cmd": 2, "arg": "*", "raw": null}
 ```
 
 **Response**: `"ok"` or error string.
@@ -214,7 +213,7 @@ On error: plain error message string.
 
 **Request**
 ```json
-{"cmd": 7, "arg": "3", "raw": "葬送的芙莉莲", "format": "json"}
+{"cmd": 7, "arg": "3", "raw": "葬送的芙莉莲"}
 ```
 
 `arg` is the `sid`; `raw` is the new name string (JSON-encoded).
