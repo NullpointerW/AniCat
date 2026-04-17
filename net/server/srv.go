@@ -50,9 +50,7 @@ func process(c *N.Conn) {
 		}
 	}()
 	var (
-		render view.Render = view.AsciiRender{
-			Conn: c,
-		}
+		render  view.Render = view.AsciiRender{Conn: c}
 		command cmd.Cmd
 	)
 	if msg, err := c.Read(); err == nil {
@@ -62,6 +60,9 @@ func process(c *N.Conn) {
 			log.Errorf(log.Struct{"error", err.Error()}, "net: json Unmarshal failed")
 			_ = c.Write(err.Error())
 			return
+		}
+		if command.Format == "json" {
+			render = view.JsonRender{AsciiRender: view.AsciiRender{Conn: c}}
 		}
 		if command.Cmd == cmd.Stop {
 			defer os.Exit(0)

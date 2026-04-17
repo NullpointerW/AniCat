@@ -273,6 +273,28 @@ func (_ JsonRender) Ls(ls []subject.Subject) string {
 	b, _ := json.Marshal(sbjs)
 	return string(b)
 }
-func (jr JsonRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
-	return jr.AsciiRender.Status(subj, torrs...)
+type StatPayload struct {
+	Path      string `json:"path"`
+	TotalSize string `json:"total_size"`
+	Torrents  []Stat `json:"torrents"`
+}
+
+func (_ JsonRender) Status(subj *subject.Subject, torrs ...qbt.Torrent) string {
+	var totalSize int
+	var stats []Stat
+	for _, t := range torrs {
+		totalSize += t.Size
+		stats = append(stats, Stat{
+			File:     filepath.Base(t.ContentPath),
+			Size:     strconv.Itoa(t.Size/1024/1024) + "MB",
+			Progress: fmt.Sprintf("%.0f", t.Progress*100) + "%",
+		})
+	}
+	payload := StatPayload{
+		Path:      subj.Path,
+		TotalSize: strconv.Itoa(totalSize/1024/1024/1024) + "GB",
+		Torrents:  stats,
+	}
+	b, _ := json.Marshal(payload)
+	return string(b)
 }

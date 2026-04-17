@@ -19,9 +19,10 @@ const (
 )
 
 type Cmd struct {
-	Cmd cTyp            `json:"cmd"`
-	Arg string          `json:"arg"`
-	Raw json.RawMessage `json:"raw"`
+	Cmd    cTyp            `json:"cmd"`
+	Arg    string          `json:"arg"`
+	Raw    json.RawMessage `json:"raw"`
+	Format string          `json:"format"` // "json" for structured output, default ascii
 }
 
 type AddFlag struct {
