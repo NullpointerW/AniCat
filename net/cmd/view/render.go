@@ -168,7 +168,7 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 	for {
 		if s.Terminate {
 			<-s.Exited
-			list.Put(s.FinihsedTorrentNameList.List())
+			list.Put(s.FinishedTorrentNameList.List())
 			list2 := list.Get()
 			r, _ := json.Marshal(list2)
 			err := c.Write(string(r))
@@ -179,7 +179,7 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 			c.TcpConn.Close()
 			break
 		}
-		list.Put(s.FinihsedTorrentNameList.List())
+		list.Put(s.FinishedTorrentNameList.List())
 		list.Put(s.TorrentMonitor.GetProgressList())
 		// fmt.Println("activelist",s.TorrentMonitor.GetProgressList())
 		list2, fin := list.Get(), list.Fin()

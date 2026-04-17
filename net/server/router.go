@@ -177,7 +177,7 @@ func createSubject(sc subject.SubjC) (resp string, err error) {
 	subject.Create <- p
 	err = p.Error()
 	if err == nil {
-		resp = strconv.Itoa(p.Arg.(int))
+		resp = strconv.Itoa(p.Sid)
 	}
 	return
 }

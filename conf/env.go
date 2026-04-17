@@ -58,9 +58,20 @@ type Environment struct {
 			TemplatePath string `yaml:"template"`
 			SkipSSL      bool   `yaml:"skipssl"`
 		} `yaml:"email"`
+		Telegram struct {
+			Token  string `yaml:"token"`
+			ChatId string `yaml:"chat_id"`
+		} `yaml:"telegram"`
 	} `yaml:"push"`
+	LLMParser struct {
+		Style   string `yaml:"style"`    // "anthropic" or "openai"
+		APIKey  string `yaml:"api_key"`
+		Model   string `yaml:"model"`
+		BaseURL string `yaml:"base_url"`
+	} `yaml:"llm-parser"`
 	BgmiLog           bool `yaml:"bangumi-log"`
 	BuiltinDownloader bool `yaml:"builtin-downloader"`
+	WebUIPort         int  `yaml:"webui-port"`
 }
 
 func (env *Environment) Print() {

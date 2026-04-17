@@ -42,15 +42,17 @@ func FileSeparatorConv(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
 }
 
-// TrimExtensionAndGetEpi trim the rename file ext and name
-// eg：
-// example xxxS01E02 => S01E02
+// TrimExtensionAndGetEpi trims the file extension and returns the last 6 characters
+// (the SxxExx episode code). Returns the full trimmed string if shorter than 6 chars.
+// Example: "孤独摇滚！S01E02.mkv" → "S01E02"
 func TrimExtensionAndGetEpi(fn string) string {
 	sep := "."
 	sp := strings.Split(fn, sep)
-	o := sep + sp[len(sp)-1]
-	trimed := strings.ReplaceAll(fn, o, "")
-	return trimed[len(trimed)-6:]
+	trimmed := strings.TrimSuffix(fn, sep+sp[len(sp)-1])
+	if len(trimmed) <= 6 {
+		return trimmed
+	}
+	return trimmed[len(trimmed)-6:]
 }
 
 func IsRegexp(str string) bool {

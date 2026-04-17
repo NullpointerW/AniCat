@@ -3,10 +3,12 @@ package rename
 import (
 	"errors"
 	"fmt"
-	"github.com/NullpointerW/anicat/errs"
-	"github.com/NullpointerW/anicat/log"
 	"path/filepath"
 	"regexp"
+
+	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/llmparser"
+	"github.com/NullpointerW/anicat/log"
 )
 
 func CaptureEpisNum(text string) (string, error) {
@@ -37,6 +39,9 @@ func CaptureEpisNum(text string) (string, error) {
 			return "0" + episNum, nil
 		}
 		return episNum, nil
+	}
+	if llmparser.Fallback != nil {
+		return llmparser.Fallback.Parse(text)
 	}
 	return "", fmt.Errorf("%w:%s", errs.ErrCannotCaptureEpisNum, text)
 }

@@ -1,11 +1,11 @@
 package subject
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 
 	"github.com/NullpointerW/anicat/log"
-
 	"github.com/NullpointerW/anicat/errs"
 )
 
@@ -22,8 +22,11 @@ type SubjC struct {
 	CreateTyp createType
 }
 
+// Pip is a typed request/response envelope for operations sent over Create or Delete channels.
+// The caller creates a Pip, sends it on the channel, then calls Wait() to block until done.
 type Pip struct {
-	Arg any
+	Arg any // input argument (SubjC for Create, int or "*" for Delete)
+	Sid int // output: the assigned subject ID (valid only after successful Create)
 	err error
 	wg  sync.WaitGroup
 }
@@ -35,6 +38,7 @@ func NewPip(a any) *Pip {
 	return p
 }
 
+// Error blocks until the operation completes and returns any error.
 func (p *Pip) Error() error {
 	p.wg.Wait()
 	return p.err
@@ -147,28 +151,26 @@ func StartManagement() {
 			if err != nil {
 				p.err = err
 			} else {
-				// send added subjId to peer
-				p.Arg = sid
+				p.Sid = sid
 			}
 			p.wg.Done()
 		case p := <-Delete:
-			i, _ := p.Arg.(int)
 			errWrap := errs.ErrWrapper{}
-			// rm *
-			// remove all subjects
-			if i == 0 && p.Arg.(string) == "*" {
+			switch v := p.Arg.(type) {
+			case string:
+				if v != "*" {
+					p.err = fmt.Errorf("unexpected delete arg: %q", v)
+					p.wg.Done()
+					continue
+				}
 				log.Warn(nil, "rm: remove all subjects")
 				merr := errs.MultiErr{}
 				for _, s := range Mgr.List() {
 					if !s.Terminate {
 						s.Exit()
 					}
-					errWrap.Handle(func() error {
-						return s.RmRes()
-					})
-					errWrap.Handle(func() error {
-						return RmFolder(&s)
-					})
+					errWrap.Handle(func() error { return s.RmRes() })
+					errWrap.Handle(func() error { return RmFolder(&s) })
 					if errWrap.Error() == nil {
 						Mgr.Remove(s.SubjId)
 					}
@@ -176,24 +178,21 @@ func StartManagement() {
 					errWrap.Reset()
 				}
 				p.err = merr.Err()
-				p.wg.Done()
-				continue
-			}
-			s := Mgr.Get(i)
-			if s != nil {
-				if !s.Terminate {
-					s.Exit()
+			case int:
+				s := Mgr.Get(v)
+				if s != nil {
+					if !s.Terminate {
+						s.Exit()
+					}
+					errWrap.Handle(func() error { return s.RmRes() })
+					errWrap.Handle(func() error { return RmFolder(s) })
+					if errWrap.Error() == nil {
+						Mgr.Remove(s.SubjId)
+					}
+					p.err = errWrap.Error()
 				}
-				errWrap.Handle(func() error {
-					return s.RmRes()
-				})
-				errWrap.Handle(func() error {
-					return RmFolder(s)
-				})
-				if errWrap.Error() == nil {
-					Mgr.Remove(s.SubjId)
-				}
-				p.err = errWrap.Error()
+			default:
+				p.err = fmt.Errorf("delete: unexpected arg type %T", p.Arg)
 			}
 			p.wg.Done()
 		}

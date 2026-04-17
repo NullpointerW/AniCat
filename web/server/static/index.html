@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AniCat</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:       #0d0d0f;
+  --surface:  #141416;
+  --card:     #1a1a1e;
+  --border:   #2a2a30;
+  --accent:   #e8935a;
+  --accent2:  #7b6ef6;
+  --text:     #e8e6e1;
+  --muted:    #666570;
+  --radius:   8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Serif SC', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,13,15,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; gap: 1.5rem;
+  height: 56px;
+}
+.logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem; font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .08em;
+  flex-shrink: 0;
+}
+.logo span { color: var(--muted); }
+.search-wrap { flex: 1; max-width: 360px; position: relative; }
+.search-wrap input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .45rem .9rem .45rem 2.2rem;
+  color: var(--text);
+  font-size: .85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap::before {
+  content: '⌕';
+  position: absolute; left: .7rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); font-size: 1rem; pointer-events: none;
+}
+.filter-tabs { display: flex; gap: .5rem; margin-left: auto; }
+.tab {
+  padding: .3rem .8rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: .78rem; font-family: inherit;
+  cursor: pointer; transition: all .2s;
+}
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Layout ── */
+.app { display: flex; min-height: calc(100vh - 56px); }
+
+/* ── Sidebar ── */
+aside {
+  width: 260px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  overflow-y: auto;
+  position: sticky; top: 56px;
+  height: calc(100vh - 56px);
+}
+.aside-label {
+  padding: 1.2rem 1.2rem .6rem;
+  font-size: .7rem; font-family: 'JetBrains Mono', monospace;
+  color: var(--muted); letter-spacing: .12em; text-transform: uppercase;
+}
+.bangumi-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .65rem 1.2rem;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+}
+.bangumi-item:hover { background: var(--card); }
+.bangumi-item.active {
+  background: var(--card);
+  border-left-color: var(--accent);
+}
+.item-cover {
+  width: 36px; height: 52px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.item-cover-placeholder {
+  width: 36px; height: 52px;
+  border-radius: 4px;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .65rem; color: var(--muted);
+  flex-shrink: 0;
+}
+.item-info { min-width: 0; }
+.item-name {
+  font-size: .82rem; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.item-meta {
+  font-size: .7rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: .2rem;
+}
+.badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: .62rem; font-family: 'JetBrains Mono', monospace;
+  vertical-align: middle;
+}
+.badge-on  { background: #1a3a1a; color: #5aad5a; }
+.badge-end { background: #1a1a3a; color: #7b6ef6; }
+
+/* ── Main ── */
+main {
+  flex: 1; overflow-y: auto;
+  padding: 2rem;
+}
+
+/* ── Home grid ── */
+.grid-header {
+  display: flex; align-items: baseline; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.grid-title { font-size: 1.1rem; font-weight: 600; }
+.grid-count { font-size: .8rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.2rem;
+}
+.card {
+  cursor: pointer;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: transform .2s, border-color .2s;
+}
+.card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.card-cover {
+  width: 100%; aspect-ratio: 2/3;
+  object-fit: cover;
+  background: var(--border);
+  display: block;
+}
+.card-cover-placeholder {
+  width: 100%; aspect-ratio: 2/3;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: var(--muted);
+}
+.card-body { padding: .6rem .7rem; }
+.card-name {
+  font-size: .78rem; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-season {
+  font-size: .68rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: .25rem;
+}
+
+/* ── Detail view ── */
+.detail { display: none; }
+.detail.visible { display: block; }
+.detail-hero {
+  display: flex; gap: 2rem;
+  margin-bottom: 2rem;
+}
+.detail-cover {
+  width: 160px; height: 230px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  background: var(--border);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.detail-cover-placeholder {
+  width: 160px; height: 230px;
+  border-radius: var(--radius);
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: var(--muted);
+  flex-shrink: 0;
+}
+.detail-meta { padding-top: .5rem; }
+.detail-name { font-size: 1.5rem; font-weight: 600; margin-bottom: .5rem; }
+.detail-tags { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.tag {
+  padding: .2rem .6rem;
+  border-radius: 4px;
+  font-size: .72rem;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.tag-accent { border-color: var(--accent); color: var(--accent); }
+.detail-bgm-link {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; color: var(--accent2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s;
+}
+.detail-bgm-link:hover { border-bottom-color: var(--accent2); }
+
+/* ── Episode list ── */
+.ep-section { margin-top: 1.5rem; }
+.ep-section-title {
+  font-size: .72rem; font-family: 'JetBrains Mono', monospace;
+  color: var(--muted); letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: .8rem;
+}
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: .6rem;
+}
+.ep-btn {
+  padding: .55rem .4rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: .75rem;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ep-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ep-btn.playing { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Player ── */
+.player-wrap {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.95);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+}
+.player-wrap.visible { display: flex; }
+.player-header {
+  display: flex; align-items: center; gap: 1rem;
+  padding: .8rem 1.2rem;
+  background: rgba(0,0,0,.6);
+  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  opacity: 0; transition: opacity .3s;
+}
+.player-wrap:hover .player-header { opacity: 1; }
+.player-back {
+  background: none; border: 1px solid var(--border);
+  color: var(--text); border-radius: 6px;
+  padding: .3rem .8rem; cursor: pointer;
+  font-family: inherit; font-size: .82rem;
+  transition: border-color .2s;
+}
+.player-back:hover { border-color: var(--accent); color: var(--accent); }
+.player-title { font-size: .9rem; color: var(--text); }
+.player-ep { font-size: .8rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+video {
+  flex: 1; width: 100%; min-height: 0;
+  background: #000;
+}
+.player-footer {
+  display: flex; gap: .5rem; flex-wrap: wrap;
+  padding: .8rem 1.2rem;
+  background: rgba(0,0,0,.6);
+  overflow-x: auto;
+}
+.player-ep-btn {
+  padding: .3rem .7rem;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: .72rem; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.player-ep-btn:hover { border-color: var(--accent); color: var(--accent); }
+.player-ep-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Empty / loading ── */
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 1rem;
+  padding: 4rem 2rem; color: var(--muted); text-align: center;
+}
+.empty-icon { font-size: 3rem; }
+.empty-text { font-size: .9rem; }
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Home visible / detail hidden ── */
+#home-view { }
+#detail-view { display: none; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Ani<span>Cat</span></div>
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="搜索番剧…">
+  </div>
+  <div class="filter-tabs">
+    <button class="tab active" data-filter="all">全部</button>
+    <button class="tab" data-filter="airing">连载中</button>
+    <button class="tab" data-filter="ended">已完结</button>
+  </div>
+</header>
+
+<div class="app">
+  <aside id="sidebar">
+    <div class="aside-label">番剧库</div>
+    <div id="sidebar-list"></div>
+  </aside>
+
+  <main id="main-content">
+    <!-- Home grid -->
+    <div id="home-view">
+      <div class="grid-header">
+        <span class="grid-title">全部番剧</span>
+        <span class="grid-count" id="count-label"></span>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <!-- Detail view -->
+    <div id="detail-view">
+      <button id="back-btn" style="background:none;border:1px solid var(--border);color:var(--muted);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:1.5rem;transition:all .2s;"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        ← 返回
+      </button>
+      <div id="detail-content"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Player overlay -->
+<div class="player-wrap" id="player">
+  <div class="player-header">
+    <button class="player-back" id="player-close">✕ 关闭</button>
+    <span class="player-title" id="player-title"></span>
+    <span class="player-ep" id="player-ep"></span>
+  </div>
+  <video id="video" controls preload="metadata"></video>
+  <div class="player-footer" id="player-ep-list"></div>
+</div>
+
+<script>
+const API = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+  ? ''   // same origin
+  : '';  // same origin always
+
+let allBangumi = [];
+let currentFilter = 'all';
+let currentSid = null;
+let currentEpisodes = [];
+
+// ── Fetch ──────────────────────────────────────────
+async function fetchList() {
+  try {
+    const r = await fetch(API + '/api/bangumi/');
+    allBangumi = await r.json();
+    renderSidebar();
+    renderGrid();
+  } catch(e) {
+    document.getElementById('grid').innerHTML =
+      `<div class="empty"><div class="empty-icon">⚠</div><div class="empty-text">无法连接服务器<br><small style="font-family:monospace;color:var(--muted)">${e.message}</small></div></div>`;
+  }
+}
+
+async function fetchDetail(sid) {
+  const r = await fetch(API + `/api/bangumi/${sid}`);
+  return r.json();
+}
+
+// ── Filter ─────────────────────────────────────────
+function filteredList() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  return allBangumi.filter(s => {
+    const matchName = !q || s.name.toLowerCase().includes(q);
+    const matchFilter =
+      currentFilter === 'all' ||
+      (currentFilter === 'airing' && !s.terminate) ||
+      (currentFilter === 'ended' && s.terminate);
+    return matchName && matchFilter;
+  });
+}
+
+// ── Sidebar ────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('sidebar-list');
+  list.innerHTML = '';
+  const items = filteredList();
+  items.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'bangumi-item' + (currentSid === s.subjId ? ' active' : '');
+    el.dataset.sid = s.subjId;
+    const coverHtml = s.hasCover
+      ? `<img class="item-cover" src="${API}/api/cover/${s.subjId}" loading="lazy" alt="">`
+      : `<div class="item-cover-placeholder">无</div>`;
+    el.innerHTML = `
+      ${coverHtml}
+      <div class="item-info">
+        <div class="item-name">${s.name}</div>
+        <div class="item-meta">S${s.season}
+          <span class="badge ${s.terminate ? 'badge-end' : 'badge-on'}">
+            ${s.terminate ? '完结' : '连载'}
+          </span>
+        </div>
+      </div>`;
+    el.addEventListener('click', () => openDetail(s.subjId));
+    list.appendChild(el);
+  });
+}
+
+// ── Grid ───────────────────────────────────────────
+function renderGrid() {
+  const items = filteredList();
+  document.getElementById('count-label').textContent = `${items.length} 部`;
+  const grid = document.getElementById('grid');
+  if (!items.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🎌</div><div class="empty-text">暂无番剧</div></div>`;
+    return;
+  }
+  grid.innerHTML = '';
+  items.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    const coverHtml = s.hasCover
+      ? `<img class="card-cover" src="${API}/api/cover/${s.subjId}" loading="lazy" alt="${s.name}">`
+      : `<div class="card-cover-placeholder">🎌</div>`;
+    el.innerHTML = `
+      ${coverHtml}
+      <div class="card-body">
+        <div class="card-name">${s.name}</div>
+        <div class="card-season">S${s.season} · ${s.terminate ? '完结' : '连载中'}</div>
+      </div>`;
+    el.addEventListener('click', () => openDetail(s.subjId));
+    grid.appendChild(el);
+  });
+}
+
+// ── Detail ─────────────────────────────────────────
+async function openDetail(sid) {
+  currentSid = sid;
+  // mark sidebar active
+  document.querySelectorAll('.bangumi-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.sid) === sid);
+  });
+
+  document.getElementById('home-view').style.display = 'none';
+  const dv = document.getElementById('detail-view');
+  dv.style.display = 'block';
+  dv.querySelector('#detail-content').innerHTML =
+    `<div class="empty"><div class="spinner"></div></div>`;
+
+  const data = await fetchDetail(sid);
+  currentEpisodes = data.episodes || [];
+  renderDetail(data);
+}
+
+function renderDetail(data) {
+  const coverHtml = data.hasCover
+    ? `<img class="detail-cover" src="${API}/api/cover/${data.subjId}" alt="${data.name}">`
+    : `<div class="detail-cover-placeholder">🎌</div>`;
+
+  const epHtml = currentEpisodes.length
+    ? `<div class="ep-section">
+        <div class="ep-section-title">剧集列表 · ${currentEpisodes.length} 集</div>
+        <div class="ep-grid">
+          ${currentEpisodes.map(ep =>
+            `<button class="ep-btn" data-idx="${ep.index - 1}" title="${ep.filename}">
+              ${ep.sxxexx || ep.filename.replace(/\.[^.]+$/, '').slice(-8)}
+            </button>`
+          ).join('')}
+        </div>
+      </div>`
+    : `<div class="empty" style="padding:2rem 0"><div class="empty-icon">📂</div><div class="empty-text">暂无已下载剧集</div></div>`;
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-hero">
+      ${coverHtml}
+      <div class="detail-meta">
+        <div class="detail-name">${data.name}</div>
+        <div class="detail-tags">
+          <span class="tag">Season ${data.season}</span>
+          <span class="tag">${data.typ}</span>
+          <span class="tag ${data.terminate ? '' : 'tag-accent'}">${data.terminate ? '已完结' : '连载中'}</span>
+        </div>
+        <a class="detail-bgm-link" href="https://bgm.tv/subject/${data.subjId}" target="_blank" rel="noopener">
+          ↗ 在 Bangumi 查看
+        </a>
+      </div>
+    </div>
+    ${epHtml}`;
+
+  // bind episode buttons
+  document.querySelectorAll('.ep-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      openPlayer(data, idx);
+    });
+  });
+}
+
+function goHome() {
+  currentSid = null;
+  document.getElementById('home-view').style.display = '';
+  document.getElementById('detail-view').style.display = 'none';
+  document.querySelectorAll('.bangumi-item').forEach(el => el.classList.remove('active'));
+}
+
+// ── Player ─────────────────────────────────────────
+function openPlayer(data, epIdx) {
+  const ep = currentEpisodes[epIdx];
+  if (!ep) return;
+
+  document.getElementById('player-title').textContent = data.name;
+  document.getElementById('player-ep').textContent = ep.sxxexx || ep.filename;
+
+  const videoUrl = `${API}/api/video/${data.subjId}/${encodeURIComponent(ep.path).replace(/%2F/g, '/')}`;
+  const vid = document.getElementById('video');
+  vid.src = videoUrl;
+  vid.play().catch(() => {});
+
+  // footer episode list
+  const footer = document.getElementById('player-ep-list');
+  footer.innerHTML = currentEpisodes.map((e, i) =>
+    `<button class="player-ep-btn ${i === epIdx ? 'active' : ''}" data-idx="${i}">
+      ${e.sxxexx || e.filename.replace(/\.[^.]+$/, '').slice(-6)}
+    </button>`
+  ).join('');
+  footer.querySelectorAll('.player-ep-btn').forEach(btn => {
+    btn.addEventListener('click', () => openPlayer(data, parseInt(btn.dataset.idx)));
+  });
+
+  document.getElementById('player').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayer() {
+  const vid = document.getElementById('video');
+  vid.pause();
+  vid.src = '';
+  document.getElementById('player').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+// ── Events ─────────────────────────────────────────
+document.getElementById('back-btn').addEventListener('click', goHome);
+document.getElementById('player-close').addEventListener('click', closePlayer);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('player').classList.contains('visible')) closePlayer();
+    else if (currentSid) goHome();
+  }
+});
+
+document.getElementById('search').addEventListener('input', () => {
+  renderSidebar();
+  if (!currentSid) renderGrid();
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.filter;
+    renderSidebar();
+    if (!currentSid) renderGrid();
+  });
+});
+
+// ── Init ───────────────────────────────────────────
+fetchList();
+// auto-refresh every 60s
+setInterval(fetchList, 60000);
+</script>
+</body>
+</html>

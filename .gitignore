@@ -3,9 +3,12 @@
 .vscode
 output.log
 build/
+env.yaml
 test/env.yaml
 __debug_bin.exe
 *bangumi.log
 *.torrent.bolt.db
 *panic.log
 *output.log
+*.exe
+.claude/

@@ -1,90 +1,72 @@
 package subject
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
-
-	// "sync"
 	"time"
 
-	DL "github.com/NullpointerW/anicat/downloader"
-	"github.com/NullpointerW/anicat/log"
-
+	CFG "github.com/NullpointerW/anicat/conf"
 	CC "github.com/NullpointerW/anicat/crawl/cover"
 	IC "github.com/NullpointerW/anicat/crawl/information"
 	RC "github.com/NullpointerW/anicat/crawl/resource"
-
-	// DL "github.com/NullpointerW/anicat/downloader"
-	CFG "github.com/NullpointerW/anicat/conf"
-
+	DL "github.com/NullpointerW/anicat/downloader"
 	"github.com/NullpointerW/anicat/downloader/builtin"
 	"github.com/NullpointerW/anicat/downloader/rss"
 	"github.com/NullpointerW/anicat/downloader/torrent"
 	"github.com/NullpointerW/anicat/errs"
+	"github.com/NullpointerW/anicat/log"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
 
-// Subject as a basic object of each bangumi
-// program will load it from OS file and manage them
-// it will be refreshed to OS file after some of the fields have updating
+// Subject is the persisted record for a single bangumi subscription.
+// Only JSON-tagged fields are written to disk; runtime state lives in the
+// embedded RuntimeState which is initialised by runtimeInit and never serialised.
 type Subject struct {
-	SubjId      int         `json:"subjId"`
-	FolderName  string      `json:"folderName"` // source from tmdb
-	Name        string      `json:"name"`
-	OriginName  string      `json:"originName"`
-	Path        string      `json:"path"`
-	Finished    bool        `json:"finished"`
-	Episode     int         `json:"episode"`
-	ResourceTyp ResourceTyp `json:"resourceTyp"`
-	ResourceUrl string      `json:"resourceUrl"`
-	Typ         BgmiTyp     `json:"typ"`
-	FolderTime  string      `json:"folderTime"` // source from tmdb
-	StartTime   string      `json:"startTime"`
-	EndTime     string      `json:"endTime"`
-	Alias       string      `json:"alias"`
-	Season      string      `json:"season"`
-	Part        string      `json:"part"` // eg: pt1、pt2
-	// used while `ResourceTyp` is `Torrent`
-	TorrentHash string `json:"torrentHash"`
-	// manager use ctx cancel func to Exit goroutine running the current subject.
-	// when delete a subject manager,should run the cancel func and if a goroutine is running
-	// for this subject it will Exit.
-	// Context is hold by subject-running goroutine
-	// while subject-running goroutine Exit actively func should be called
-	Exit context.CancelFunc `json:"-"`
-	// before detector-goroutine push to subject,Check if this channel is closed.
-	// before exit Exited channel should be closed
-	Exited chan struct{} `json:"-"`
-	// While detector-goroutine detected that the resource downloader of the subject is completed
-	// it will send downLoad message to subject-running goroutine
-	// received and push to terminal
-	PushChan chan qbt.Torrent `json:"-"`
-	// The anime series of this project has already ended and all episodes have been downloaded.
-	// while init,if this flag is true then there is no need to start a goroutine to run it
-	// exit actively flag should be set to true
+	// --- identity & metadata ---
+	SubjId     int     `json:"subjId"`
+	Name       string  `json:"name"`
+	OriginName string  `json:"originName"`
+	Alias      string  `json:"alias"`
+	Typ        BgmiTyp `json:"typ"`
+
+	// --- folder & timing ---
+	FolderName string `json:"folderName"` // from TMDB
+	FolderTime string `json:"folderTime"` // from TMDB
+	Path       string `json:"path"`
+	Season     string `json:"season"`
+	Part       string `json:"part"` // e.g. pt1, pt2
+	StartTime  string `json:"startTime"`
+	EndTime    string `json:"endTime"`
+
+	// --- state flags ---
+	Finished  bool `json:"finished"`
 	Terminate bool `json:"terminate"`
-	// a Set store all pushed renamed episodes,avoid duplicate push.
-	// content will like be `xxx S01E01,xxx S01E05...`
-	Pushed        map[string]string   `json:"pushed"`
-	RssTorrents   map[string]struct{} `json:"rssTorrents"`
-	OperationChan chan Operate        `json:"-"`
-	// builtin-downloader filed
-	BuiltinDownload         bool                                    `json:"builtinDownload"`
-	RssTorrentsName         map[string]struct{}                     `json:"rssTorrentsName"`
-	RssReader               *rss.Reader                             `json:"-"`
-	RssGuids                map[string]struct{}                     `json:"rssGuids"`
-	Filter                  *FilterVerb                             `json:"filter"`
-	TorrentUrls             map[string]RssFileOptStrage             `json:"torrentUrls"`
-	TorrentFinishedUrls     map[string]struct{}                     `json:"torrentFinishedUrls"`
-	MonitorchanBuiltin      chan builtin.MonitoredTorrent           `json:"-"`
-	PushChanBuiltin         chan builtin.MonitoredTorrent           `json:"-"`
-	FinihsedTorrentNameList *util.ListView[builtin.TorrentProgress] `json:"-"`
-	TorrentMonitor          *builtin.TorrentProgressMonitor         `json:"-"`
+	Episode   int  `json:"episode"`
+
+	// --- download config ---
+	ResourceTyp     ResourceTyp `json:"resourceTyp"`
+	ResourceUrl     string      `json:"resourceUrl"`
+	BuiltinDownload bool        `json:"builtinDownload"`
+
+	// --- qBittorrent downloader state ---
+	TorrentHash string              `json:"torrentHash"`
+	Pushed      map[string]string   `json:"pushed"`
+	RssTorrents map[string]struct{} `json:"rssTorrents"`
+
+	// --- builtin downloader state ---
+	RssTorrentsName     map[string]struct{}         `json:"rssTorrentsName"`
+	RssGuids            map[string]struct{}         `json:"rssGuids"`
+	Filter              *FilterVerb                 `json:"filter,omitempty"`
+	TorrentUrls         map[string]RssFileOptStrage `json:"torrentUrls"`
+	TorrentFinishedUrls map[string]struct{}         `json:"torrentFinishedUrls"`
+
+	// RuntimeState holds all goroutine, channel, and in-memory-only fields.
+	// It is never serialised; runtimeInit populates it on startup.
+	RuntimeState `json:"-"`
 }
 type subjOp int
 
@@ -120,7 +102,7 @@ func (ex *Extra) NoArgs() bool {
 }
 
 func (s *Subject) initializeFinishedTorrentNameList() {
-	if s.FinihsedTorrentNameList == nil && s.ResourceTyp == RSS {
+	if s.FinishedTorrentNameList == nil && s.ResourceTyp == RSS {
 		f := make([]builtin.TorrentProgress, 0, len(s.TorrentFinishedUrls))
 		for u := range s.TorrentFinishedUrls {
 			f = append(f, builtin.TorrentProgress{
@@ -128,16 +110,16 @@ func (s *Subject) initializeFinishedTorrentNameList() {
 				Name:       s.TorrentUrls[u].Renamed,
 			})
 		}
-		s.FinihsedTorrentNameList = util.NewListView(f)
-	} else if s.FinihsedTorrentNameList == nil {
+		s.FinishedTorrentNameList = util.NewListView(f)
+	} else if s.FinishedTorrentNameList == nil {
 		f := make([]builtin.TorrentProgress, 0, len(s.TorrentFinishedUrls))
 		for u := range s.TorrentFinishedUrls {
-			// torrent type will store name to finished list
 			f = append(f, builtin.TorrentProgress{
 				Percentage: 100,
-				Name:       u})
+				Name:       u,
+			})
 		}
-		s.FinihsedTorrentNameList = util.NewListView(f)
+		s.FinishedTorrentNameList = util.NewListView(f)
 	}
 }
 
@@ -156,52 +138,22 @@ func (s *Subject) RssPath() string {
 	return s.QbtTag()
 }
 
-func CreateSubject(n string, ext *Extra) (int, error) {
-	subject := new(Subject)
-	bgmurl, err := solveResource(n, subject, ext)
-	if err != nil {
-		return 0, err
-	}
-
-	var tips map[string]string
-	if bgmurl != "" {
-		tips, err = IC.DoScrape(bgmurl)
-	} else {
-		tips, err = IC.Scrape(n)
-	}
-	if err != nil {
-		return 0, err
-	}
-
-	sid, err := strconv.Atoi(tips[IC.SubjId])
-	if err != nil {
-		return 0, err
-	}
-	if Mgr.Get(sid) != nil {
-		return 0, fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
-	}
-	subject.SubjId = sid
-	err = subject.Loadfields(tips)
-	if err != nil {
-		return 0, err
-	}
+// finalizeSubject handles the common steps after basic info is fetched:
+// loading fields, folder init, cover scrape, download setup, and runtime start.
+func finalizeSubject(subject *Subject, ext *Extra) (int, error) {
 	GetSeason(subject)
 	subject.GetPart()
 	subject.trimName()
-	err = initFolder(subject)
-	if err != nil {
+	if err := initFolder(subject); err != nil {
 		return 0, err
 	}
 	lastS, err := FindLastSeason(subject.Path)
 	if err != nil {
 		return 0, err
 	}
-
-	err = subject.scrapeCover(lastS)
-	if err != nil {
+	if err = subject.scrapeCover(lastS); err != nil {
 		return 0, err
 	}
-
 	subject.BuiltinDownload = CFG.Env.BuiltinDownloader
 	if !subject.BuiltinDownload {
 		err = download(subject, ext)
@@ -211,17 +163,41 @@ func CreateSubject(n string, ext *Extra) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	if err = subject.writeJson(); err != nil {
+		return 0, err
+	}
+	subject.runtimeInit(false)
+	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
+	return subject.SubjId, nil
+}
 
-	// create Info-Json after init completed
-	err = subject.writeJson()
+func CreateSubject(n string, ext *Extra) (int, error) {
+	subject := new(Subject)
+	bgmurl, err := solveResource(n, subject, ext)
 	if err != nil {
 		return 0, err
 	}
-
-	subject.runtimeInit(false)
-
-	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
-	return sid, nil
+	var tips map[string]string
+	if bgmurl != "" {
+		tips, err = IC.DoScrape(bgmurl)
+	} else {
+		tips, err = IC.Scrape(n)
+	}
+	if err != nil {
+		return 0, err
+	}
+	sid, err := strconv.Atoi(tips[IC.SubjId])
+	if err != nil {
+		return 0, err
+	}
+	if Mgr.Get(sid) != nil {
+		return 0, fmt.Errorf("%w:sid:%d", errs.ErrSubjectAlreadyExisted, sid)
+	}
+	subject.SubjId = sid
+	if err = subject.Loadfields(tips); err != nil {
+		return 0, err
+	}
+	return finalizeSubject(subject, ext)
 }
 
 // CreateSubjectViaFeed use a specified rss-feed url as the resource to create a subject,
@@ -244,10 +220,7 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 	if name != "" {
 		tips, err = IC.Scrape(name)
 	} else {
-		var (
-			bgmurl string
-			title  string
-		)
+		var bgmurl, title string
 		if title, bgmurl, err = fp.GetTitleAndLink(); err != nil {
 			return 0, err
 		} else if bgmurl == "" {
@@ -268,42 +241,44 @@ func CreateSubjectViaFeed(feed, name string, ext *Extra) (int, error) {
 		return 0, fmt.Errorf("%w: sid=%d", errs.ErrSubjectAlreadyExisted, sid)
 	}
 	subject.SubjId = sid
-	err = subject.Loadfields(tips)
-	if err != nil {
+	if err = subject.Loadfields(tips); err != nil {
 		return 0, err
 	}
-	GetSeason(subject)
-	subject.GetPart()
-	subject.trimName()
-	err = initFolder(subject)
-	if err != nil {
-		return 0, err
-	}
-	lastS, err := FindLastSeason(subject.Path)
-	if err != nil {
-		return 0, fmt.Errorf("getLastSeason failed: %w", err)
-	}
-	err = subject.scrapeCover(lastS)
-	if err != nil {
-		return 0, err
-	}
+	return finalizeSubject(subject, ext)
+}
 
-	if !subject.BuiltinDownload {
-		err = download(subject, ext)
-	} else {
-		err = BuiltinDownloadPrepare(subject, ext)
+// folderSearch tries TMDB folder lookup in order: Name → OriginName → each Alias → strip season suffix.
+func (s *Subject) folderSearch(tmdbTyp string) error {
+	var err error
+	s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.Name)
+	if err == nil {
+		return nil
 	}
-	if err != nil {
-		return 0, err
+	if !errors.Is(err, errs.ErrCrawlNotFound) {
+		return err
 	}
-
-	err = subject.writeJson()
-	if err != nil {
-		return 0, err
+	s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.OriginName)
+	if err == nil {
+		return nil
 	}
-	subject.runtimeInit(false)
-	log.Info(log.Struct{"sid", subject.SubjId}, "create subject succeeded")
-	return sid, nil
+	if !errors.Is(err, errs.ErrCrawlNotFound) {
+		return err
+	}
+	for _, alias := range strings.Split(s.Alias, "|") {
+		s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, alias)
+		if err == nil {
+			return nil
+		}
+		if !errors.Is(err, errs.ErrCrawlNotFound) {
+			return err
+		}
+	}
+	re := regexp.MustCompile(`第(.)季`)
+	if match := re.FindStringSubmatch(s.Name); len(match) > 1 {
+		trimmed := strings.TrimRight(strings.ReplaceAll(s.Name, fmt.Sprintf("第%s季", match[1]), ""), " ")
+		s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, trimmed)
+	}
+	return err
 }
 
 func (s *Subject) Loadfields(tips map[string]string) error {
@@ -344,69 +319,29 @@ func (s *Subject) Loadfields(tips map[string]string) error {
 			s.EndTime = et
 			s.Finished = n.After(eti) || n.Equal(eti)
 		}
-	} else { // if movie finished
+	} else {
 		s.StartTime = tips[IC.SubjMoveStartTime]
 		s.Finished = true
 	}
 	s.Alias = tips[IC.Alias]
 
-	// fetch folder info,source from tmdb
-	var tmdbTyp = IC.TMDB_TYP_TV
+	tmdbTyp := IC.TMDB_TYP_TV
 	if s.Typ == MOVIE {
 		tmdbTyp = IC.TMDB_TYP_MOVIE
 	}
-	var err error
-	// First, attempt to search for the folder using the subject's Name
-	s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.Name)
-	if err != nil {
-		if errors.Is(err, errs.ErrCrawlNotFound) {
-			// If the search failed because the folder was not found,
-			// try again using the subject's OriginName
-			s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, s.OriginName)
-		}
-		if errors.Is(err, errs.ErrCrawlNotFound) {
-			// If the search still cannot found, try using each alias from the subject's Alias field
-			for _, n := range strings.Split(s.Alias, "|") {
-				s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
-				if err == nil {
-					return nil
-				} else if !errors.Is(err, errs.ErrCrawlNotFound) {
-					// If the search failed with an error other than ErrCrawlNotFound, return the error
-					return err
-				}
-			}
-			// If all aliases failed, try removing the season number from the subject's Name and search again
-			re := regexp.MustCompile(`第(.)季`)
-			match := re.FindStringSubmatch(s.Name)
-			if len(match) > 1 {
-				season := match[1]
-				n := strings.ReplaceAll(s.Name, fmt.Sprintf("第%s季", season), "")
-				n = strings.TrimRight(n, " ")
-				s.FolderName, s.FolderTime, err = IC.FloderSearch(tmdbTyp, n)
-				return err
-			}
-		}
-		return err
-	}
-	return nil
+	return s.folderSearch(tmdbTyp)
 }
 
 func (s *Subject) FetchInfo() error {
 	tips, err := IC.BgmTVInfoScrape(s.SubjId)
 	if err != nil {
-		return nil
+		log.Error(log.Struct{"sid", s.SubjId, "err", err}, "FetchInfo: scrape failed, skipping update")
+		return nil // non-fatal: keep running with existing info
 	}
 	wrap := errs.ErrWrapper{}
-	wrap.Handle(func() error {
-		return s.Loadfields(tips)
-	})
-	wrap.Handle(func() error {
-		Mgr.Sync()
-		return nil
-	})
-	wrap.Handle(func() error {
-		return s.writeJson()
-	})
+	wrap.Handle(func() error { return s.Loadfields(tips) })
+	wrap.Handle(func() error { Mgr.Sync(); return nil })
+	wrap.Handle(func() error { return s.writeJson() })
 	return wrap.Error()
 }
 
@@ -431,117 +366,106 @@ func solveResource(n string, subj *Subject, ext *Extra) (string, error) {
 	return bgm, nil
 }
 
+// applyFilter checks whether desc passes the filter defined by ext and global config.
+// Returns true if the item should be downloaded, false if it should be skipped.
+func applyFilter(sid int, desc string, enaFl bool, ext *Extra) bool {
+	if enaFl {
+		if !FilterWithRegs(desc, BuildFilterRegs(CFG.Env.RssFilter.Contain), BuildFilterRegs(CFG.Env.RssFilter.Exclusion)) {
+			log.Info(log.Struct{"sid", sid, "filtered", desc}, "global filtered")
+			return false
+		}
+		return true
+	}
+	if ext != nil && !ext.NoArgs() {
+		if ext.RssOption.UseRegex {
+			if !FilterWithCustomReg(desc, *ext) {
+				log.Info(log.Struct{"sid", sid, "filtered", desc}, "custom filtered")
+				return false
+			}
+		} else {
+			if !FilterWithCustom(desc, *ext) {
+				log.Info(log.Struct{"sid", sid, "filtered", desc}, "custom filtered")
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func download(subj *Subject, ext *Extra) error {
 	if subj.ResourceTyp == Torrent {
 		h, err := torrent.Add(subj.ResourceUrl, subj.Path, subj.QbtTag())
 		subj.TorrentHash = h
 		return err
-	} else if subj.Finished {
+	}
+
+	if subj.Finished {
 		it, err := rss.AddAndGetItems(subj.ResourceUrl, subj.RssPath())
-		log.Debug(log.Struct{"sid", subj.SubjId, "rss path ", subj.RssPath()}, "add RssResource")
+		log.Debug(log.Struct{"sid", subj.SubjId, "rss path", subj.RssPath()}, "add RssResource")
 		if err != nil {
 			return err
 		}
 		enaFl := CFG.Env.EnabledFilter() && (ext == nil || ext.NoArgs())
-	rssTraverse:
 		for _, a := range it.Articles {
-			log.Debug(log.Struct{"rssDesc", a.Description}, "traverse rssItems")
 			desc := a.Description
-			if subj.isCollection(desc) {
-				if enaFl {
-					contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
-					exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
-					if !FilterWithRegs(desc, contains, exclusions) {
-						log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filtered")
-						continue
+			log.Debug(log.Struct{"rssDesc", desc}, "traverse rssItems")
+			isCollOrColl := subj.isCollection(desc)
+			if !isCollOrColl {
+				for _, reg := range coll_regs {
+					re, err := regexp.Compile(reg)
+					if err != nil {
+						return err
 					}
-				} else if !(ext == nil || ext.NoArgs()) {
-					if ext.RssOption.UseRegex {
-						if !FilterWithCustomReg(desc, *ext) {
-							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
-							continue
-						}
-					} else {
-						if !FilterWithCustom(desc, *ext) {
-							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
-							continue
-						}
+					if re.MatchString(desc) {
+						isCollOrColl = true
+						break
 					}
-				}
-				log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
-				return subj.rssToTorr(a.TorrentURL)
-			}
-			for _, reg := range coll_regs {
-				re, err := regexp.Compile(reg)
-				if err != nil {
-					return err
-				}
-				if re.MatchString(desc) {
-					if enaFl {
-						contains := BuildFilterRegs(CFG.Env.RssFilter.Contain)
-						exclusions := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
-						if !FilterWithRegs(desc, contains, exclusions) {
-							log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "global filter")
-							continue rssTraverse
-						}
-					} else if !(ext == nil || ext.NoArgs()) {
-						if ext.RssOption.UseRegex {
-							if !FilterWithCustomReg(desc, *ext) {
-								log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
-								continue
-							}
-						} else {
-							if !FilterWithCustom(desc, *ext) {
-								log.Info(log.Struct{"sid", subj.SubjId, "filtered", desc}, "custom filtered")
-								continue
-							}
-						}
-					}
-					log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
-					return subj.rssToTorr(a.TorrentURL)
 				}
 			}
+			if !isCollOrColl {
+				continue
+			}
+			if !applyFilter(subj.SubjId, desc, enaFl, ext) {
+				continue
+			}
+			log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "matched", desc, "rss path", subj.RssPath()}, "matched collection")
+			return subj.rssToTorr(a.TorrentURL)
 		}
+
 		log.Info(log.Struct{"sid", subj.SubjId, "name", subj.Name, "rss path", subj.RssPath()}, "not matched any collection")
-		err = torrent.AddCategroy(subj.QbtCateg())
-		if err != nil {
+		if err = torrent.AddCategroy(subj.QbtCateg()); err != nil {
 			return err
 		}
-		if !(ext == nil || ext.NoArgs()) {
-			err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
+		if ext != nil && !ext.NoArgs() {
+			return rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
 				ext.RssOption.UseRegex, ext.RssOption.MustContain, ext.RssOption.MustNotContain)
-		} else {
-			err = rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
-				enaFl, BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
 		}
-		return err
-	} else {
-		err := torrent.AddCategroy(subj.QbtCateg())
-		if err != nil {
-			return err
-		}
-		r := qbt.AutoDLRule{
-			Enabled:          true,
-			AffectedFeeds:    []string{subj.ResourceUrl},
-			SavePath:         subj.Path,
-			AssignedCategory: subj.QbtCateg(),
-		}
-		if ext != nil {
-			r.UseRegex = ext.RssOption.UseRegex
-			if ext.NoArgs() {
-				if CFG.Env.EnabledFilter() {
-					// use global filter
-					r.UseRegex = true
-					r.MustContain, r.MustNotContain = BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion)
-				}
-			} else {
-				r.MustContain = ext.RssOption.MustContain
-				r.MustNotContain = ext.RssOption.MustNotContain
-			}
-		}
-		err = rss.Download(r, subj.RssPath())
+		return rss.SetAutoDLRule(subj.ResourceUrl, subj.QbtCateg(), subj.Path, subj.RssPath(),
+			enaFl, BuildFilterPerlReg(CFG.Env.RssFilter.Contain), BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion))
+	}
+
+	// ongoing series: set up auto-download rule
+	if err := torrent.AddCategroy(subj.QbtCateg()); err != nil {
 		return err
 	}
+	r := qbt.AutoDLRule{
+		Enabled:          true,
+		AffectedFeeds:    []string{subj.ResourceUrl},
+		SavePath:         subj.Path,
+		AssignedCategory: subj.QbtCateg(),
+	}
+	if ext != nil {
+		r.UseRegex = ext.RssOption.UseRegex
+		if ext.NoArgs() && CFG.Env.EnabledFilter() {
+			r.UseRegex = true
+			r.MustContain = BuildFilterPerlReg(CFG.Env.RssFilter.Contain)
+			r.MustNotContain = BuildFilterPerlReg(CFG.Env.RssFilter.Exclusion)
+		} else {
+			r.MustContain = ext.RssOption.MustContain
+			r.MustNotContain = ext.RssOption.MustNotContain
+		}
+	}
+	return rss.Download(r, subj.RssPath())
 }
 
 func GetSeason(s *Subject) {
