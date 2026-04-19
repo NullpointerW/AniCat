@@ -112,12 +112,26 @@ func rmFolder(s *Subject) error {
 	return os.RemoveAll(s.Path)
 }
 
-func (s *Subject) writeJson() (err error) {
-	b, _ := json.Marshal(*s)
-	fldrp := s.Path
-	jsfn := fmt.Sprintf(jsonfileName, s.GetSeasonAndPart())
-	err = os.WriteFile(fldrp+"/"+jsfn, b, 0777)
-	return err
+func (s *Subject) writeJson() error {
+	b, err := json.Marshal(*s)
+	if err != nil {
+		return fmt.Errorf("writeJson marshal: %w", err)
+	}
+	target := filepath.Join(s.Path, fmt.Sprintf(jsonfileName, s.GetSeasonAndPart()))
+	tmp, err := os.CreateTemp(s.Path, ".meta-tmp-*")
+	if err != nil {
+		return fmt.Errorf("writeJson create temp: %w", err)
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if _, err = tmp.Write(b); err != nil {
+		tmp.Close()
+		return fmt.Errorf("writeJson write: %w", err)
+	}
+	if err = tmp.Close(); err != nil {
+		return fmt.Errorf("writeJson close: %w", err)
+	}
+	return os.Rename(tmpName, target)
 }
 
 func (s *Subject) RmRes() error {
@@ -134,7 +148,7 @@ func (s *Subject) RmRes() error {
 		// so it needs to be repeated multiple times
 		// to ensure they are truly removed
 		rep := 2
-		for i := 0; i < rep; i++ {
+		for range rep {
 			wrap.Handle(func() error {
 				categ := s.QbtTag()
 				return DL.Qbt.RmCategoies(categ)
@@ -222,7 +236,10 @@ func InitTvNfo(p, t string) error {
 		return err
 	}
 	defer xmlFile.Close()
-	byteValue, _ := io.ReadAll(xmlFile)
+	byteValue, err := io.ReadAll(xmlFile)
+	if err != nil {
+		return err
+	}
 	xmldata := string(byteValue)
 	const doc = `<title>%s</title>`
 	exp := fmt.Sprintf(doc, "(.*?)")

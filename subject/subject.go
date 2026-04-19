@@ -506,18 +506,14 @@ func (s *Subject) GetPart() {
 	as := strings.Split(s.Alias, "|")
 	ns = append(ns, as...)
 	for _, n := range ns {
-		for _, reg := range part_regs {
-			re := regexp.MustCompile(reg)
+		for _, re := range compiledPartRegs {
 			match := re.FindStringSubmatch(n)
 			if len(match) > 1 {
-				m := match[1]
-				s.Part = fmt.Sprintf("pt%s", m)
+				s.Part = fmt.Sprintf("pt%s", match[1])
 				return
 			}
 		}
-		re, _ := regexp.Compile(reg_part2)
-		matched := re.MatchString(n)
-		if matched {
+		if compiledRegPart2.MatchString(n) {
 			s.Part = "pt2"
 			return
 		}
@@ -560,8 +556,7 @@ func (s *Subject) scrapeCover(lastS int) error {
 }
 
 func (s *Subject) isCollection(desc string) bool {
-	re := regexp.MustCompile(reg2_coll)
-	m := re.FindStringSubmatch(desc)
+	m := compiledReg2Coll.FindStringSubmatch(desc)
 	if len(m) > 1 {
 		m := m[1]
 		i, _ := strconv.Atoi(m)

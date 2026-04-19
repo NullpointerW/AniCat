@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"regexp"
 
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/llmparser"
@@ -12,11 +11,9 @@ import (
 )
 
 func CaptureEpisNum(text string) (string, error) {
-	for _, reg := range epiRegs {
-		regexper := regexp.MustCompile(reg)
-		match := regexper.FindStringSubmatch(text)
+	for _, re := range compiledEpiRegs {
+		match := re.FindStringSubmatch(text)
 		if len(match) > 1 {
-			// fmt.Println("matched", i)
 			episNum := match[1]
 			if len([]byte(episNum)) == 1 {
 				return "0" + episNum, nil
@@ -24,8 +21,7 @@ func CaptureEpisNum(text string) (string, error) {
 			return episNum, nil
 		}
 	}
-	regexper := regexp.MustCompile(specialReg)
-	matchs := regexper.FindAllStringSubmatch(text, -1)
+	matchs := compiledSpecialReg.FindAllStringSubmatch(text, -1)
 	if matchs != nil {
 		if l := len(matchs); l == 1 {
 			episNum := matchs[0][1]
@@ -69,14 +65,10 @@ func Tv(base, sean, fn string) (string, error) {
 	return rename, nil
 }
 func SubtitleFileLang(fn string) string {
-	reg, _ := regexp.Compile(chsSubStationReg)
-	ok := reg.MatchString(fn)
-	if ok {
+	if compiledChsSub.MatchString(fn) {
 		return "chs"
 	}
-	reg, _ = regexp.Compile(chtSubStationReg)
-	ok = reg.MatchString(fn)
-	if ok {
+	if compiledChtSub.MatchString(fn) {
 		return "cht"
 	}
 	return ""

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/log"
@@ -148,7 +149,7 @@ func init() {
 		model:   cfg.Model,
 		baseURL: strings.TrimRight(baseURL, "/"),
 		style:   style,
-		client:  &http.Client{},
+		client:  &http.Client{Timeout: 30 * time.Second},
 	}
 	log.Info(log.Struct{"style", style, "model", cfg.Model, "base_url", baseURL}, "llmparser: enabled")
 }

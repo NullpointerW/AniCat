@@ -74,8 +74,7 @@ func send(sid int, torr qbt.Torrent) error {
 		"pushing completed downloadEvent")
 	select {
 	case <-s.Exited:
-	default:
-		s.PushChan <- torr
+	case s.PushChan <- torr:
 	}
 	return nil
 }

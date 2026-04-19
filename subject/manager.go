@@ -136,66 +136,72 @@ func (m *Manager) Range(f func(int, *Subject) bool) {
 
 func StartManagement() {
 	for {
-		select {
-		case p := <-Create:
-			sc := p.Arg.(SubjC)
-			var (
-				sid int
-				err error
-			)
-			if sc.CreateTyp == CreateViaStr {
-				sid, err = CreateSubject(sc.N, &sc.Extra)
-			} else { // CreateViaFeed
-				sid, err = CreateSubjectViaFeed(sc.N, sc.Extra.RssOption.Name, &sc.Extra)
-			}
-			if err != nil {
-				p.err = err
-			} else {
-				p.Sid = sid
-			}
-			p.wg.Done()
-		case p := <-Delete:
-			errWrap := errs.ErrWrapper{}
-			switch v := p.Arg.(type) {
-			case string:
-				if v != "*" {
-					p.err = fmt.Errorf("unexpected delete arg: %q", v)
-					p.wg.Done()
-					continue
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error(log.Struct{"panic", r}, "StartManagement: recovered from panic, loop continues")
 				}
-				log.Warn(nil, "rm: remove all subjects")
-				merr := errs.MultiErr{}
-				for _, s := range Mgr.List() {
-					if !s.Terminate {
-						s.Exit()
-					}
-					errWrap.Handle(func() error { return s.RmRes() })
-					errWrap.Handle(func() error { return RmFolder(&s) })
-					if errWrap.Error() == nil {
-						Mgr.Remove(s.SubjId)
-					}
-					merr.Add(errWrap.Error())
-					errWrap.Reset()
+			}()
+			select {
+			case p := <-Create:
+				sc := p.Arg.(SubjC)
+				var (
+					sid int
+					err error
+				)
+				if sc.CreateTyp == CreateViaStr {
+					sid, err = CreateSubject(sc.N, &sc.Extra)
+				} else {
+					sid, err = CreateSubjectViaFeed(sc.N, sc.Extra.RssOption.Name, &sc.Extra)
 				}
-				p.err = merr.Err()
-			case int:
-				s := Mgr.Get(v)
-				if s != nil {
-					if !s.Terminate {
-						s.Exit()
-					}
-					errWrap.Handle(func() error { return s.RmRes() })
-					errWrap.Handle(func() error { return RmFolder(s) })
-					if errWrap.Error() == nil {
-						Mgr.Remove(s.SubjId)
-					}
-					p.err = errWrap.Error()
+				if err != nil {
+					p.err = err
+				} else {
+					p.Sid = sid
 				}
-			default:
-				p.err = fmt.Errorf("delete: unexpected arg type %T", p.Arg)
+				p.wg.Done()
+			case p := <-Delete:
+				errWrap := errs.ErrWrapper{}
+				switch v := p.Arg.(type) {
+				case string:
+					if v != "*" {
+						p.err = fmt.Errorf("unexpected delete arg: %q", v)
+						p.wg.Done()
+						return
+					}
+					log.Warn(nil, "rm: remove all subjects")
+					merr := errs.MultiErr{}
+					for _, s := range Mgr.List() {
+						if !s.Terminate {
+							s.Exit()
+						}
+						errWrap.Handle(func() error { return s.RmRes() })
+						errWrap.Handle(func() error { return RmFolder(&s) })
+						if errWrap.Error() == nil {
+							Mgr.Remove(s.SubjId)
+						}
+						merr.Add(errWrap.Error())
+						errWrap.Reset()
+					}
+					p.err = merr.Err()
+				case int:
+					s := Mgr.Get(v)
+					if s != nil {
+						if !s.Terminate {
+							s.Exit()
+						}
+						errWrap.Handle(func() error { return s.RmRes() })
+						errWrap.Handle(func() error { return RmFolder(s) })
+						if errWrap.Error() == nil {
+							Mgr.Remove(s.SubjId)
+						}
+						p.err = errWrap.Error()
+					}
+				default:
+					p.err = fmt.Errorf("delete: unexpected arg type %T", p.Arg)
+				}
+				p.wg.Done()
 			}
-			p.wg.Done()
-		}
+		}()
 	}
-
 }
