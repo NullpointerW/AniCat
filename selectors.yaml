@@ -1,0 +1,64 @@
+mikan:
+  rss_li:
+    xpath: "/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/ul[@class='list-inline an-ul']/li"
+    validate: ""
+  rss_endpoint:
+    xpath: "/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text'][1]/a[@class='mikan-rss']/@href"
+    validate: "^/"
+  subgroup_container:
+    xpath: "/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text']"
+    validate: ""
+  bgm_url:
+    xpath: "/html/body[@class='main']/div[@id='sk-container']/div[@class='pull-left leftbar-container']/p[@class='bangumi-info'][last()]/a/@href"
+    validate: "bgm\\.tv|bangumi\\.tv"
+  search_rows:
+    xpath: "//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row']"
+    validate: ""
+  magnet_link:
+    xpath: "//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[2]/a[2]/@data-clipboard-text"
+    validate: "^magnet:\\?"
+  filename:
+    xpath: "//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[2]/a[@class='magnet-link-wrap']"
+    validate: ""
+  filesize:
+    xpath: "//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[3]"
+    validate: "MB|GB"
+  update_time:
+    xpath: "//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[4]"
+    validate: ""
+  rss_table_rows:
+    xpath: "(//table[@class='table table-striped tbl-border fadeIn'])[%d]/tbody/tr"
+    validate: ""
+  rss_item_name:
+    xpath: "/td[2]/a[@class='magnet-link-wrap']"
+    validate: ""
+  rss_item_size:
+    xpath: "/td[3]"
+    validate: "MB|GB"
+  rss_item_uptime:
+    xpath: "/td[4]"
+    validate: ""
+
+bgmtv:
+  info_page:
+    xpath: "/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='main'][2]/div[@class='columns clearit']/div[@id='columnSearchB']/ul[@id='browserItemList']/li[1]/div[@class='inner']/h3/a[@class='l']/@href"
+    validate: ""
+  infobox:
+    xpath: "//ul[@id='infobox']/li"
+    validate: ".+"
+  origin_name:
+    xpath: "//h1[@class='nameSingle']/a"
+    validate: ".+"
+
+tmdb:
+  title:
+    xpath: "//h2"
+    validate: ".+"
+  release_date:
+    xpath: "//span[contains(@class,'release_date')]"
+    validate: ".+"
+
+douban:
+  cover:
+    xpath: "/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src"
+    validate: "^https?://"

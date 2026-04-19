@@ -13,7 +13,7 @@ import (
 var (
 	c        *http.Client
 	o        sync.Once
-	BgmiRoot = "http://api.bgm.tv/"
+	BgmiRoot = "https://api.bgm.tv/"
 )
 
 type BgmiSubjIntro struct {

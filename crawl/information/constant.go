@@ -1,9 +1,14 @@
 package information
 
+import sel "github.com/NullpointerW/anicat/crawl/selector"
+
 const (
-	infoBaseUrl      = `https://bgm.tv`
-	infoPageXpathExp = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='main'][2]/div[@class='columns clearit']/div[@id='columnSearchB']/ul[@id='browserItemList']/li[1]/div[@class='inner']/h3/a[@class='l']/@href`
-	infoXpathExp     = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@class='mainWrapper']/div[@class='columns clearit']/div[@id='columnSubjectHomeA']/div[@id='bangumiInfo']/div[@class='infobox']/div[@class='infobox_container']/ul[@id='infobox']/li`
+	infoBaseUrl = `https://bgm.tv`
+
+	// fallback XPaths used when selectors.yaml is not loaded
+	infoPageXpathExpDefault = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='main'][2]/div[@class='columns clearit']/div[@id='columnSearchB']/ul[@id='browserItemList']/li[1]/div[@class='inner']/h3/a[@class='l']/@href`
+	infoXpathExpDefault     = `//ul[@id='infobox']/li`
+	originNameXpathDefault  = `//h1[@class='nameSingle']/a`
 )
 
 // keys for info map Scrape from bgm.tv
@@ -33,4 +38,16 @@ const (
 	TMDB_TYP_MOVIE = "movie"
 )
 
-const OriginNameXpath = `/html/body[@class='bangumi']/div[@id='wrapperNeue']/div[@id='headerSubject']/h1[@class='nameSingle']/a`
+func bgmXpath(key, fallback string) string {
+	if v := sel.Get("bgmtv", key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+func tmdbXpath(key, fallback string) string {
+	if v := sel.Get("tmdb", key); v != "" {
+		return v
+	}
+	return fallback
+}

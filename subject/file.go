@@ -26,38 +26,37 @@ var HOME = CFG.Env.SubjPath
 func Scan() {
 	builtin := CFG.Env.BuiltinDownloader
 	home := trimPath(HOME)
-	if fs, err := os.ReadDir(home); err == nil {
-		for _, f := range fs {
-			if f.IsDir() {
-				log.Info(log.Struct{"path", util.FileSeparatorConv(home + string(os.PathSeparator) + f.Name())},
-					"scan: found folder")
-				fs, err := os.ReadDir(home + `/` + f.Name())
-				if err != nil {
-					log.Error(log.Struct{"err", err}, "scan: open folder failed")
-					continue
-				}
-				for _, ff := range fs {
-					isf := !ff.IsDir()
-					if isf && util.IsJsonFile(ff.Name()) && strings.Contains(ff.Name(), "meta-data#") {
-						if jsraw, err := os.ReadFile(home + `/` + f.Name() + `/` + ff.Name()); err == nil {
-							var s Subject
-							err := json.Unmarshal(jsraw, &s)
-							if err != nil {
-								log.Error(log.Struct{"err", err}, "scan: unmarshal json failed")
-								continue
-							}
-							if builtin != s.BuiltinDownload {
-								continue
-							}
-							s.runtimeInit(true)
-						} else {
-							log.Error(log.Struct{"err", err}, "scan: open file failed")
-						}
-					}
-				}
-			}
+	err := filepath.WalkDir(home, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			log.Error(log.Struct{"path", path, "err", err}, "scan: walk error")
+			return nil
 		}
-	} else {
+		if d.IsDir() {
+			log.Info(log.Struct{"path", util.FileSeparatorConv(path)}, "scan: found folder")
+			return nil
+		}
+		fn := d.Name()
+		if !util.IsJsonFile(fn) || !strings.Contains(fn, "meta-data#") {
+			return nil
+		}
+		log.Info(log.Struct{"file", path}, "scan: found meta-data file")
+		jsraw, err := os.ReadFile(path)
+		if err != nil {
+			log.Error(log.Struct{"err", err}, "scan: open file failed")
+			return nil
+		}
+		var s Subject
+		if err := json.Unmarshal(jsraw, &s); err != nil {
+			log.Error(log.Struct{"err", err}, "scan: unmarshal json failed")
+			return nil
+		}
+		if builtin != s.BuiltinDownload {
+			return nil
+		}
+		s.runtimeInit(true)
+		return nil
+	})
+	if err != nil {
 		log.Error(log.Struct{"err", err}, "scan: open home folder failed")
 		os.Exit(1)
 	}
@@ -113,12 +112,26 @@ func rmFolder(s *Subject) error {
 	return os.RemoveAll(s.Path)
 }
 
-func (s *Subject) writeJson() (err error) {
-	b, _ := json.Marshal(*s)
-	fldrp := s.Path
-	jsfn := fmt.Sprintf(jsonfileName, s.GetSeasonAndPart())
-	err = os.WriteFile(fldrp+"/"+jsfn, b, 0777)
-	return err
+func (s *Subject) writeJson() error {
+	b, err := json.Marshal(*s)
+	if err != nil {
+		return fmt.Errorf("writeJson marshal: %w", err)
+	}
+	target := filepath.Join(s.Path, fmt.Sprintf(jsonfileName, s.GetSeasonAndPart()))
+	tmp, err := os.CreateTemp(s.Path, ".meta-tmp-*")
+	if err != nil {
+		return fmt.Errorf("writeJson create temp: %w", err)
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if _, err = tmp.Write(b); err != nil {
+		tmp.Close()
+		return fmt.Errorf("writeJson write: %w", err)
+	}
+	if err = tmp.Close(); err != nil {
+		return fmt.Errorf("writeJson close: %w", err)
+	}
+	return os.Rename(tmpName, target)
 }
 
 func (s *Subject) RmRes() error {
@@ -135,7 +148,7 @@ func (s *Subject) RmRes() error {
 		// so it needs to be repeated multiple times
 		// to ensure they are truly removed
 		rep := 2
-		for i := 0; i < rep; i++ {
+		for range rep {
 			wrap.Handle(func() error {
 				categ := s.QbtTag()
 				return DL.Qbt.RmCategoies(categ)
@@ -223,7 +236,10 @@ func InitTvNfo(p, t string) error {
 		return err
 	}
 	defer xmlFile.Close()
-	byteValue, _ := io.ReadAll(xmlFile)
+	byteValue, err := io.ReadAll(xmlFile)
+	if err != nil {
+		return err
+	}
 	xmldata := string(byteValue)
 	const doc = `<title>%s</title>`
 	exp := fmt.Sprintf(doc, "(.*?)")

@@ -19,6 +19,7 @@ import (
 	eslog "github.com/NullpointerW/anicat/pkg/log"
 	P "github.com/NullpointerW/anicat/pusher"
 	"github.com/NullpointerW/anicat/pusher/email"
+	"github.com/NullpointerW/anicat/pusher/telegram"
 	util "github.com/NullpointerW/anicat/utils"
 	qbt "github.com/NullpointerW/go-qbittorrent-apiv2"
 )
@@ -27,6 +28,8 @@ import (
 func (s *Subject) runtimeInit(reload bool) {
 	s.Exited = make(chan struct{})
 	if s.Terminate {
+		log.Info(log.Struct{"sid", s.SubjId, "name", s.Name, "season", s.Season, "typ", s.Typ.String(),
+			"path", s.Path, "builtinDownload", s.BuiltinDownload, "resourceTyp", s.ResourceTyp}, "runtimeInit: subject terminated")
 		close(s.Exited)
 		Mgr.Add(s)
 		if s.BuiltinDownload {
@@ -34,8 +37,7 @@ func (s *Subject) runtimeInit(reload bool) {
 		}
 		return
 	}
-	c := context.Background()
-	ctx, exit := context.WithCancel(c)
+	ctx, exit := context.WithCancel(context.Background())
 	s.Exit = exit
 	if s.Pushed == nil {
 		s.Pushed = make(map[string]string)
@@ -49,18 +51,20 @@ func (s *Subject) runtimeInit(reload bool) {
 		if s.TorrentFinishedUrls == nil {
 			s.TorrentFinishedUrls = make(map[string]struct{})
 		}
+		if s.Filter != nil {
+			s.Filter.Restore()
+		}
 		if reload {
 			s.initializeFinishedTorrentNameList()
 		} else {
-			s.FinihsedTorrentNameList = util.NewListView([]builtin.TorrentProgress(nil))
+			s.FinishedTorrentNameList = util.NewListView([]builtin.TorrentProgress(nil))
 		}
 		s.PushChanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
-		s.MonitorchanBuiltin = make(chan builtin.MonitoredTorrent, 1024)
+		s.MonitorChan = make(chan builtin.MonitoredTorrent, 1024)
 		m := builtin.NewTorrentProgressMonitor(time.Second * 15)
 		s.TorrentMonitor = m
-		go builtin.MonitorBuiltin(s.MonitorchanBuiltin, s.PushChanBuiltin, ctx, m)
+		go builtin.MonitorBuiltin(s.MonitorChan, s.PushChanBuiltin, ctx, m)
 		go s.runWithBuiltinDownloader(ctx, reload)
-
 	} else {
 		s.PushChan = make(chan qbt.Torrent, 1024)
 		go s.run(ctx, reload)
@@ -89,36 +93,43 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 	}
 	t := time.NewTicker(30 * time.Minute)
 	if s.ResourceTyp == Torrent {
-		var seeker builtin.TorrentSeeker
+		var (
+			seeker   builtin.TorrentSeeker
+			fop      builtin.FileOption
+			startErr error
+		)
 		u, err := url.Parse(s.ResourceUrl)
 		if err != nil {
-			log.Error(log.Struct{"err", err}, "parse torrentUrl failed")
+			startErr = fmt.Errorf("parse torrentUrl: %w", err)
+		} else {
+			switch strings.ToLower(u.Scheme) {
+			case "magnet":
+				seeker = &MagnetUrlSeeker{}
+			case "http", "https":
+				// seeker remains nil; DefaultDownLoader's HttpSeeker is used
+			default:
+				startErr = fmt.Errorf("unexpected scheme %q", u.Scheme)
+			}
+		}
+		if startErr == nil {
+			switch s.Typ {
+			case TV:
+				fop = FilePath{FileName: &TorrFileOpt{s}, DirPath: s.Path}
+			case MOVIE:
+				fop = FilePath{FileName: new(MovieFileOpt), DirPath: s.Path}
+			}
+			t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
+			if err != nil {
+				startErr = fmt.Errorf("download: %w", err)
+			} else {
+				s.builtinDownload(builtin.MonitoredTorrent{TorrentInfo: builtin.TorrentInfo{Torrent: t}, Url: s.ResourceUrl})
+			}
+		}
+		if startErr != nil {
+			log.Error(log.Struct{"sid", s.SubjId, "err", startErr}, "start torrent download failed")
 			s.Exit()
+			// ctx is now cancelled; the select loop below exits via ctx.Done() → exit(s)
 		}
-		scheme := strings.ToLower(u.Scheme)
-		switch {
-		case scheme == "magnet":
-			seeker = &MagnetUrlSeeker{}
-		case scheme == "http" || scheme == "https":
-			seeker = nil
-		default:
-			log.Error(log.Struct{"err", fmt.Errorf("unexpected scheme %q", u.Scheme)}, "parse torrentUrl failed")
-			s.Exit()
-		}
-		var fop builtin.FileOption
-		switch s.Typ {
-		case TV:
-			fop = FilePath{FileName: &TorrFileOpt{s}, DirPath: s.Path}
-		case MOVIE:
-			fop = FilePath{FileName: new(MovieFileOpt), DirPath: s.Path}
-		}
-		fmt.Printf("TorrFileOpt: %+v \n", fop)
-		t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "download torrentResource failed")
-			s.Exit()
-		}
-		s.builtinDownload(builtin.MonitoredTorrent{TorrentInfo: builtin.TorrentInfo{Torrent: t}, Url: s.ResourceUrl})
 	}
 	if s.ResourceTyp == RSS && reload {
 		var ff rss.FilterFunc
@@ -148,12 +159,12 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 			} else {
 				s.TorrentFinishedUrls[torr.Url] = struct{}{}
 			}
-			s.FinihsedTorrentNameList.Append(builtin.TorrentProgress{Percentage: 100, Name: torr.Rename})
+			s.FinishedTorrentNameList.Append(builtin.TorrentProgress{Percentage: 100, Name: torr.Rename})
 			err := s.writeJson()
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "write json failed")
 			}
-			err = s.pushBuiltin(torr, email.Poster)
+			err = s.pushBuiltin(torr, P.Multi{email.Poster, telegram.Poster})
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
 			}
@@ -192,7 +203,7 @@ func (s *Subject) run(ctx context.Context, reload bool) {
 				}
 			}
 		case torr := <-s.PushChan:
-			err := s.push(torr, email.Poster)
+			err := s.push(torr, P.Multi{email.Poster, telegram.Poster})
 			if err != nil {
 				log.Error(log.Struct{"sid", s.SubjId, "err", err}, "push process failed")
 			}
@@ -509,6 +520,21 @@ func (s *Subject) readRssAndDownload() {
 
 func (s *Subject) pushBuiltin(torr builtin.MonitoredTorrent, pusher P.Pusher) error {
 	log.Debug(log.Struct{"sid", s.SubjId, "torrName", torr.Rename}, "push builtin")
-	pusher.Push(P.Payload{})
-	return nil
+	var episode string
+	if s.Typ == TV {
+		episode = util.TrimExtensionAndGetEpi(torr.Rename)
+	} else {
+		episode = "MOVIE"
+	}
+	err := pusher.Push(P.Payload{
+		SubjectId:    s.SubjId,
+		SubjectName:  s.Name,
+		DownLoadName: torr.Rename,
+		Size:         int(torr.Size),
+		Episode:      episode,
+	})
+	if s.ResourceTyp == Torrent {
+		s.terminate()
+	}
+	return err
 }

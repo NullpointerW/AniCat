@@ -50,9 +50,7 @@ func process(c *N.Conn) {
 		}
 	}()
 	var (
-		render view.Render = view.AsciiRender{
-			Conn: c,
-		}
+		render  = view.JsonRender{Conn: c}
 		command cmd.Cmd
 	)
 	if msg, err := c.Read(); err == nil {
@@ -75,6 +73,7 @@ func process(c *N.Conn) {
 			_ = c.Write(err.Error())
 			return
 		}
+		log.Debug(log.Struct{"resp", resp}, "send response")
 		_ = c.Write(resp)
 	}
 }

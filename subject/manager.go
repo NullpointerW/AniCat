@@ -1,11 +1,11 @@
 package subject
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 
 	"github.com/NullpointerW/anicat/log"
-
 	"github.com/NullpointerW/anicat/errs"
 )
 
@@ -22,8 +22,11 @@ type SubjC struct {
 	CreateTyp createType
 }
 
+// Pip is a typed request/response envelope for operations sent over Create or Delete channels.
+// The caller creates a Pip, sends it on the channel, then calls Wait() to block until done.
 type Pip struct {
-	Arg any
+	Arg any // input argument (SubjC for Create, int or "*" for Delete)
+	Sid int // output: the assigned subject ID (valid only after successful Create)
 	err error
 	wg  sync.WaitGroup
 }
@@ -35,6 +38,7 @@ func NewPip(a any) *Pip {
 	return p
 }
 
+// Error blocks until the operation completes and returns any error.
 func (p *Pip) Error() error {
 	p.wg.Wait()
 	return p.err
@@ -132,71 +136,72 @@ func (m *Manager) Range(f func(int, *Subject) bool) {
 
 func StartManagement() {
 	for {
-		select {
-		case p := <-Create:
-			sc := p.Arg.(SubjC)
-			var (
-				sid int
-				err error
-			)
-			if sc.CreateTyp == CreateViaStr {
-				sid, err = CreateSubject(sc.N, &sc.Extra)
-			} else { // CreateViaFeed
-				sid, err = CreateSubjectViaFeed(sc.N, sc.Extra.RssOption.Name, &sc.Extra)
-			}
-			if err != nil {
-				p.err = err
-			} else {
-				// send added subjId to peer
-				p.Arg = sid
-			}
-			p.wg.Done()
-		case p := <-Delete:
-			i, _ := p.Arg.(int)
-			errWrap := errs.ErrWrapper{}
-			// rm *
-			// remove all subjects
-			if i == 0 && p.Arg.(string) == "*" {
-				log.Warn(nil, "rm: remove all subjects")
-				merr := errs.MultiErr{}
-				for _, s := range Mgr.List() {
-					if !s.Terminate {
-						s.Exit()
-					}
-					errWrap.Handle(func() error {
-						return s.RmRes()
-					})
-					errWrap.Handle(func() error {
-						return RmFolder(&s)
-					})
-					if errWrap.Error() == nil {
-						Mgr.Remove(s.SubjId)
-					}
-					merr.Add(errWrap.Error())
-					errWrap.Reset()
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error(log.Struct{"panic", r}, "StartManagement: recovered from panic, loop continues")
 				}
-				p.err = merr.Err()
+			}()
+			select {
+			case p := <-Create:
+				sc := p.Arg.(SubjC)
+				var (
+					sid int
+					err error
+				)
+				if sc.CreateTyp == CreateViaStr {
+					sid, err = CreateSubject(sc.N, &sc.Extra)
+				} else {
+					sid, err = CreateSubjectViaFeed(sc.N, sc.Extra.RssOption.Name, &sc.Extra)
+				}
+				if err != nil {
+					p.err = err
+				} else {
+					p.Sid = sid
+				}
 				p.wg.Done()
-				continue
-			}
-			s := Mgr.Get(i)
-			if s != nil {
-				if !s.Terminate {
-					s.Exit()
+			case p := <-Delete:
+				errWrap := errs.ErrWrapper{}
+				switch v := p.Arg.(type) {
+				case string:
+					if v != "*" {
+						p.err = fmt.Errorf("unexpected delete arg: %q", v)
+						p.wg.Done()
+						return
+					}
+					log.Warn(nil, "rm: remove all subjects")
+					merr := errs.MultiErr{}
+					for _, s := range Mgr.List() {
+						if !s.Terminate {
+							s.Exit()
+						}
+						errWrap.Handle(func() error { return s.RmRes() })
+						errWrap.Handle(func() error { return RmFolder(&s) })
+						if errWrap.Error() == nil {
+							Mgr.Remove(s.SubjId)
+						}
+						merr.Add(errWrap.Error())
+						errWrap.Reset()
+					}
+					p.err = merr.Err()
+				case int:
+					s := Mgr.Get(v)
+					if s != nil {
+						if !s.Terminate {
+							s.Exit()
+						}
+						errWrap.Handle(func() error { return s.RmRes() })
+						errWrap.Handle(func() error { return RmFolder(s) })
+						if errWrap.Error() == nil {
+							Mgr.Remove(s.SubjId)
+						}
+						p.err = errWrap.Error()
+					}
+				default:
+					p.err = fmt.Errorf("delete: unexpected arg type %T", p.Arg)
 				}
-				errWrap.Handle(func() error {
-					return s.RmRes()
-				})
-				errWrap.Handle(func() error {
-					return RmFolder(s)
-				})
-				if errWrap.Error() == nil {
-					Mgr.Remove(s.SubjId)
-				}
-				p.err = errWrap.Error()
+				p.wg.Done()
 			}
-			p.wg.Done()
-		}
+		}()
 	}
-
 }

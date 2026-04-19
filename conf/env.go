@@ -2,6 +2,7 @@ package conf
 
 import (
 	"fmt"
+	"github.com/NullpointerW/anicat/crawl/selector"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
 	eslog "github.com/NullpointerW/anicat/pkg/log"
@@ -58,9 +59,20 @@ type Environment struct {
 			TemplatePath string `yaml:"template"`
 			SkipSSL      bool   `yaml:"skipssl"`
 		} `yaml:"email"`
+		Telegram struct {
+			Token  string `yaml:"token"`
+			ChatId string `yaml:"chat_id"`
+		} `yaml:"telegram"`
 	} `yaml:"push"`
+	LLMParser struct {
+		Style   string `yaml:"style"`    // "anthropic" or "openai"
+		APIKey  string `yaml:"api_key"`
+		Model   string `yaml:"model"`
+		BaseURL string `yaml:"base_url"`
+	} `yaml:"llm-parser"`
 	BgmiLog           bool `yaml:"bangumi-log"`
 	BuiltinDownloader bool `yaml:"builtin-downloader"`
+	WebUIPort         int  `yaml:"webui-port"`
 }
 
 func (env *Environment) Print() {
@@ -113,6 +125,19 @@ func init() {
 	}
 	errs.PanicErr(err, errCallbackFunc)
 	errs.PanicErr(yaml.Unmarshal(b, &Env), errCallbackFunc)
+	selectorPath := filepath.Join(filepath.Dir(EnvPath), "selectors.yaml")
+	if err := selector.Load(selectorPath); err != nil {
+		log.Error(log.Struct{"err", err}, "failed to load selectors.yaml, using hardcoded defaults")
+	}
+	if Env.LLMParser.APIKey != "" {
+		selector.SetLLMConfig(selector.LLMConfig{
+			Style:   Env.LLMParser.Style,
+			APIKey:  Env.LLMParser.APIKey,
+			Model:   Env.LLMParser.Model,
+			BaseURL: Env.LLMParser.BaseURL,
+		})
+		log.Info(log.Struct{"style", Env.LLMParser.Style, "model", Env.LLMParser.Model}, "SelectorHealer enabled")
+	}
 	if Env.Qbt.Timeout <= 0 {
 		Env.Qbt.Timeout = 3000
 	}
@@ -126,7 +151,7 @@ func init() {
 			return
 		}
 		executePath += "/bangumi.log"
-		output, err := os.OpenFile(executePath, os.O_APPEND|os.O_CREATE, 0777)
+		output, err := os.OpenFile(executePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 		if err != nil {
 			log.Error(log.Struct{"err", err}, "open bgmi-log failed")
 			Env.BgmiLog = false
@@ -151,19 +176,19 @@ func logInit(debug bool) {
 			executePath = "." + executePath
 		}
 		executePath = util.FileSeparatorConv(executePath)
-		output, err = os.OpenFile(executePath, os.O_TRUNC|os.O_CREATE, 0777)
+		output, err = os.OpenFile(executePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
 		if err != nil {
 			output = os.Stdout
-			defer log.Error(log.Struct{"err", err}, "create logfile failed")
+			log.Error(log.Struct{"err", err}, "create logfile failed")
 		}
 		// receive PANIC
 		dirP := filepath.Dir(executePath)
 		PanicP := filepath.Join(dirP, "panic.log")
-		panicOp, err := os.OpenFile(PanicP, os.O_APPEND|os.O_CREATE, 0777)
+		panicOp, err := os.OpenFile(PanicP, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 		if err == nil {
 			err = errs.PanicRedirect(panicOp)
 			if err != nil {
-				defer log.Error(log.Struct{"err", err}, "redirect stderr failed")
+				log.Error(log.Struct{"err", err}, "redirect stderr failed")
 				_ = panicOp.Close()
 			}
 		}

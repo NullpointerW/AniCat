@@ -2,175 +2,137 @@ package subject
 
 import (
 	"fmt"
-	"github.com/NullpointerW/anicat/downloader/rss"
-	"github.com/NullpointerW/anicat/log"
 	"regexp"
 	"strings"
+
+	"github.com/NullpointerW/anicat/downloader/rss"
+	"github.com/NullpointerW/anicat/log"
 )
 
+// FilterVerb holds precompiled regexps for RSS item filtering.
+// Contain rules use AND logic; Exclusion rules use OR-reject logic.
+// Precompilation avoids repeated regexp.Compile on every filter call.
 type FilterVerb struct {
-	Single    bool `json:"single"`
-	Contain   any  `json:"contain"`
-	Exclusion any  `json:"exclusion"`
+	// Runtime fields: precompiled regexps, not persisted.
+	contain   []*regexp.Regexp
+	exclusion []*regexp.Regexp
+	// Persisted fields: raw pattern strings for JSON reload.
+	RawContain   []string `json:"contain"`
+	RawExclusion []string `json:"exclusion"`
 }
 
-func NewFilterVerb(single bool, c, e any) *FilterVerb {
-	return &FilterVerb{
-		Single:    single,
-		Contain:   c,
-		Exclusion: e,
+// BuildFilterVerb constructs a FilterVerb from raw pattern strings.
+func BuildFilterVerb(contain, exclusion []string) *FilterVerb {
+	f := &FilterVerb{
+		RawContain:   contain,
+		RawExclusion: exclusion,
 	}
+	f.contain = compileRegs(contain)
+	f.exclusion = compileRegs(exclusion)
+	return f
 }
+
+// BuildFilterVerbSingle constructs a FilterVerb from a single regex pair.
+func BuildFilterVerbSingle(contain, exclusion string) *FilterVerb {
+	return BuildFilterVerb([]string{contain}, []string{exclusion})
+}
+
+// Restore recompiles regexps after JSON unmarshal.
+func (f *FilterVerb) Restore() {
+	f.contain = compileRegs(f.RawContain)
+	f.exclusion = compileRegs(f.RawExclusion)
+}
+
+// Filter returns an rss.FilterFunc backed by this FilterVerb.
 func (f *FilterVerb) Filter() rss.FilterFunc {
-	if f.Single {
-		return func(n string) bool {
-			return FilterWithReg(n, f.Contain.(string), f.Exclusion.(string))
-		}
-	}
 	return func(n string) bool {
-		return FilterWithRegs(n, ifaceConvertStrSlice(f.Contain), ifaceConvertStrSlice(f.Exclusion))
+		return matchRegs(n, f.contain, f.exclusion)
 	}
-
-}
-func ifaceConvertStrSlice(iface any) []string {
-	if sfaceAssert(iface){
-		return sfaceConvertStrSlice(iface.([]interface{}))
-	}
-	return iface.([]string)
-}
-func sfaceAssert(iface any )bool{
-	_, ok := iface.([]interface{})
-	return ok
-}
-func sfaceConvertStrSlice(sface []interface{}) []string {
-	ss := make([]string, 0, len(sface))
-	for _, f := range sface {
-		ss = append(ss, f.(string))
-	}
-	return ss
 }
 
-func BuildFilterPerlReg(vbs []string) string {
-	var reg string
-	const tmp = `(?=.*?%s)`
-	if len(vbs) != 0 {
-		reg += "(?i)"
-		for _, ct := range vbs {
-			vb := strings.ReplaceAll(ct, ",", "|")
-			vb = "(" + vb + ")"
-			reg += fmt.Sprintf(tmp, vb)
+// compileRegs compiles pattern strings into []*regexp.Regexp.
+// Commas within a pattern become | (OR within a group); all patterns are case-insensitive.
+func compileRegs(patterns []string) []*regexp.Regexp {
+	out := make([]*regexp.Regexp, 0, len(patterns))
+	for _, p := range patterns {
+		if p == "" {
+			continue
 		}
-		return reg
-	} else {
+		p = "(?i)" + strings.ReplaceAll(p, ",", "|")
+		re, err := regexp.Compile(p)
+		if err != nil {
+			log.Error(log.Struct{"err", err, "pattern", p}, "filter: regexp compile failed, skipping")
+			continue
+		}
+		out = append(out, re)
+	}
+	return out
+}
+
+// matchRegs applies precompiled regexps: all contain rules must match (AND),
+// any exclusion rule match rejects the string.
+func matchRegs(s string, contains, exclusions []*regexp.Regexp) bool {
+	for _, re := range contains {
+		matched := re.MatchString(s)
+		log.Debug(log.Struct{"containRegexp", re.String(), "matchingString", s, "matched", matched})
+		if !matched {
+			return false
+		}
+	}
+	for _, re := range exclusions {
+		if re.MatchString(s) {
+			log.Debug(log.Struct{"exclusionRegexp", re.String(), "matchingString", s, "matched", true})
+			return false
+		}
+	}
+	return true
+}
+
+// BuildFilterPerlReg builds a single perl-style lookahead regex for qBittorrent AutoDL rules.
+func BuildFilterPerlReg(vbs []string) string {
+	if len(vbs) == 0 {
 		return ""
 	}
-}
-
-func BuildFilterRegs(vbs []string) []string {
-	if len(vbs) != 0 {
-		regs := make([]string, 0, len(vbs))
-		for _, ct := range vbs {
-			vb := strings.ReplaceAll(ct, ",", "|")
-			vb = "(?i)" + vb
-			regs = append(regs, vb)
-		}
-		return regs
-	} else {
-		return nil
+	const tmp = `(?=.*?%s)`
+	reg := "(?i)"
+	for _, ct := range vbs {
+		vb := "(" + strings.ReplaceAll(ct, ",", "|") + ")"
+		reg += fmt.Sprintf(tmp, vb)
 	}
+	return reg
 }
 
-func FilterWithRegs(s string, contains, exclusions []string) bool {
-	var (
-		containOk, exclusionOk bool
+// BuildFilterRegs compiles pattern strings into []*regexp.Regexp for repeated use.
+func BuildFilterRegs(patterns []string) []*regexp.Regexp {
+	return compileRegs(patterns)
+}
+
+// FilterWithRegs filters s against precompiled regexp slices.
+func FilterWithRegs(s string, contains, exclusions []*regexp.Regexp) bool {
+	return matchRegs(s, contains, exclusions)
+}
+
+// FilterWithReg checks s against a single contain and exclusion pattern string.
+func FilterWithReg(s, contain, exclusion string) bool {
+	var c, e []*regexp.Regexp
+	if contain != "" {
+		c = compileRegs([]string{contain})
+	}
+	if exclusion != "" {
+		e = compileRegs([]string{exclusion})
+	}
+	return matchRegs(s, c, e)
+}
+
+// FilterWithCustomReg applies per-subject regex filters from an Extra.
+func FilterWithCustomReg(s string, ex Extra) bool {
+	return FilterWithReg(s, ex.RssOption.MustContain, ex.RssOption.MustNotContain)
+}
+
+// FilterWithCustom applies per-subject keyword filters from an Extra (splits on whitespace).
+func FilterWithCustom(s string, ex Extra) bool {
+	return FilterWithRegs(s,
+		compileRegs(strings.Fields(ex.RssOption.MustContain)),
+		compileRegs(strings.Fields(ex.RssOption.MustNotContain)),
 	)
-	if len(contains) == 0 {
-		containOk = true
-	}
-	if len(exclusions) == 0 {
-		exclusionOk = true
-	}
-	if !containOk {
-		//containOks := make([]bool, 0, len(contains))
-		for _, reg := range contains {
-			var ok bool
-			csre, err := regexp.Compile(reg)
-			if err != nil {
-				log.Error(log.Struct{"err", err}, "globalFilter: contains regexp compile failed")
-				ok = true
-			} else {
-				ok = csre.MatchString(s)
-				log.Debug(log.Struct{"containRegexp", csre.String(), "matchingString", s, "matched", ok})
-				//improve: break immediately
-				if !ok {
-					return false
-				}
-			}
-			//containOks = append(containOks, ok)
-		}
-		containOk = true
-		//for _, ok := range containOks {
-		//	if !ok {
-		//		containOk = false
-		//		break
-		//	}
-		//}
-	}
-
-	if !exclusionOk {
-		//exclusionOks := make([]bool, 0, len(exclusions))
-		for _, reg := range exclusions {
-			var ok bool
-			clsre, err := regexp.Compile(reg)
-			if err != nil {
-				log.Error(log.Struct{"err", err}, "globalFilter: exclusions regexp compile failed")
-				ok = true
-			} else {
-				ok = !clsre.MatchString(s)
-				log.Debug(log.Struct{"exclusionRegexp", clsre.String(), "matchingString", s, "matched", ok})
-				if !ok {
-					return false
-				}
-			}
-			//exclusionOks = append(exclusionOks, ok)
-		}
-		exclusionOk = true
-		//for _, ok := range exclusionOks {
-		//	if !ok {
-		//		exclusionOk = false
-		//		break
-		//	}
-		//}
-	}
-	return containOk && exclusionOk
-}
-
-func FilterWithCustomReg(s string, e Extra) bool {
-	return FilterWithReg(s, e.RssOption.MustContain, e.RssOption.MustNotContain)
-}
-
-func FilterWithReg(s string, c, e string) bool {
-	clsOk, exlOk := true, true
-	if cls := c; cls != "" {
-		clsReg, err := regexp.Compile(cls)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
-		} else {
-			clsOk = clsReg.MatchString(s)
-		}
-	}
-	if exl := e; exl != "" {
-		exlReg, err := regexp.Compile(exl)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "customFilter: contains regexp compile failed")
-		} else {
-			exlOk = !exlReg.MatchString(s)
-		}
-	}
-	return clsOk && exlOk
-}
-
-func FilterWithCustom(s string, e Extra) bool {
-	cls, ext := strings.Fields(e.RssOption.MustContain), strings.Fields(e.RssOption.MustNotContain)
-	return FilterWithRegs(s, cls, ext)
 }

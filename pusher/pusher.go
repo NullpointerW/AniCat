@@ -27,3 +27,17 @@ type Payload struct {
 type Pusher interface {
 	Push(p Payload) error
 }
+
+// Multi chains multiple pushers. Each pusher's Push is called in order;
+// errors are logged and the last non-nil error is returned.
+type Multi []Pusher
+
+func (m Multi) Push(p Payload) error {
+	var last error
+	for _, pr := range m {
+		if err := pr.Push(p); err != nil {
+			last = err
+		}
+	}
+	return last
+}

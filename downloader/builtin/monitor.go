@@ -1,12 +1,12 @@
 package builtin
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/NullpointerW/anicat/log"
 	util "github.com/NullpointerW/anicat/utils"
 	"github.com/anacrolix/torrent"
 	"golang.org/x/net/context"
@@ -154,7 +154,7 @@ func MonitorBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monit
 			gch := mt.Torrent.GotInfo()
 			torrents[reflect.ValueOf(gch).Pointer()] = ts
 			cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(gch)})
-			fmt.Printf("bultin-detector: recv torrent download-event,start get info:%+v \n", mt)
+			log.Info(log.Struct{"url", mt.Url, "rename", mt.Rename}, "builtin-detector: recv torrent, getting info")
 		} else {
 			ptr := cases[c].Chan.Pointer()
 			ts, ex := torrents[ptr]
@@ -164,7 +164,7 @@ func MonitorBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monit
 			delete(torrents, ptr)
 			if ts.gotInfo { // push
 				ts.Size = ts.Torrent.Length()
-				fmt.Printf("bultin-detector: download complete :%+v \n", ts.MonitoredTorrent)
+				log.Info(log.Struct{"url", ts.Url, "rename", ts.Rename, "size", ts.Size}, "builtin-detector: download complete")
 				ts.Torrent.Drop()
 				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectSend, Chan: reflect.ValueOf(send), Send: reflect.ValueOf(ts.MonitoredTorrent)})
 			} else { // download
@@ -177,7 +177,7 @@ func MonitorBuiltin(recv, send chan MonitoredTorrent, ctx context.Context, monit
 				torrents[reflect.ValueOf(dch).Pointer()] = ts
 				cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(dch)})
 				monitor.AddTorrent(ts.TorrentInfo)
-				fmt.Printf("bultin-detector: got torrent info ok,downloading :%+v \n", ts.MonitoredTorrent)
+				log.Info(log.Struct{"url", ts.Url, "rename", ts.Rename}, "builtin-detector: got info, downloading")
 			}
 		cleancases:
 			cases = util.SliceDelete(cases, c)

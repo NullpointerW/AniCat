@@ -38,11 +38,11 @@ type LsiFlag struct {
 }
 
 type CommandCase struct {
-	invoke func(Cmd, view.Render) (string, error)
+	invoke func(Cmd, view.JsonRender) (string, error)
 	flag   cTyp
 }
 
-func NewCommandCase(flag cTyp, invokeFunc func(Cmd, view.Render) (string, error)) CommandCase {
+func NewCommandCase(flag cTyp, invokeFunc func(Cmd, view.JsonRender) (string, error)) CommandCase {
 	return CommandCase{invokeFunc, flag}
 }
 
@@ -50,7 +50,7 @@ type Selector struct {
 	cases []CommandCase
 }
 
-func (sl *Selector) Select(c Cmd, r view.Render) (string, error) {
+func (sl *Selector) Select(c Cmd, r view.JsonRender) (string, error) {
 	for _, _case := range sl.cases {
 		if c.Cmd == _case.flag {
 			return _case.invoke(c, r)

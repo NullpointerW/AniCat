@@ -1,13 +1,13 @@
 package subject
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	CFG "github.com/NullpointerW/anicat/conf"
 	"github.com/NullpointerW/anicat/downloader/builtin"
 	"github.com/NullpointerW/anicat/downloader/rss"
+	"github.com/NullpointerW/anicat/log"
 	"github.com/NullpointerW/anicat/rename"
 	util "github.com/NullpointerW/anicat/utils"
 	"github.com/anacrolix/torrent"
@@ -31,38 +31,33 @@ func (d FilePath) Dir() storage.TorrentDirFilePathMaker {
 }
 
 func (s *Subject) builtinDownload(mt builtin.MonitoredTorrent) {
-	s.MonitorchanBuiltin <- mt
+	s.MonitorChan <- mt
 }
 
 func BuildFilter(s *Subject, ex *Extra) {
 	if ex == nil || ex.NoArgs() {
 		if CFG.Env.EnabledFilter() {
-			c := BuildFilterRegs(CFG.Env.RssFilter.Contain)
-			e := BuildFilterRegs(CFG.Env.RssFilter.Exclusion)
-			s.Filter = &FilterVerb{
-				false,
-				c,
-				e,
-			}
+			s.Filter = BuildFilterVerb(
+				CFG.Env.RssFilter.Contain,
+				CFG.Env.RssFilter.Exclusion,
+			)
 		}
-	} else {
-		if ex.RssOption.UseRegex {
-			s.Filter = &FilterVerb{
-				true,
-				ex.RssOption.MustContain,
-				ex.RssOption.MustNotContain,
-			}
-			return
-		}
-		s.Filter = &FilterVerb{
-			false,
-			strings.Fields(ex.RssOption.MustContain),
-			strings.Fields(ex.RssOption.MustNotContain),
-		}
+		return
 	}
+	if ex.RssOption.UseRegex {
+		s.Filter = BuildFilterVerbSingle(
+			ex.RssOption.MustContain,
+			ex.RssOption.MustNotContain,
+		)
+		return
+	}
+	s.Filter = BuildFilterVerb(
+		strings.Fields(ex.RssOption.MustContain),
+		strings.Fields(ex.RssOption.MustNotContain),
+	)
 }
 func RssReader(s *Subject) error {
-	fmt.Println("init rss reader")
+	log.Debug(nil, "RssReader: initializing")
 	if s.ResourceTyp == Torrent {
 		return nil
 	}
@@ -80,13 +75,13 @@ func RssReader(s *Subject) error {
 			if ok {
 				for _, it := range its {
 					if s.isCollection(it.Desc) {
-						fmt.Println("rss reader:  found collection:", it.Title)
+						log.Info(log.Struct{"title", it.Title}, "RssReader: found collection")
 						s.ResourceTyp = Torrent
 						s.ResourceUrl = it.TorrUrl
 						return nil
 					}
 				}
-				fmt.Println("rss reader:  no collection found")
+				log.Info(nil, "RssReader: no collection found")
 			}
 		}
 	} else {
@@ -139,7 +134,7 @@ type TorrFileOpt struct {
 func (t *TorrFileOpt) Name() storage.FilePathMaker {
 	return func(opts storage.FilePathMakerOpts) string {
 		if len(opts.File.Path) != 0 {
-			p := opts.File.Path[len(opts.File.Path)]
+			p := opts.File.Path[len(opts.File.Path)-1]
 			if util.IsSubtitleFile(p) {
 				r, err := renameTV(t.subj, p)
 				if err != nil {
@@ -171,8 +166,7 @@ type MovieFileOpt struct{}
 func (m *MovieFileOpt) Name() storage.FilePathMaker {
 	return func(opts storage.FilePathMakerOpts) string {
 		if len(opts.File.Path) != 0 {
-			p := opts.File.Path[len(opts.File.Path)]
-			return p
+			return opts.File.Path[len(opts.File.Path)-1]
 		}
 		return opts.Info.Name
 	}
@@ -206,7 +200,7 @@ func (s *Subject) resumeRssDownload() error {
 		s.builtinDownload(builtin.MonitoredTorrent{Url: u, TorrentInfo: builtin.TorrentInfo{Rename: v.Renamed, Torrent: t}})
 	}
 	if len(sr) == 0 {
-		fmt.Println("no resume torrent found,strat new download")
+		log.Info(nil, "resumeRssDownload: no pending torrents, starting fresh")
 		s.readRssAndDownload()
 	}
 	return nil

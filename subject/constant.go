@@ -1,5 +1,7 @@
 package subject
 
+import "regexp"
+
 // resource type
 type ResourceTyp int
 
@@ -81,7 +83,18 @@ const (
 	reg0_bgmTvTime = `\d{4}年\d{1,2}月\d{1,2}日`
 )
 
-var coll_regs = []string{reg0_coll}
+var (
+	coll_regs        = []string{reg0_coll}
+	compiledReg2Coll = regexp.MustCompile(reg2_coll)
+	compiledPartRegs = func() []*regexp.Regexp {
+		out := make([]*regexp.Regexp, len(part_regs))
+		for i, r := range part_regs {
+			out[i] = regexp.MustCompile(r)
+		}
+		return out
+	}()
+	compiledRegPart2 = regexp.MustCompile(reg_part2)
+)
 
 //var epi_regs = []string{reg0v_epi, reg1_epi, reg2_epi, reg3_epi, reg4_epi, reg5_epi}
 

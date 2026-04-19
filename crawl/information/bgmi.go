@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	CR "github.com/NullpointerW/anicat/crawl"
+	sel "github.com/NullpointerW/anicat/crawl/selector"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
 	"github.com/antchfx/htmlquery"
@@ -15,9 +16,8 @@ import (
 var endpoint = "search/subject/%s?type=2&start=%d&max_results=%d"
 
 func BgmiApiSearch(searchstr string) (sid int, err error) {
-	searchstr = CR.UrlEncode(searchstr)
-	ed := fmt.Sprintf(endpoint, searchstr, 0,
-		10)
+	encoded := CR.UrlEncode(searchstr)
+	ed := fmt.Sprintf(endpoint, encoded, 0, 10)
 	log.Info(log.NewUrlStruct(CR.BgmiRoot+ed), "request bgmTV search api")
 	req, err := http.NewRequest("GET", CR.BgmiRoot+ed, nil)
 	if err != nil {
@@ -50,6 +50,7 @@ func BgmiApiSearch(searchstr string) (sid int, err error) {
 	if tatget == nil {
 		tatget = &bsis.List[0]
 	}
+	log.Info(log.Struct{"searchStr", searchstr, "sid", tatget.Id, "name", tatget.NameCN}, "bgmTV search done")
 	return tatget.Id, err
 }
 
@@ -61,13 +62,10 @@ func BgmTVInfoScrape(sid int) (tips map[string]string, err error) {
 
 func Scrape(searchstr string) (tips map[string]string, err error) {
 	sid, err := BgmiApiSearch(searchstr)
-	// p, err := InfoPageScrape(searchstr)
 	if err != nil {
 		return tips, err
 	}
 	tips, err = BgmTVInfoScrape(sid)
-	// url := infoBaseUrl + p
-	// tips, err = DoScrape(url)
 	return
 }
 
@@ -80,7 +78,7 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			err = e
 			return
 		}
-		ls := htmlquery.Find(doc, infoXpathExp)
+		ls := htmlquery.Find(doc, bgmXpath("infobox", infoXpathExpDefault))
 		if ls != nil {
 			for _, l := range ls {
 				t := htmlquery.FindOne(l, "./span")
@@ -102,10 +100,11 @@ func DoScrape(url string) (tips map[string]string, err error) {
 			sid := s[len(s)-1]
 			tips["sid"] = sid
 			// fetch origin name
-			a := htmlquery.FindOne(doc, OriginNameXpath)
+			a := htmlquery.FindOne(doc, bgmXpath("origin_name", originNameXpathDefault))
 			tips[SubjOriginName] = htmlquery.InnerText(a)
 		} else {
 			err = fmt.Errorf("%w: bgmi info", errs.ErrCrawlNotFound)
+			sel.TriggerHeal("bgmtv", "infobox", url)
 			return
 		}
 	})
@@ -113,9 +112,8 @@ func DoScrape(url string) (tips map[string]string, err error) {
 		log.Info(log.NewUrlStruct(r.URL, "source", "bgmTV"), "fetching info")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
-		e = fmt.Errorf("%s: search info failed: %w", errs.ErrBgmTVApiPrefix, e)
-		err = e
-		log.Error(nil, err)
+		err = fmt.Errorf("%w: search info failed: %w", errs.ErrBgmTVApiPrefix, e)
+		log.Error(log.Struct{"url", url}, err)
 	})
 	c.Visit(url)
 	return tips, err
@@ -130,7 +128,7 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 			err = e
 			return
 		}
-		a := htmlquery.FindOne(doc, infoPageXpathExp)
+		a := htmlquery.FindOne(doc, bgmXpath("info_page", infoPageXpathExpDefault))
 		if a != nil {
 			p = htmlquery.InnerText(a)
 		} else {
@@ -142,9 +140,8 @@ func InfoPageScrape(searchstr string) (p string, err error) {
 		log.Info(log.NewUrlStruct(r.URL, "source", "bgmTV"), "fetching info")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
-		e = fmt.Errorf("fetch info from bgmTV failed: %w", e)
-		err = e
-		log.Error(nil, err)
+		err = fmt.Errorf("fetch info from bgmTV failed: %w", e)
+		log.Error(log.Struct{"searchstr", searchstr}, err)
 	})
 	c.Visit(BuildInfoSearching(CR.UrlEncode(searchstr)))
 	return p, err

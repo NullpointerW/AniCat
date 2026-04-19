@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"sync"
 	"time"
 
 	CFG "github.com/NullpointerW/anicat/conf"
@@ -35,6 +36,7 @@ func InitDownloader() {
 type Downloader struct {
 	client *torrent.Client
 	TorrentSeeker
+	mu            sync.RWMutex
 	extraTrackers [][]string
 }
 type FileName interface {
@@ -98,7 +100,14 @@ func NewDownloader(c *DownloaderConfig) *Downloader {
 	}
 
 	log.Info(log.Struct{"version", cfg.ExtendedHandshakeClientVersion, "userAgent", cfg.HTTPUserAgent, "peerID", peerIDStr(client.PeerID()), "upnpID", cfg.UpnpID}, "torrent-client initialized")
-	return &Downloader{client, c.Seeker, extraTrackers()}
+	d := &Downloader{client: client, TorrentSeeker: c.Seeker}
+	go func() {
+		trackers := extraTrackers()
+		d.mu.Lock()
+		d.extraTrackers = trackers
+		d.mu.Unlock()
+	}()
+	return d
 
 }
 
@@ -119,7 +128,9 @@ func (d *Downloader) Download(s string, fOp FileOption, seeker TorrentSeeker) (t
 	fop.PieceCompletion = storage.NewMapPieceCompletion()
 	ts.Storage = storage.NewFileOpts(fop)
 	t, _, err = d.client.AddTorrentSpec(ts)
+	d.mu.RLock()
 	t.AddTrackers(d.extraTrackers)
+	d.mu.RUnlock()
 	return
 }
 func extraTrackers() (trackers [][]string) {
