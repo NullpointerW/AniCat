@@ -3,6 +3,8 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+
 	// "errors"
 	"strconv"
 
@@ -69,6 +71,7 @@ func init() {
 			err = errs.ErrUndefinedCrawlListType
 		}
 		resp = ls
+		fmt.Println(ls)
 		return
 	})
 	status := cmd.NewCommandCase(cmd.Status, func(c cmd.Cmd, r view.JsonRender) (resp string, err error) {

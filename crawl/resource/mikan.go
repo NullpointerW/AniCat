@@ -5,6 +5,7 @@ import (
 	CR "github.com/NullpointerW/anicat/crawl"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
+	sel "github.com/NullpointerW/anicat/crawl/selector"
 	"github.com/antchfx/htmlquery"
 	"github.com/gocolly/colly"
 	"golang.org/x/net/html"
@@ -31,11 +32,11 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
-		if err != nil {
+		if e != nil {
 			err = e
 			return
 		}
-		a := htmlquery.Find(doc, MikanRssLiXpath)
+		a := htmlquery.Find(doc, mikanXpath("rss_li", MikanRssLiXpathDefault))
 		// command is add ... -i ,even if rss source has been found,show the search list
 		if opt.Index > 0 {
 			a = nil
@@ -50,17 +51,11 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 			isrss = true
 			bgmUrl = bgmurl
 		} else {
-			log.Info(log.Struct{"searchName", searchstr}, "rssResource not found")
+			log.Debug(log.Struct{"searchName", searchstr}, "rssResource not found, fallback to magnet")
 			if opt.Index <= 0 {
 				opt.Index = 1
 			}
-			mglinkTemp := `/html/body[@class='main']/
-			div[@id='sk-container']/
-			div[@class='central-container']/
-			table[@class='table table-striped tbl-border fadeIn']/
-			tbody/
-			tr[@class='js-search-results-row'][%d]
-			/td[1]/a[2]/@data-clipboard-text`
+			mglinkTemp := mikanXpath("magnet_link", `//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[2]/a[2]/@data-clipboard-text`)
 			mglink := htmlquery.FindOne(doc, fmt.Sprintf(mglinkTemp, opt.Index))
 			if mglink != nil {
 				url = htmlquery.InnerText(mglink)
@@ -68,11 +63,12 @@ func Scrape(searchstr string, opt Option) (url, bgmUrl string, isrss bool, err e
 				isrss = false
 			} else {
 				err = fmt.Errorf("%w: %s", errs.ErrCrawlNotFound, searchstr)
+				sel.TriggerHeal("mikan", "magnet_link", BuildSearching(CR.UrlEncode(searchstr)))
 			}
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.Struct{"url", r.URL, "source", "mikan"}, "fetching resource")
+		log.Debug(log.Struct{"url", r.URL, "source", "mikan"}, "fetching resource")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("search failed from mikan: %w", e)
@@ -101,20 +97,19 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 			err = e
 			return
 		}
-		defXpathExp := `/html/body[@class='main']/div[@id='sk-container']/
-		div[@class='central-container']/
-		div[@class='subgroup-text'][1]/
-		a[@class='mikan-rss']/@href`
+		pageURL := resourcesBaseUrl + endpoint
+		rssEndpointXpath := mikanXpath("rss_endpoint", `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text'][1]/a[@class='mikan-rss']/@href`)
 		if opt.Group == "" {
-			a := htmlquery.FindOne(doc, defXpathExp)
+			a := htmlquery.FindOne(doc, rssEndpointXpath)
 			if a == nil {
 				err = errs.ErrCrawlNotFound
+				sel.TriggerHeal("mikan", "rss_endpoint", pageURL)
 				return
 			} else {
 				rssUrl = htmlquery.InnerText(a)
 			}
 		} else {
-			tg := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text']`
+			tg := mikanXpath("subgroup_container", `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text']`)
 			ds := htmlquery.Find(doc, tg)
 			var hitgrp *html.Node
 			for _, d := range ds {
@@ -143,25 +138,27 @@ func scrapeRssEndPoint(endpoint string, opt Option) (rssUrl, bgmurl string, err 
 					rssUrl = htmlquery.InnerText(a)
 				}
 			} else {
-				a := htmlquery.FindOne(doc, defXpathExp)
+				a := htmlquery.FindOne(doc, rssEndpointXpath)
 				if a == nil {
 					err = errs.ErrCrawlNotFound
+					sel.TriggerHeal("mikan", "rss_endpoint", pageURL)
 					return
 				} else {
 					rssUrl = htmlquery.InnerText(a)
 				}
 			}
 		}
-		a := htmlquery.FindOne(doc, BgmXpathExp)
+		a := htmlquery.FindOne(doc, mikanXpath("bgm_url", BgmXpathExpDefault))
 		if a == nil {
 			err = errs.ErrBgmUrlNotFoundOnMikan
+			sel.TriggerHeal("mikan", "bgm_url", pageURL)
 			return
 		} else {
 			bgmurl = htmlquery.InnerText(a)
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rssResource")
+		log.Debug(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rssResource")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("fetch rss resource from mikan failed: %w", e)
@@ -179,16 +176,17 @@ func FetchBgmTVUrl(page string) (url string, err error) {
 			err = e
 			return
 		}
-		a := htmlquery.FindOne(doc, BgmXpathExp)
+		a := htmlquery.FindOne(doc, mikanXpath("bgm_url", BgmXpathExpDefault))
 		if a == nil {
 			err = errs.ErrBgmUrlNotFoundOnMikan
+			sel.TriggerHeal("mikan", "bgm_url", page)
 			return
 		} else {
 			url = htmlquery.InnerText(a)
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching bgmtvUrl")
+		log.Debug(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching bgmtvUrl")
 	})
 	c.OnError(func(_ *colly.Response, e error) {
 		err = fmt.Errorf("fetch bgmTV url from mikan failed: %w", e)
@@ -202,11 +200,11 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	c := CR.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		doc, e := htmlquery.Parse(strings.NewReader(string(r.Body)))
-		if err != nil {
+		if e != nil {
 			err = e
 			return
 		}
-		a := htmlquery.Find(doc, MikanRssLiXpath)
+		a := htmlquery.Find(doc, mikanXpath("rss_li", MikanRssLiXpathDefault))
 		if searchls {
 			a = nil
 		}
@@ -217,41 +215,15 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 				return
 			}
 		} else {
-			log.Info(log.Struct{"searchName", searchstr, "type", "torrent"}, "command lsi")
+			log.Debug(log.Struct{"searchName", searchstr, "type", "torrent"}, "command lsi: rssResource not found, using torrent search")
 			switch t {
 			case Ls:
-				fnTemp := `/html/body[@class='main']/div[@id='sk-container']/
-				div[@class='central-container']/
-				table[@class='table table-striped tbl-border fadeIn']/
-				tbody/
-				tr[@class='js-search-results-row'][%d]/
-				td[1]/
-				a[@class='magnet-link-wrap']`
-				szTemp := `/html/body[@class='main']/div[@id='sk-container']/
-				div[@class='central-container']/
-				table[@class='table table-striped tbl-border fadeIn']/
-				tbody/
-				tr[@class='js-search-results-row'][%d]/
-				td[2]`
-				uptTemp := `/html/body[@class='main']/div[@id='sk-container']/
-				div[@class='central-container']/
-				table[@class='table table-striped tbl-border fadeIn']/
-				tbody/
-				tr[@class='js-search-results-row'][%d]/
-				td[3]`
-				/*
-				 torrTemp := htmlquery.FindOne(doc, `/html/body[@class='main']/div[@id='sk-container']/
-				 div[@class='central-container']/
-				 table[@class='table table-striped tbl-border fadeIn']/
-				 tbody/
-				 tr[@class='js-search-results-row'][%d]/
-				 td[4]/a/@href`)
-				*/
-				nodes := htmlquery.Find(doc, `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/
-				table[@class='table table-striped tbl-border fadeIn']/
-				tbody/tr[@class='js-search-results-row']`)
+				fnTemp := mikanXpath("filename", `//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[2]/a[@class='magnet-link-wrap']`)
+				szTemp := mikanXpath("filesize", `//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[3]`)
+				uptTemp := mikanXpath("update_time", `//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row'][%d]/td[4]`)
+				nodes := htmlquery.Find(doc, mikanXpath("search_rows", `//table[@class='table table-striped tbl-border fadeIn']/tbody/tr[@class='js-search-results-row']`))
 				var items []Item
-				for i, _ := range nodes {
+				for i := range nodes {
 					fn := htmlquery.FindOne(doc, fmt.Sprintf(fnTemp, i+1))
 					sz := htmlquery.FindOne(doc, fmt.Sprintf(szTemp, i+1))
 					upt := htmlquery.FindOne(doc, fmt.Sprintf(uptTemp, i+1))
@@ -263,7 +235,12 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 				}
 				if len(items) == 0 {
 					err = fmt.Errorf("%w: %s %s", errs.ErrCrawlNotFound, t.String(), searchstr)
+					sel.TriggerHeal("mikan", "search_rows", BuildSearching(CR.UrlEncode(searchstr)))
 				} else {
+					if len(items) > 0 && !sel.Validate("mikan", "filesize", items[0].Size) {
+						log.Warn(log.Struct{"size", items[0].Size}, "mikan sanity check failed, triggering healer")
+						sel.TriggerHeal("mikan", "filesize", BuildSearching(CR.UrlEncode(searchstr)))
+					}
 					res, err = items, nil
 				}
 			case LSGroup:
@@ -276,7 +253,7 @@ func ListScrape(searchstr string, t LsTyp, searchls bool) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching resourceList")
+		log.Debug(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching resourceList")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
@@ -301,14 +278,12 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 			err = errs.ErrUnknownResCrawlLsType
 			return
 		}
-		trsTemp := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/
-		table[@class='table table-striped tbl-border fadeIn'][%d]/
-		tbody/tr`
-		itnExp := `/td[1]/a[@class='magnet-link-wrap']`
-		szExp := `/td[2]`
-		uptExp := `/td[3]`
+		trsTemp := mikanXpath("rss_table_rows", `(//table[@class='table table-striped tbl-border fadeIn'])[%d]/tbody/tr`)
+		itnExp := mikanXpath("rss_item_name", `/td[2]/a[@class='magnet-link-wrap']`)
+		szExp := mikanXpath("rss_item_size", `/td[3]`)
+		uptExp := mikanXpath("rss_item_uptime", `/td[4]`)
 		var rgs []RssGroup
-		tg := `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text']`
+		tg := mikanXpath("subgroup_container", `/html/body[@class='main']/div[@id='sk-container']/div[@class='central-container']/div[@class='subgroup-text']`)
 		ds := htmlquery.Find(doc, tg)
 		for i, d := range ds {
 			rg := RssGroup{}
@@ -352,7 +327,7 @@ func scrapeRssList(endpoint string, t LsTyp) (res any, err error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		log.Info(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rssGroups")
+		log.Debug(log.NewUrlStruct(r.URL, "source", "mikan"), "fetching rssGroups")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {

@@ -93,35 +93,43 @@ func (s *Subject) runWithBuiltinDownloader(ctx context.Context, reload bool) {
 	}
 	t := time.NewTicker(30 * time.Minute)
 	if s.ResourceTyp == Torrent {
-		var seeker builtin.TorrentSeeker
+		var (
+			seeker   builtin.TorrentSeeker
+			fop      builtin.FileOption
+			startErr error
+		)
 		u, err := url.Parse(s.ResourceUrl)
 		if err != nil {
-			log.Error(log.Struct{"err", err}, "parse torrentUrl failed")
+			startErr = fmt.Errorf("parse torrentUrl: %w", err)
+		} else {
+			switch strings.ToLower(u.Scheme) {
+			case "magnet":
+				seeker = &MagnetUrlSeeker{}
+			case "http", "https":
+				// seeker remains nil; DefaultDownLoader's HttpSeeker is used
+			default:
+				startErr = fmt.Errorf("unexpected scheme %q", u.Scheme)
+			}
+		}
+		if startErr == nil {
+			switch s.Typ {
+			case TV:
+				fop = FilePath{FileName: &TorrFileOpt{s}, DirPath: s.Path}
+			case MOVIE:
+				fop = FilePath{FileName: new(MovieFileOpt), DirPath: s.Path}
+			}
+			t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
+			if err != nil {
+				startErr = fmt.Errorf("download: %w", err)
+			} else {
+				s.builtinDownload(builtin.MonitoredTorrent{TorrentInfo: builtin.TorrentInfo{Torrent: t}, Url: s.ResourceUrl})
+			}
+		}
+		if startErr != nil {
+			log.Error(log.Struct{"sid", s.SubjId, "err", startErr}, "start torrent download failed")
 			s.Exit()
+			// ctx is now cancelled; the select loop below exits via ctx.Done() → exit(s)
 		}
-		scheme := strings.ToLower(u.Scheme)
-		switch {
-		case scheme == "magnet":
-			seeker = &MagnetUrlSeeker{}
-		case scheme == "http" || scheme == "https":
-			seeker = nil
-		default:
-			log.Error(log.Struct{"err", fmt.Errorf("unexpected scheme %q", u.Scheme)}, "parse torrentUrl failed")
-			s.Exit()
-		}
-		var fop builtin.FileOption
-		switch s.Typ {
-		case TV:
-			fop = FilePath{FileName: &TorrFileOpt{s}, DirPath: s.Path}
-		case MOVIE:
-			fop = FilePath{FileName: new(MovieFileOpt), DirPath: s.Path}
-		}
-		t, err := builtin.DefaultDownLoader.Download(s.ResourceUrl, fop, seeker)
-		if err != nil {
-			log.Error(log.Struct{"err", err}, "download torrentResource failed")
-			s.Exit()
-		}
-		s.builtinDownload(builtin.MonitoredTorrent{TorrentInfo: builtin.TorrentInfo{Torrent: t}, Url: s.ResourceUrl})
 	}
 	if s.ResourceTyp == RSS && reload {
 		var ff rss.FilterFunc
@@ -512,6 +520,21 @@ func (s *Subject) readRssAndDownload() {
 
 func (s *Subject) pushBuiltin(torr builtin.MonitoredTorrent, pusher P.Pusher) error {
 	log.Debug(log.Struct{"sid", s.SubjId, "torrName", torr.Rename}, "push builtin")
-	pusher.Push(P.Payload{})
-	return nil
+	var episode string
+	if s.Typ == TV {
+		episode = util.TrimExtensionAndGetEpi(torr.Rename)
+	} else {
+		episode = "MOVIE"
+	}
+	err := pusher.Push(P.Payload{
+		SubjectId:    s.SubjId,
+		SubjectName:  s.Name,
+		DownLoadName: torr.Rename,
+		Size:         int(torr.Size),
+		Episode:      episode,
+	})
+	if s.ResourceTyp == Torrent {
+		s.terminate()
+	}
+	return err
 }

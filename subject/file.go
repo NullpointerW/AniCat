@@ -51,7 +51,7 @@ func Scan() {
 			return nil
 		}
 		if builtin != s.BuiltinDownload {
-			// continue
+			return nil
 		}
 		s.runtimeInit(true)
 		return nil

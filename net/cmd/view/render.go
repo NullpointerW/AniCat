@@ -117,6 +117,7 @@ func (r JsonRender) StatusBuiltin(subj *subject.Subject) {
 }
 
 func HandleStatus(s *subject.Subject, c *net.Conn) {
+	log.Info(log.Struct{"sid", s.SubjId, "name", s.Name}, "HandleStatus started")
 	c.Write("keep-alive")
 	var list builtin.TorrentProgressList
 	for {
@@ -124,6 +125,7 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 			<-s.Exited
 			list.Put(s.FinishedTorrentNameList.List())
 			r, _ := json.Marshal(builtin.TorrentProgressListSend{List: list.Get(), Fin: true})
+			log.Info(log.Struct{"sid", s.SubjId, "resp", string(r)}, "HandleStatus send final")
 			if err := c.Write(string(r)); err != nil {
 				log.Error(log.Struct{"err", err}, "conn write err")
 			}
@@ -134,6 +136,7 @@ func HandleStatus(s *subject.Subject, c *net.Conn) {
 		list.Put(s.TorrentMonitor.GetProgressList())
 		lse := builtin.TorrentProgressListSend{List: list.Get(), Fin: list.Fin()}
 		r, _ := json.Marshal(lse)
+		log.Debug(log.Struct{"sid", s.SubjId, "resp", string(r)}, "HandleStatus send progress")
 		if err := c.Write(string(r)); err != nil {
 			log.Error(log.Struct{"err", err}, "conn write err")
 			return

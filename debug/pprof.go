@@ -1,7 +1,6 @@
 package debug
 
 import (
-	// "fmt"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"

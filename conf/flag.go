@@ -24,8 +24,6 @@ func flagInit() {
 	testing.Init()
 	flag.Parse()
 
-	// Testing=true
-
 	if Testing {
 		IdeDebugging = true
 	}

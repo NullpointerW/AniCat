@@ -1,5 +1,14 @@
 package cover
 
+import sel "github.com/NullpointerW/anicat/crawl/selector"
+
+func doubanXpath(key, fallback string) string {
+	if v := sel.Get("douban", key); v != "" {
+		return v
+	}
+	return fallback
+}
+
 const (
 	DouBancoverSearchUrl = `https://movie.douban.com/j/subject_suggest?q=%s`
 	DouBancoverXpathExp  = `/html/body/div[@id='wrapper']/div[@id='content']/div[@class='grid-16-8 clearfix']/div[@class='article']/ul[@class='poster-col3 clearfix']/li[1]/div[@class='cover']/a/img/@src`

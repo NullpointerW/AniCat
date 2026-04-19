@@ -15,7 +15,10 @@
   [UHA-WINGS]Bocchi the Rock![05][x264][1080p]>>孤独摇滚！S01E05
   ```
  * 支持字幕组筛选、关键字正则过滤
- * 下载完成后提醒推送(目前支持邮件)
+ * 下载完成后提醒推送（支持邮件、Telegram）
+ * **内置下载器**：可不依赖 qBittorrent，通过 `builtin-downloader: on` 启用原生 torrent 客户端，下载时直接按 `S01E01` 格式写入文件名
+ * **LLM 辅助重命名**：配置 `llm-parser`（支持 OpenAI 兼容接口，如 Qwen），在正则无法解析集数时由 LLM 兜底识别
+ * **XPath 自动修复**：当番剧资源站页面结构变动导致爬取失败时，由 LLM 自动修复 `selectors.yaml` 中的 XPath，无需手动干预
  
  ## 部署
  ### linux 
@@ -62,6 +65,23 @@ push: # 配置推送服务，如无此需求则可省略
   # skipssl: yes # 跳过ssl,开启此项可能需要变更相应的smtp地址，具体情况询问邮箱运营商
   # template: tmp/template.html # 邮件模板地址，若省略则使用内置的模板
 bangumi-log: on #开启番剧更新日志，将在根目录创建日志，记录剧集的更新信息
+builtin-downloader: off # 开启内置下载器（不依赖 qBittorrent，直接内置 torrent 客户端）
+
+llm-parser: # LLM 辅助集数识别与 XPath 自动修复，省略则禁用
+  style: "openai"  # openai 兼容接口 或 anthropic
+  api_key: ""
+  model: "qwen-turbo"
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+push:
+  email:        # 邮件推送（与之前一致）
+    host: smtp.xxx.com
+    port: 25
+    username: xxx@xxx.com
+    password: xxx
+  telegram:     # Telegram 推送（可选）
+    token: ""   # Bot Token
+    chat_id: "" # 目标 Chat ID
 ```
 #### docker-compose 部署
  * 下载docker-compose yaml
@@ -237,6 +257,12 @@ rss-filter:
  <img src="doc/mseason.jpg" width="500">
 <!-- ![infuse-list](doc/infuse-list.jpg)
  ![infuse-detail](doc/infuse-detail.jpg)-->
+
+ ## selectors.yaml
+
+爬虫使用的 XPath 集中管理在与 `env.yaml` 同目录的 `selectors.yaml` 中，支持运行时热更新。若文件不存在则使用内置默认值。
+
+配置了 `llm-parser` 后，当某个 XPath 爬取结果不符合预期（如网站改版），程序会自动调用 LLM 修复并写回 `selectors.yaml`，无需重启。
 
  ## 说明
  ### 数据源

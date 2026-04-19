@@ -3,6 +3,7 @@ package information
 import (
 	"fmt"
 	CR "github.com/NullpointerW/anicat/crawl"
+	sel "github.com/NullpointerW/anicat/crawl/selector"
 	"github.com/NullpointerW/anicat/errs"
 	"github.com/NullpointerW/anicat/log"
 	"github.com/antchfx/htmlquery"
@@ -10,10 +11,9 @@ import (
 	"strings"
 )
 
-var (
-	root         = `/html/body[@class='zh v4']/div[1]/main[1]/section[@class='main_content search_results']/div[@class='column_wrapper reverse']/div[@class='content_wrapper']/div[@class='white_column']/section[@class='panel']/div[1]/div[@class='results flex']/div[1]/div[@class='wrapper']/div[@class='details']/div[@class='wrapper']/div[@class='title']`
-	nameXpathExp = root + `/div/a[@class='result']/h2`
-	dateXpathExp = root + `/span[@class='release_date']`
+const (
+	nameXpathExpDefault = `//h2`
+	dateXpathExpDefault = `//span[contains(@class,'release_date')]`
 )
 
 func FloderSearch(typ, searchstr string) (name, date string, err error) {
@@ -29,18 +29,21 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 			err = e
 			return
 		}
-		nameH2 := htmlquery.FindOne(doc, nameXpathExp)
+		pageURL := url + CR.UrlEncode(searchstr)
+		nameH2 := htmlquery.FindOne(doc, tmdbXpath("title", nameXpathExpDefault))
 		if nameH2 != nil {
 			name = htmlquery.InnerText(nameH2)
 		} else {
 			err = fmt.Errorf("%w: TMDB info not found,search str=%s", errs.ErrCrawlNotFound, searchstr)
+			sel.TriggerHeal("tmdb", "title", pageURL)
 			return
 		}
-		dateSpan := htmlquery.FindOne(doc, dateXpathExp)
+		dateSpan := htmlquery.FindOne(doc, tmdbXpath("release_date", dateXpathExpDefault))
 		if dateSpan != nil {
 			date = htmlquery.InnerText(dateSpan)
 		} else {
 			err = fmt.Errorf("%w: TMDB info not found", errs.ErrCrawlNotFound)
+			sel.TriggerHeal("tmdb", "release_date", pageURL)
 			return
 		}
 	})
@@ -49,13 +52,12 @@ func FloderSearch(typ, searchstr string) (name, date string, err error) {
 		agent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 		r.Headers.Set("User-Agent", agent)
 		r.Headers.Set("Accept-Language", "zh-CN,zh;q=0.9")
-		log.Info(log.NewUrlStruct(r.URL, "source", "TMDB", "serachstring", searchstr), "fetching folderInfo")
+		log.Debug(log.NewUrlStruct(r.URL, "source", "TMDB", "searchStr", searchstr), "fetching folderInfo")
 	})
 
 	c.OnError(func(_ *colly.Response, e error) {
-		e = fmt.Errorf("search/fetch folder info from TMDB failed: %w", e)
-		err = e
-		log.Error(nil, err)
+		err = fmt.Errorf("search/fetch folder info from TMDB failed: %w", e)
+		log.Error(log.Struct{"url", url, "searchStr", searchstr}, err)
 	})
 
 	c.Visit(url + CR.UrlEncode(searchstr))

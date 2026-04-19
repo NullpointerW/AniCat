@@ -134,7 +134,7 @@ type TorrFileOpt struct {
 func (t *TorrFileOpt) Name() storage.FilePathMaker {
 	return func(opts storage.FilePathMakerOpts) string {
 		if len(opts.File.Path) != 0 {
-			p := opts.File.Path[len(opts.File.Path)-1] // fixed: was [len(...)] — off by one
+			p := opts.File.Path[len(opts.File.Path)-1]
 			if util.IsSubtitleFile(p) {
 				r, err := renameTV(t.subj, p)
 				if err != nil {
@@ -166,7 +166,7 @@ type MovieFileOpt struct{}
 func (m *MovieFileOpt) Name() storage.FilePathMaker {
 	return func(opts storage.FilePathMakerOpts) string {
 		if len(opts.File.Path) != 0 {
-			return opts.File.Path[len(opts.File.Path)-1] // fixed: was [len(...)] — off by one
+			return opts.File.Path[len(opts.File.Path)-1]
 		}
 		return opts.Info.Name
 	}

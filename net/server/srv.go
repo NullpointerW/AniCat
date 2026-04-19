@@ -73,6 +73,7 @@ func process(c *N.Conn) {
 			_ = c.Write(err.Error())
 			return
 		}
+		log.Debug(log.Struct{"resp", resp}, "send response")
 		_ = c.Write(resp)
 	}
 }
